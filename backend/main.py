@@ -16,11 +16,18 @@ def get_tracks_from_playlist(playlist_id: int):
     return playlist["tracks"]["items"]
 
 def sort_data(tracks):
-    # names = [ t["track"]["name"] for t in tracks]
-    uris = [ t["track"]["external_urls"]["spotify"] for t in tracks]
-    # artists = [ t["track"]["artists"]["name"] for t in tracks]
-    # release_date = [ t["track"]["release_date"] for t in tracks]
-    print(uris)
+    names = [ t["track"]["name"] for t in tracks]
+    urls = [ t["track"]["external_urls"]["spotify"] for t in tracks]
+    artists = [ t["track"]["artists"][0]['name'] for t in tracks]
+    release_date = [ t["track"]["album"]["release_date"] for t in tracks]
+    added_at = [ t["added_at"]for t in tracks]
+    
+
+    print(names)
+    print(urls)
+    # print(artists)
+    print(release_date)
+    # print(added_at)
 
 
 
