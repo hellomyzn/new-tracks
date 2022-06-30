@@ -8,3 +8,6 @@ services:
     tty: true
     volumes:
       - ./backend/:/root
+    environment:
+      SPOTIPY_CLIENT_ID: ${SPOTIPY_CLIENT_ID}
+      SPOTIPY_CLIENT_SECRET: ${SPOTIPY_CLIENT_SECRET}

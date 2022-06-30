@@ -10,8 +10,15 @@ ENV LC_ALL ja_JP.UTF-8
 ENV TZ JST-9
 ENV TERM xterm
 
-RUN apt-get install -y vim less
+RUN apt-get install -y vim less ffmpeg
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
-RUN python -m pip install jupyterlab
+RUN python -m pip install \
+    jupyterlab \
+    spotify_dl \
+    bs4 \
+    gspread \
+    oauth2client \
+    termcolor \
+    pytest
