@@ -16,18 +16,25 @@ def get_tracks_from_playlist(playlist_id: int):
     return playlist["tracks"]["items"]
 
 def sort_data(tracks):
-    names = [ t["track"]["name"] for t in tracks]
-    urls = [ t["track"]["external_urls"]["spotify"] for t in tracks]
-    artists = [ t["track"]["artists"][0]['name'] for t in tracks]
-    release_date = [ t["track"]["album"]["release_date"] for t in tracks]
-    added_at = [ t["added_at"]for t in tracks]
     
+    names =         [ t["track"]["name"] for t in tracks]
+    urls =          [ t["track"]["external_urls"]["spotify"] for t in tracks]
+    artists =       [ t["track"]["artists"][0]['name'] for t in tracks]
+    release_date =  [ t["track"]["album"]["release_date"] for t in tracks]
+    added_at =      [ t["added_at"]for t in tracks]
+    num_tracks = len(names)
+    
+    tracks = []
 
-    print(names)
-    print(urls)
-    # print(artists)
-    print(release_date)
-    # print(added_at)
+    for i in range(num_tracks):
+        tracks.append({'name':         names[i],
+                        'url':          urls[i],
+                        'artist':       artists[i],
+                        'release_date': release_date[i],
+                        'added_at':     added_at[i]}
+                        )
+    for i in range(num_tracks):
+        print(tracks[i] , "\n")
 
 
 
