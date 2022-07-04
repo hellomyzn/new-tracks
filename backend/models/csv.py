@@ -1,5 +1,3 @@
-import setting
-
 from models.interfaces.table import Table
 
 class Csv(Table):

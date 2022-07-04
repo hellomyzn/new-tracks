@@ -29,9 +29,10 @@ class CsvService(object):
 
 
     @staticmethod
-    def add_tracks(csv, tracks: list) -> None:
+    def add_tracks(csv, tracks: list, country_name: str) -> None:
         if CsvService.is_not_columns(csv.file_path):
             CsvRepository.add_columns(csv.file_path, csv.columns)
 
+        CsvRepository.add(csv.file_path, csv.columns, tracks)
         CsvRepository.add(csv.file_path, csv.columns, tracks)
         return
