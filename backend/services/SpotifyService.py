@@ -41,12 +41,12 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def remove_existed_track(spotify, csv) -> None:
+    def remove_existed_track(spotify, csv_path) -> None:
         tracks_only_name_artist_from_csv = []
         tracks_only_name_artist_from_new = []
 
         # Check there is track data on csv and if so, get header data and all track data on csv
-        header, tracks_from_csv = CsvService.get_header_and_tracks(csv)
+        header, tracks_from_csv = CsvService.get_header_and_tracks(csv_path)
         # If there is no track data, it regards all tracks as new tracks
         if not tracks_from_csv:
             spotify.new_tracks = spotify.tracks
