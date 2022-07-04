@@ -29,14 +29,44 @@ def sort_data(tracks) -> list:
     tracks = []
 
     for i in range(num_tracks):
-        tracks.append({'name':         names[i],
-                        'url':          urls[i],
+        tracks.append({'name':          names[i],
                         'artist':       artists[i],
+                        'url':          urls[i],                        
                         'release_date': release_date[i],
                         'added_at':     added_at[i],
                         'created_at':   datetime.datetime.now()}
                         )
     return tracks
+
+def remove_existed_track(tracks, url):
+    tracks_from_csv = []
+    new_tracks_for_check = []
+    new_tracks = []
+    with open(url, 'r', newline='') as csvfile:
+        csvreader = csv.reader(csvfile)
+        header = next(csvreader)
+        for row in csvreader:
+            tracks_from_csv.append(
+                {
+                    'name':     row[header.index('name')],
+                    'artist':   row[header.index('artist')]
+                })
+
+    for track in tracks:
+        new_tracks_for_check.append(
+            {
+                'name':     track['name'],
+                'artist':   track['artist']
+            }
+        )
+    
+    for i, track in enumerate(new_tracks_for_check):
+        if track in tracks_from_csv:
+            continue
+        new_tracks.append(tracks[i])
+    
+    return new_tracks
+        
 
 def create_columns_csv(url, columns):
     
@@ -66,12 +96,6 @@ def write_csv(tracks, url, columns):
 
 
 
-
-
-
-# def main():
-    # controller.conversation.talk_about_input_vocabulary()
-
 if __name__ == "__main__":
     columns = ['name', 'artist', 'url', 'release_date', 'added_at', 'created_at']
     csv_url = './src/csv/tracks.csv'
@@ -79,6 +103,6 @@ if __name__ == "__main__":
     playlist_id_ph = "37i9dQZEVXbNBz9cRCSFkY"
     tracks_ph = get_tracks_from_playlist(playlist_id_ph)
     tracks_ph = sort_data(tracks_ph)
-    write_csv(tracks_ph, csv_url, columns)
+    new_tracks = remove_existed_track(tracks_ph, csv_url)
+    write_csv(new_tracks, csv_url, columns)
 
-    # main()
