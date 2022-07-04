@@ -5,6 +5,9 @@ config_file = 'config.ini'
 CONFIG = ConfigParser()
 CONFIG.read(config_file)
 
+# Google Spreadsheet
+AUTHENTICATION_JSON = CONFIG['GOOGLE_API']['JSONF_DIR'] + CONFIG['GOOGLE_API']['JSON_FILE']
+
 DIR_PATH_OF_CSV = CONFIG['FILES']['DIR_CSV']
 FILE_PATH_OF_CSV = CONFIG['FILES']['DIR_CSV'] + CONFIG['FILES']['FILENAME_OF_CSV']
 

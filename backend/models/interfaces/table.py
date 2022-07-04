@@ -12,6 +12,7 @@ class Table(metaclass=abc.ABCMeta):
             'url', 
             'release_date', 
             'added_at', 
-            'created_at'
+            'created_at',
+            'like'
             ]
         return columns
