@@ -68,31 +68,7 @@ def remove_existed_track(tracks, url):
     return new_tracks
         
 
-def create_columns_csv(url, columns):
-    
-    print('Create header on CSV')
-    # TODO: Get this url from config.ini
-    with open(url, 'a', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=columns)
-        writer.writeheader()
 
-def is_not_columns(url):
-    with open(url, 'r', newline='') as csvfile:
-        data = csvfile.readline()
-        if not data:
-            return True
-        else:
-            return False
-
-def write_csv(tracks, url, columns):
-    if is_not_columns(url):
-        create_columns_csv(url, columns)
-
-    with open(url, 'a', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=columns)
-        for track in tracks:
-            writer.writerow(track)
-            print(f"[WRITING]: {track}")
 
 
 
