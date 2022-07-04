@@ -1,11 +1,12 @@
-import csv
-import os
 import datetime
 
-class SpotifyService(object):
+from services.CsvService import CsvService
 
+
+class SpotifyService(object):
+    
     @staticmethod
-    def get_tracks_from_playlist(spotify):
+    def get_tracks_from_playlist(spotify) -> None:
         playlist_data = spotify.connect.playlist(spotify.playlist_id)
         spotify.playlist_data = playlist_data["tracks"]["items"]
 
@@ -13,7 +14,7 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def retrieve_tracks_data_from_json(spotify) -> list:
+    def retrieve_tracks_data_from_json(spotify) -> None:
         
         # Retrieve certain data from json data
         names =         [ t["track"]["name"] for t in spotify.playlist_data]
@@ -40,20 +41,26 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def remove_existed_track(spotify, path):
+    def remove_existed_track(spotify, csv) -> None:
         tracks_only_name_artist_from_csv = []
         tracks_only_name_artist_from_new = []
 
-        with open(path, 'r', newline='') as csvfile:
-            csvreader = csv.reader(csvfile)
-            header = next(csvreader)
-            for row in csvreader:
-                tracks_only_name_artist_from_csv.append(
-                    {
-                        'name':     row[header.index('name')],
-                        'artist':   row[header.index('artist')]
-                    })
+        # Check there is track data on csv and if so, get header data and all track data on csv
+        header, tracks_from_csv = CsvService.get_header_and_tracks(csv)
+        # If there is no track data, it regards all tracks as new tracks
+        if not tracks_from_csv:
+            spotify.new_tracks = spotify.tracks
+            return 
 
+        # Prepare a list from csv to check which tracks are new for this time
+        for track in tracks_from_csv:
+            tracks_only_name_artist_from_csv.append(
+                {
+                    'name':     track[header.index('name')],
+                    'artist':   track[header.index('artist')]
+                })
+
+        # Prepare a list from retrieved tracks to check which tracks are new for this time
         for track in spotify.tracks:
             tracks_only_name_artist_from_new.append(
                 {
@@ -62,6 +69,7 @@ class SpotifyService(object):
                 }
             )
         
+        # Check which tracks are new
         for i, track in enumerate(tracks_only_name_artist_from_new):
             if track in tracks_only_name_artist_from_csv:
                 continue
