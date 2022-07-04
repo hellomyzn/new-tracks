@@ -6,6 +6,7 @@
 *.cache
 *src
 *.viminfo
+*__pycache__
 backend/src/*.txt
 backend/src/result/*.txt
 backend/src/*.csv
