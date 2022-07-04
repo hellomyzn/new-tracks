@@ -1,5 +1,4 @@
-import datetime
-
+import helper
 from services.CsvService import CsvService
 
 
@@ -33,7 +32,8 @@ class SpotifyService(object):
                     'url':          urls[i],                        
                     'release_date': release_date[i],
                     'added_at':     added_at[i],
-                    'created_at':   datetime.datetime.now()
+                    'created_at':   helper.get_date(),
+                    'like':         False
                 }
             )
 
