@@ -36,7 +36,7 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def retrieve_new_tracks(spotify, tracks, csv_path) -> None:
+    def retrieve_new_tracks(spotify, tracks, csv_path) -> list:
         tracks_only_name_artist_from_csv = []
         tracks_only_name_artist_from_new = []
         new_tracks = []
@@ -87,9 +87,16 @@ class SpotifyService(object):
 
     @staticmethod
     def delete_all_tracks_from_playlist(spotify, playlist_id) -> None:
-        SpotifyService.get_tracks_from_playlist(playlist_id)
-        SpotifyService.retrieve_tracks_data_from_json(spotify)
-        items = spotify.connect.playlist_items(playlist_id)
-        print(items)
-        # spotify.playlist_remove_all_occurrences_of_items(playlist_id, items)
+        trakcs = SpotifyService.retrieve_tracks_from_playlist(spotify, playlist_id)
+        
+        items = []
+        for track in trakcs:
+            items.append(track['track_url'])
+        
+        user_input = input(f'Do you want to remove all tracks from your playlist? [y/n]')
+        if helper.is_yes(user_input):
+            spotify.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
+        else:
+            print("It's cancelled")
+        return
         
