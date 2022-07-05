@@ -12,6 +12,7 @@ class TrackController(object):
     def __init__(self):
         self.csv = Csv()
         self.google_spreadsheet = GoogleSpreadsheet()
+        self.all_new_tracks = []
 
     def add_new_tracks(self) -> None:
         # Add new tracks by each playlist
@@ -23,8 +24,14 @@ class TrackController(object):
             SpotifyService.get_tracks_from_playlist(spotify)        
             SpotifyService.retrieve_tracks_data_from_json(spotify)
             SpotifyService.remove_existed_track(spotify, self.csv.file_path)
+            print(f'[IFNO]: playlist - {pl_name} [{len(spotify.new_tracks)}]')
+
             CsvService.add_tracks(self.csv, spotify.new_tracks)
-            
-        GoogleSpreadsheetService.add_tracks(spotify.new_tracks, self.google_spreadsheet)
+
+            # Add new tracks of the playlist to total one
+            if spotify.new_tracks:
+                self.all_new_tracks += spotify.new_tracks
+        
+        GoogleSpreadsheetService.add_tracks(self.all_new_tracks, self.google_spreadsheet)
 
         return 

@@ -23,12 +23,22 @@ class GoogleSpreadsheetService(object):
 
     @staticmethod
     def add_tracks(tracks: list, google_spreadsheet) -> None:
+        if not tracks:
+            print('There is no new tracks this time.')
+            return
+
         # If the spreadsheet is empty, Add column on header(from (1,1))
         if GoogleSpreadsheetService.is_not_columns(google_spreadsheet.worksheet):
             GoogleSpreadsheetService.create_columns(google_spreadsheet.worksheet, google_spreadsheet.columns)
             google_spreadsheet.next_row += 1
 
+        count = 0
+        len_tracks = len(tracks)
+        print(f'\n[INFO]: The number of tracks is {len_tracks}')
         for track in tracks:
+            count += 1
+            print(f'\n[{count}/{len_tracks}]')
+            print(f'[TRACK]: {track}')
             for i, column in enumerate(google_spreadsheet.columns, start=1):
                 try:
                     GoogleSpreadsheetRepository.add(google_spreadsheet, i, column, track)

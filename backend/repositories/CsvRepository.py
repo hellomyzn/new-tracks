@@ -50,6 +50,7 @@ class CsvRepository(object):
             writer = csv.DictWriter(csvfile, fieldnames=columns)
             for d in data:
                 writer.writerow(d)
-                print(f"[ADD]: {d}")
+                # should be logging
+                # print(f"[ADD]: {d}")
 
         return
