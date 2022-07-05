@@ -38,5 +38,6 @@ class TrackController(object):
         SpotifyService.add_tracks_to_playlist(self.spotify, all_new_tracks, setting.MY_PLAYLIST_ID)
 
         # Remove all tracks from playlist 
+        # TODO: there is limitation to remove tracks as 100, so I have to fix
         # SpotifyService.delete_all_tracks_from_playlist(self.spotify, setting.MY_PLAYLIST_ID)
         return 

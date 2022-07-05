@@ -77,12 +77,27 @@ class SpotifyService(object):
             print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
             return
         
-        print(f'\n[INFO] - The number of new tracks to add to a playlist on Spotify is {len(tracks)}')
+        tracks_number = len(tracks)
+        print(f'\n[INFO] - The number of new tracks to add to a playlist on Spotify is {tracks_number}')
+
+        max_number = 99
+        while max_number < tracks_number:
+
+            piece_of_tracks, tracks = tracks[0:int(max_number)], tracks[int(max_number)::]
+            
+            urls = []
+            for track in piece_of_tracks:
+                urls.append(track['track_url'])
+
+            spotify.connect.playlist_add_items(playlist_id, urls, position=0)
+
+            tracks_number = len(tracks)
+        
         urls = []
         for track in tracks:
             urls.append(track['track_url'])
 
-        spotify.connect.playlist_add_items(playlist_id, urls, position=0)        
+        spotify.connect.playlist_add_items(playlist_id, urls, position=0)
         return 
 
 
@@ -94,7 +109,7 @@ class SpotifyService(object):
         for track in trakcs:
             items.append(track['track_url'])
         
-        user_input = input(f'Do you want to remove all tracks from your playlist? [y/n]')
+        user_input = input(f'Do you want to remove all tracks from your playlist? [y/n]: ')
         if helper.is_yes(user_input):
             spotify.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
         else:
