@@ -73,15 +73,15 @@ class SpotifyService(object):
     @staticmethod
     def add_tracks_to_playlist(spotify, tracks, playlist_id) -> None:
         if not tracks:
-            print('There is no new tracks this time.')
+            print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
             return
         
+        print(f'\n[INFO] - The number of new tracks to add to a playlist on Spotify is {len(tracks)}')
         urls = []
         for track in tracks:
             urls.append(track['track_url'])
 
-        spotify.connect.playlist_add_items(playlist_id, urls, position=0)
-        
+        spotify.connect.playlist_add_items(playlist_id, urls, position=0)        
         return 
 
 

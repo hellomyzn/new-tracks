@@ -17,6 +17,7 @@ class TrackController(object):
         self.my_playlist_id = setting.MY_PLAYLIST_ID
 
     def add_new_tracks(self) -> None:
+        all_new_tracks = []
         # Add new tracks by each playlist
         for playlist_id in setting.PLAYLISTS_IDS:            
             self.spotify.new_tracks = []
@@ -28,11 +29,10 @@ class TrackController(object):
             CsvService.add_tracks(self.csv, new_tracks)
 
             # Add new tracks of the playlist to total one
-            if self.spotify.new_tracks:
-                self.all_new_tracks += self.spotify.new_tracks
+            if new_tracks:
+                all_new_tracks += new_tracks        
         
-        # GoogleSpreadsheetService.add_tracks(self.all_new_tracks, self.google_spreadsheet)
-        
-        # SpotifyService.add_tracks_to_playlist(self.spotify, self.all_new_tracks, self.my_playlist_id)
+        GoogleSpreadsheetService.add_tracks(self.google_spreadsheet, all_new_tracks)
+        SpotifyService.add_tracks_to_playlist(self.spotify, all_new_tracks, self.my_playlist_id)
         # SpotifyService.delete_all_tracks_from_playlist(self.spotify, self.my_playlist_id)
         return 
