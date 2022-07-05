@@ -46,6 +46,7 @@ class SpotifyService(object):
 
         # If there is no track data, it regards all tracks as new tracks
         if not tracks_from_csv:
+            print(f'[INFO] -    The number of new tracks is {len(tracks)}')
             return tracks
 
         # Prepare a list from csv to check which tracks are new for this time

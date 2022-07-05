@@ -16,7 +16,7 @@ class GoogleSpreadsheet(Table):
         self.worksheet = GoogleSpreadsheet.connect()
         # self.current_vocabularies = self.worksheet.col_values(1)
         self.next_row = GoogleSpreadsheet.next_available_row(self.worksheet)
-        self.sleep_time_sec = 0.7
+        self.sleep_time_sec = 0.8
 
     @classmethod
     def connect(cls):

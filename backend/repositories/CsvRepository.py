@@ -36,7 +36,7 @@ class CsvRepository(object):
 
     @staticmethod
     def add_columns(path: str, columns: list) -> None:
-        print('Add header on CSV')
+        print('[INFO] - Add header on CSV')
         with open(path, 'a', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=columns)
             writer.writeheader()
