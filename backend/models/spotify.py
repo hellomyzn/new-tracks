@@ -2,9 +2,11 @@ import setting
 import spotipy
 
 class Spotify(object):
-    def __init__(self, playlist_id):
+    def __init__(self, playlist_name, playlist_id):
         self.connect        = Spotify.connect()
         self.playlist_id    = playlist_id
+        self.playlist_name  = playlist_name
+        self.playlist_url   = 'https://open.spotify.com/playlist/' + playlist_id
         self.playlist_data  = None
         self.tracks         = []
         self.new_tracks     = []

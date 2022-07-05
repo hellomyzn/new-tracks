@@ -9,7 +9,9 @@ class Table(metaclass=abc.ABCMeta):
         columns = [
             'name', 
             'artist', 
-            'url', 
+            'playlist_name',
+            'track_url', 
+            'playlist_url',
             'release_date', 
             'added_at', 
             'created_at',

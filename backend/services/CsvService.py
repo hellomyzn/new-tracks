@@ -3,9 +3,29 @@ import helper
 
 
 class CsvService(object):
+
+    @classmethod
+    def is_not_header(cls, path: str) -> bool:
+        if not CsvRepository.get_header(path):
+            return True
+        else:
+            return False
+
+
+    @classmethod
+    def is_not_csv(cls, path: str) -> bool:
+        if not helper.is_file(path):
+            return True
+        else:
+            return False
+
+
     @staticmethod
     def get_tracks(path: str) -> list:
-        if CsvService.is_not_columns(path):
+        if CsvService.is_not_csv(path):
+            return []
+
+        if CsvService.is_not_header(path):
             return []
 
         data = CsvRepository.get_data(path)
@@ -14,33 +34,25 @@ class CsvService(object):
 
     @staticmethod
     def get_header_and_tracks(path: str) -> list:
-        if CsvService.is_not_columns(path):
+        if CsvService.is_not_csv(path):
+            return [],[]
+
+        if CsvService.is_not_header(path):
             return [],[]
 
         header, data = CsvRepository.get_header_and_data(path)
         return header, data    
-    
-    
-    @staticmethod
-    def is_not_columns(path: str) -> bool:
-        if not CsvRepository.get_header(path):
-            return True
-        else:
-            return False
 
 
     @staticmethod
-    def add_tracks(csv, tracks: list, csv_path_of_tracks_by_key: str) -> None:
-
-        if not helper.is_file(csv_path_of_tracks_by_key):
-            helper.create_file(csv_path_of_tracks_by_key)
-
-        if CsvService.is_not_columns(csv.file_path):
-            CsvRepository.add_columns(csv.file_path, csv.columns)
-        
-        if CsvService.is_not_columns(csv_path_of_tracks_by_key):
-            CsvRepository.add_columns(csv_path_of_tracks_by_key, csv.columns)    
+    def add_tracks(csv, tracks: list) -> None:
+        # Check there is csv file 
+        if CsvService.is_not_csv(csv.file_path):
+            helper.create_file(csv.file_path)
+            
+        # Check there is header
+        if CsvService.is_not_header(csv.file_path):
+            CsvRepository.add_columns(csv.file_path, csv.columns)  
 
         CsvRepository.add(csv.file_path, csv.columns, tracks)
-        CsvRepository.add(csv_path_of_tracks_by_key, csv.columns, tracks)
         return

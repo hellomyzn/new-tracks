@@ -40,15 +40,3 @@ class GoogleSpreadsheet(Table):
 
         str_list = list(filter(None, worksheet.col_values(1)))
         return int(len(str_list)+1)
-
-
-
-
-
-    # def update_memorized(self, vocabulary) -> None:
-    #     # Update memorized col
-    #     cell = self.worksheet.find(vocabulary.title)
-    #     self.worksheet.update_cell(cell.row, 8, False)
-    #     self.worksheet.update_cell(cell.row, 9, False)
-    #     time.sleep(self.sleep_time_sec)
-    #     return None

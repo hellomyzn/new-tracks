@@ -24,14 +24,14 @@ PLAYLIST_ID_FR = CONFIG['PLAYLIST_ID']['FR']
 
 
 PLAYLIST_DATA = [
-    {'key': 'GLOBAL', 'id': PLAYLIST_ID_GLOBAL},
-    {'key': 'US', 'id': PLAYLIST_ID_US},
-    {'key': 'JP', 'id': PLAYLIST_ID_JP},
-    {'key': 'PH', 'id': PLAYLIST_ID_PH},
-    {'key': 'IN', 'id': PLAYLIST_ID_IN},
-    {'key': 'IT', 'id': PLAYLIST_ID_IT},
-    {'key': 'UK', 'id': PLAYLIST_ID_UK},
-    {'key': 'KR', 'id': PLAYLIST_ID_KR},
-    {'key': 'SP', 'id': PLAYLIST_ID_SP},
-    {'key': 'FR', 'id': PLAYLIST_ID_FR}
+    {'name': 'GLOBAL', 'id': PLAYLIST_ID_GLOBAL},
+    {'name': 'US', 'id': PLAYLIST_ID_US},
+    {'name': 'JP', 'id': PLAYLIST_ID_JP},
+    {'name': 'PH', 'id': PLAYLIST_ID_PH},
+    {'name': 'IN', 'id': PLAYLIST_ID_IN},
+    {'name': 'IT', 'id': PLAYLIST_ID_IT},
+    {'name': 'UK', 'id': PLAYLIST_ID_UK},
+    {'name': 'KR', 'id': PLAYLIST_ID_KR},
+    {'name': 'SP', 'id': PLAYLIST_ID_SP},
+    {'name': 'FR', 'id': PLAYLIST_ID_FR}
 ]

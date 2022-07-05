@@ -27,13 +27,15 @@ class SpotifyService(object):
         for i in range(num_tracks):
             spotify.tracks.append(
                 {
-                    'name':         names[i],
-                    'artist':       artists[i],
-                    'url':          urls[i],                        
-                    'release_date': release_date[i],
-                    'added_at':     added_at[i],
-                    'created_at':   helper.get_date(),
-                    'like':         False
+                    'name':             names[i],
+                    'artist':           artists[i],                    
+                    'playlist_name':    spotify.playlist_name,
+                    'track_url':        urls[i],
+                    'playlist_url':     spotify.playlist_url,                  
+                    'release_date':     release_date[i],
+                    'added_at':         added_at[i],
+                    'created_at':       helper.get_date(),
+                    'like':             False
                 }
             )
 
