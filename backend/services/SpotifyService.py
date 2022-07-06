@@ -62,7 +62,7 @@ class SpotifyService(object):
         return tracks
 
     @staticmethod
-    def retrieve_all_tracks_from_playlist(spotify, playlist_id) -> list:
+    def retrieve_all_tracks_from_playlist(spotify, playlist_id: str) -> list:
         # TODO: there is more than 100 tracks
         tracks = []
 
@@ -76,8 +76,8 @@ class SpotifyService(object):
             offset = len(tracks)
             tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
             tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(playlist_json_data, tracks_json_data)            
-            tracks_number -= len(tracks_json_data) 
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(playlist_json_data, tracks_json_data)
+            tracks_number -= len(tracks_json_data)             
         else:
             # after while loop
             offset = len(tracks)
@@ -157,31 +157,48 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:
-        # TODO: Test to remove all tracks from a playlist even thought it's more than 100
-        trakcs = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
-        
-
+    def remove_specific_tracks_from_playlist(spotify, playlist_id, tracks) -> None:
         # TODO: if there are more than 100 tracks
-        items = []
-        for track in trakcs:
-            items.append(track['track_url'])
+        items = [track['track_url'] for track in tracks]
+        names = [track['name'] for track in tracks]
+        print('\n')
+        for name in names:
+            print(f'\t[TRACK NAME] - {name}')
+
+        user_input = input(f'\nDo you want to remove these tracks above from your playlist? [y/n]: ')
         
-        user_input = input(f'Do you want to remove all tracks from your playlist? [y/n]: ')
         if helper.is_yes(user_input):
             spotify.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
+            print("It's removed")
+
         else:
             print("It's cancelled")
         return
 
+
+    @staticmethod
+    def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:
+        # TODO: Test to remove all tracks from a playlist even thought it's more than 100
+        tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
+        
+        # TODO: if there are more than 100 tracks
+        SpotifyService.remove_specific_tracks_from_playlist(spotify, playlist_id, tracks)
+
+
     @staticmethod
     def remove_tracks_from_playlist(spotify, playlist_id, first, last) -> None:
         # TODO: if there are more than 100 tracks
-        
-        print(len(trakcs))
+        all_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
 
-    
-    @staticmethod
-    def remove_track_from_playlist(spotify, track_number) -> None:
-        pass
+        # TODO Manage first and last number is proper
+        """
+        no: 
+            -1, -2, 
+            the number more than the number of tracks in playlist, 
+            first is bigger than last
+        """
+        tracks = all_tracks[first-1:last]
+        
+        SpotifyService.remove_specific_tracks_from_playlist(spotify, playlist_id, tracks)
+
         
