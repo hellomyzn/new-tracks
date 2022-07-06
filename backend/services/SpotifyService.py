@@ -126,9 +126,8 @@ class SpotifyService(object):
 
     @staticmethod
     def get_current_track(spotify) -> list:
-        track_json_data = spotify.connect.current_user_playing_track()
-        track_json_data = track_json_data['item']
-        track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
+        track = SpotifyRepository.get_current_track(spotify)
+        
         return track
 
 

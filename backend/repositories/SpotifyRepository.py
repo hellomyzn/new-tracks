@@ -16,6 +16,15 @@ class SpotifyRepository(object):
 
         return track
 
+
+    @staticmethod
+    def get_current_track(spotify) -> list:
+        track_json_data = spotify.connect.current_user_playing_track()
+        track_json_data = track_json_data['item']
+        track = SpotifyRepository.retrieve_track_data_for_columns(track_json_data)
+        return track
+
+
     @staticmethod
     def get_tracks_played_recently(spotify) -> list:
         tracks = []

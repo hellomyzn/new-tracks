@@ -12,6 +12,17 @@ class CsvRepository(object):
         
         return data
 
+    @staticmethod
+    def get_data_by_name_and_artist(path: str, name: str, artist: str) -> list:
+        data = []
+        with open(path, 'r', newline='') as csvfile:
+            csv_reader = csv.reader(csvfile)
+            header = next(csv_reader)
+            for row in csv_reader:
+                if row[0] == name and row[1] == artist:
+                    data.append(row)
+        return data
+
 
     @staticmethod
     def get_header(path: str) -> list:

@@ -31,6 +31,17 @@ class CsvService(object):
         data = CsvRepository.get_data(path)
         return data
 
+    @staticmethod
+    def get_track_by_name_and_artist(path: str, name: str, artist: str) -> list:
+        if CsvService.is_not_csv(path):
+            return []
+
+        if CsvService.is_not_header(path):
+            return []
+
+        track = CsvRepository.get_data_by_name_and_artist(path, name, artist)
+        return track
+
 
     @staticmethod
     def get_header_and_tracks(path: str) -> list:
