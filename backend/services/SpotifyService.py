@@ -1,25 +1,11 @@
 import helper
 from services.CsvService import CsvService
+from repositories.SpotifyRepository import SpotifyRepository
 
 
 class SpotifyService(object):
 
     # TODO: move some functions to repository
-
-    @classmethod
-    def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
-        track = [{ 'name': track_json_data['name'],
-                    'artist': track_json_data['artists'][0]['name'],
-                    'playlist_name': None,
-                    'track_url': track_json_data['external_urls']['spotify'],
-                    'playlist_url': None,
-                    'release_date': None,
-                    'added_at': None,
-                    'created_at': helper.get_date(),
-                    'like': False}]
-
-        return track
-
     @classmethod
     def retrieve_track_data_for_columns_from_playlist(cls, tracks_json_data: dict, playlist_json_data: dict) -> list:
         tracks = []
@@ -47,7 +33,7 @@ class SpotifyService(object):
         return tracks
 
     @staticmethod
-    def retrieve_tracks_from_playlist(spotify, playlist_id) -> list:
+    def retrieve_tracks_from_playlist(spotify, playlist_id: str) -> list:
         # TODO: there is more than 100 tracks
         tracks = []
         playlist_json_data = spotify.connect.playlist(playlist_id)
@@ -145,21 +131,9 @@ class SpotifyService(object):
         track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
         return track
 
-    
-    @staticmethod
-    def get_tracks_played_recently(spotify) -> list:
-        tracks = []
-        tracks_json_data = spotify.connect.current_user_recently_played()
-        tracks_json_data = tracks_json_data['items']
-        for track_json_data in tracks_json_data:
-            track_json_data = track_json_data['track']
-            tracks += SpotifyService.retrieve_track_data_for_columns(track_json_data)
-        
-        return tracks
 
-        
     @staticmethod
-    def add_tracks_to_playlist(spotify, tracks, playlist_id) -> None:
+    def add_tracks_to_playlist(spotify, tracks, playlist_id: str) -> None:
         if not tracks:
             print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
             return
@@ -191,36 +165,17 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def remove_specific_tracks_from_playlist(spotify, playlist_id, tracks) -> None:
-        # TODO: if there are more than 100 tracks
-        items = [track['track_url'] for track in tracks]
-        names = [track['name'] for track in tracks]
-        print('\n')
-        for name in names:
-            print(f'\t[TRACK NAME] - {name}')
-
-        user_input = input(f'\nDo you want to remove these tracks above from your playlist? [y/n]: ')
-        
-        if helper.is_yes(user_input):
-            spotify.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
-            print("It's removed")
-
-        else:
-            print("It's cancelled")
-        return
-
-
-    @staticmethod
     def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:
         # TODO: Test to remove all tracks from a playlist even thought it's more than 100
         tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
         
         # TODO: if there are more than 100 tracks
-        SpotifyService.remove_specific_tracks_from_playlist(spotify, playlist_id, tracks)
+        SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
+        return
 
 
     @staticmethod
-    def remove_tracks_from_playlist(spotify, playlist_id, first, last) -> None:
+    def remove_tracks_from_playlist(spotify, playlist_id: str, first, last) -> None:
         # TODO: if there are more than 100 tracks
         all_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
 
@@ -233,6 +188,14 @@ class SpotifyService(object):
         """
         tracks = all_tracks[first-1:last]
         
-        SpotifyService.remove_specific_tracks_from_playlist(spotify, playlist_id, tracks)
+        SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
+        return
+
+    @staticmethod
+    def remove_tracks_played_recently_from_playlist(spotify, playlist_id: str) -> None:
+        tracks = SpotifyRepository.get_tracks_played_recently(spotify)
+        SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
+
+        return
 
         

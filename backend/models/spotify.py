@@ -8,10 +8,7 @@ import os
 
 class Spotify(object):
     def __init__(self):
-        self.connect        = Spotify.connect()
-        self.tracks         = []
-        self.new_tracks     = []
-        
+        self.connect = Spotify.connect()
     
     @classmethod
     def connect(cls):
