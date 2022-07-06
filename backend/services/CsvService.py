@@ -39,7 +39,7 @@ class CsvService(object):
         if CsvService.is_not_header(path):
             return []
 
-        track = CsvRepository.get_data_by_name_and_artist(path, name, artist)
+        track = CsvRepository.get_first_data_by_name_and_artist(path, name, artist)
         return track
 
 
