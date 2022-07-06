@@ -4,8 +4,24 @@ from services.CsvService import CsvService
 
 class SpotifyService(object):
 
+    # TODO: move some functions to repository
+
     @classmethod
-    def retrieve_track_data_for_columns_from_playlist(cls, playlist_json_data: dict, tracks_json_data: dict) -> list:
+    def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
+        track = [{ 'name': track_json_data['name'],
+                    'artist': track_json_data['artists'][0]['name'],
+                    'playlist_name': None,
+                    'track_url': track_json_data['external_urls']['spotify'],
+                    'playlist_url': None,
+                    'release_date': None,
+                    'added_at': None,
+                    'created_at': helper.get_date(),
+                    'like': False}]
+
+        return track
+
+    @classmethod
+    def retrieve_track_data_for_columns_from_playlist(cls, tracks_json_data: dict, playlist_json_data: dict) -> list:
         tracks = []
         # Retrieve certain data from json data
         names =         [ t["track"]["name"] for t in tracks_json_data]
@@ -20,14 +36,14 @@ class SpotifyService(object):
 
         for i in range(len(names)):
             tracks.append({'name': names[i],
-                                    'artist': artists[i],
-                                    'playlist_name': playlist_name,
-                                    'track_url': urls[i],
-                                    'playlist_url': playlist_url,
-                                    'release_date': release_date[i],
-                                    'added_at': added_at[i],
-                                    'created_at': helper.get_date(),
-                                    'like': False})
+                            'artist': artists[i],
+                            'playlist_name': playlist_name,
+                            'track_url': urls[i],
+                            'playlist_url': playlist_url,
+                            'release_date': release_date[i],
+                            'added_at': added_at[i],
+                            'created_at': helper.get_date(),
+                            'like': False})
         return tracks
 
     @staticmethod
@@ -76,17 +92,16 @@ class SpotifyService(object):
             offset = len(tracks)
             tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
             tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(playlist_json_data, tracks_json_data)
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
             tracks_number -= len(tracks_json_data)             
         else:
             # after while loop
             offset = len(tracks)
             tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
             tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(playlist_json_data, tracks_json_data)
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
 
         return tracks
-
 
     @staticmethod
     def retrieve_new_tracks(spotify, tracks, csv_path) -> list:
@@ -123,6 +138,17 @@ class SpotifyService(object):
         print(f'[INFO] -    The number of new tracks is {len(new_tracks)}')
         return new_tracks
 
+    @staticmethod
+    def get_current_track(spotify) -> list:
+        track_json_data = spotify.connect.current_user_playing_track()
+        track_json_data = track_json_data['item']
+        track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
+        return track
+
+    
+
+        # tracks = spotify.connect.current_user_recently_played()
+        # print(track)
 
     @staticmethod
     def add_tracks_to_playlist(spotify, tracks, playlist_id) -> None:

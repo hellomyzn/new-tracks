@@ -24,5 +24,10 @@ PLAYLISTS_IDS = [
     "37i9dQZEVXbLnolsZ8PSNw", # UK
     "37i9dQZEVXbNxXF4SkHj9F", # KR
     "37i9dQZEVXbNFJfN1Vw8d9", # SP
+    "37i9dQZEVXbJPcfkRz0wJ0", # AU
+    "37i9dQZEVXbJiZcmkrIHGU", # GE
+    "37i9dQZEVXbIQnj7RRhdSX", # IT
+    "37i9dQZEVXbIPWwFssbupI", # FR
+    "37i9dQZEVXbMXbN3EUUhlg", # BR
     "37i9dQZF1DX4JAvHpjipBk"  # New Music Friday
 ]
