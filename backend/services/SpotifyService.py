@@ -146,10 +146,18 @@ class SpotifyService(object):
         return track
 
     
+    @staticmethod
+    def get_tracks_played_recently(spotify) -> list:
+        tracks = []
+        tracks_json_data = spotify.connect.current_user_recently_played()
+        tracks_json_data = tracks_json_data['items']
+        for track_json_data in tracks_json_data:
+            track_json_data = track_json_data['track']
+            tracks += SpotifyService.retrieve_track_data_for_columns(track_json_data)
+        
+        return tracks
 
-        # tracks = spotify.connect.current_user_recently_played()
-        # print(track)
-
+        
     @staticmethod
     def add_tracks_to_playlist(spotify, tracks, playlist_id) -> None:
         if not tracks:

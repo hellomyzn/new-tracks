@@ -43,8 +43,12 @@ class TrackController(object):
         return 
     
     def remove_tracks_from_playlist(self) -> None:
-        first = int(input('Enter a track number (first): '))
-        last =  int(input('Enter a track number (last): '))
-        SpotifyService.remove_tracks_from_playlist(self.spotify, setting.MY_PLAYLIST_ID, first, last)
+        if helper.is_yes(input("\nDo you want to remove some tracks you've already listened from playlist? (y/n): ")):
+            SpotifyService.get_tracks_played_recently(self.spotify)
+        else:
+            print('You can remove tracks between the track number(first) you choose and the track number(last) you choose')
+            first = int(input('Enter a track number (first): '))
+            last =  int(input('Enter a track number (last): '))
+            SpotifyService.remove_tracks_from_playlist(self.spotify, setting.MY_PLAYLIST_ID, first, last)
 
         return
