@@ -7,6 +7,24 @@ class SpotifyService(object):
 
     # TODO: move some functions to repository
     @classmethod
+    def show_track_names(cls, tracks) -> None:
+        names = [track['name'] for track in tracks]
+        print("\n")
+        for name in names:
+            print(f'\t[TRACK NAME] - {name}')
+        return 
+
+    @classmethod
+    def is_in_track(cls, track: dict, tracks: list) -> bool:
+        track = {'name': track['name'], 'artist': track['artist']}
+        tracks = [{'name': t['name'], 'artist': t['artist']} for t in tracks]
+        if track in tracks:
+            return True
+        else:
+            return False
+
+
+    @classmethod
     def retrieve_track_data_for_columns_from_playlist(cls, tracks_json_data: dict, playlist_json_data: dict) -> list:
         tracks = []
         # Retrieve certain data from json data
@@ -192,7 +210,15 @@ class SpotifyService(object):
 
     @staticmethod
     def remove_tracks_played_recently_from_playlist(spotify, playlist_id: str) -> None:
-        tracks = SpotifyRepository.get_tracks_played_recently(spotify)
+        tracks = []
+        tracks_played_recently = SpotifyRepository.get_tracks_played_recently(spotify)
+        print(f'TRACKS PLAYED RECENTLY')
+        SpotifyService.show_track_names(tracks_played_recently)
+        playlist_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
+        for t in tracks_played_recently:
+            if SpotifyService.is_in_track(t, playlist_tracks):
+                tracks.append(t)
+
         SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
 
         return
