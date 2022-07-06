@@ -4,10 +4,37 @@ from services.CsvService import CsvService
 
 class SpotifyService(object):
 
+    @classmethod
+    def retrieve_track_data_for_columns_from_playlist(cls, playlist_json_data: dict, tracks_json_data: dict) -> list:
+        tracks = []
+        # Retrieve certain data from json data
+        names =         [ t["track"]["name"] for t in tracks_json_data]
+        urls =          [ t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
+        artists =       [ t["track"]["artists"][0]['name'] for t in tracks_json_data]
+        release_date =  [ t["track"]["album"]["release_date"] for t in tracks_json_data]
+        added_at =      [ t["added_at"]for t in tracks_json_data]
+        playlist_name = playlist_json_data["name"]
+        playlist_url = playlist_json_data['external_urls']['spotify']
+
+        print(f'[IFNO] - Retrieve tracks data from playlist: {playlist_name}')
+
+        for i in range(len(names)):
+            tracks.append({'name': names[i],
+                                    'artist': artists[i],
+                                    'playlist_name': playlist_name,
+                                    'track_url': urls[i],
+                                    'playlist_url': playlist_url,
+                                    'release_date': release_date[i],
+                                    'added_at': added_at[i],
+                                    'created_at': helper.get_date(),
+                                    'like': False})
+        return tracks
+
     @staticmethod
     def retrieve_tracks_from_playlist(spotify, playlist_id) -> list:
+        # TODO: there is more than 100 tracks
         tracks = []
-        playlist_json_data = spotify.connect.playlist(playlist_id)        
+        playlist_json_data = spotify.connect.playlist(playlist_id)
         tracks_json_data = playlist_json_data["tracks"]["items"]
 
         # Retrieve certain data from json data
@@ -31,6 +58,32 @@ class SpotifyService(object):
                                     'added_at': added_at[i],
                                     'created_at': helper.get_date(),
                                     'like': False})
+
+        return tracks
+
+    @staticmethod
+    def retrieve_all_tracks_from_playlist(spotify, playlist_id) -> list:
+        # TODO: there is more than 100 tracks
+        tracks = []
+
+        # Check there are more than 100 tracks in a playlist
+        playlist_json_data = spotify.connect.playlist(playlist_id)
+        tracks_number = playlist_json_data['tracks']['total']
+        max_number = 100
+        print(f'\n[INFO] - The number of new tracks to retrieve from a playlist on Spotify is {tracks_number}')
+        
+        while max_number < tracks_number:
+            offset = len(tracks)
+            tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
+            tracks_json_data = tracks_json_data["items"]
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(playlist_json_data, tracks_json_data)            
+            tracks_number -= len(tracks_json_data) 
+        else:
+            # after while loop
+            offset = len(tracks)
+            tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
+            tracks_json_data = tracks_json_data["items"]
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(playlist_json_data, tracks_json_data)
 
         return tracks
 
@@ -77,6 +130,8 @@ class SpotifyService(object):
             print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
             return
         
+        # If there are more than 100 tracks in tracks, you need to avoid exception.
+        # TODO: need to care of order tracks if there are more than 100 tracks.
         tracks_number = len(tracks)
         print(f'\n[INFO] - The number of new tracks to add to a playlist on Spotify is {tracks_number}')
 
@@ -102,9 +157,12 @@ class SpotifyService(object):
 
 
     @staticmethod
-    def delete_all_tracks_from_playlist(spotify, playlist_id) -> None:
-        trakcs = SpotifyService.retrieve_tracks_from_playlist(spotify, playlist_id)
+    def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:
+        # TODO: Test to remove all tracks from a playlist even thought it's more than 100
+        trakcs = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
         
+
+        # TODO: if there are more than 100 tracks
         items = []
         for track in trakcs:
             items.append(track['track_url'])
@@ -115,4 +173,15 @@ class SpotifyService(object):
         else:
             print("It's cancelled")
         return
+
+    @staticmethod
+    def remove_tracks_from_playlist(spotify, playlist_id, first, last) -> None:
+        # TODO: if there are more than 100 tracks
+        
+        print(len(trakcs))
+
+    
+    @staticmethod
+    def remove_track_from_playlist(spotify, track_number) -> None:
+        pass
         

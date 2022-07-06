@@ -14,7 +14,7 @@ class TrackController(object):
         self.spotify = Spotify()
         self.google_spreadsheet = GoogleSpreadsheet()
 
-    def add_new_tracks(self) -> None:
+    def add_new_tracks_to_playlist(self) -> None:
         all_new_tracks = []
         # Add new tracks by each playlist
         for playlist_id in setting.PLAYLISTS_IDS:            
@@ -39,5 +39,11 @@ class TrackController(object):
 
         # Remove all tracks from playlist 
         # TODO: there is limitation to remove tracks as 100, so I have to fix
-        # SpotifyService.delete_all_tracks_from_playlist(self.spotify, setting.MY_PLAYLIST_ID)
+        # SpotifyService.remove_all_tracks_from_playlist(self.spotify, setting.MY_PLAYLIST_ID)
         return 
+    
+    def remove_tracks_from_playlist(self) -> None:
+        # first = input('Enter a track number (first): ')
+        # last =  input('Enter a track number (last): ')
+        first, last = 0, 0
+        SpotifyService.remove_tracks_from_playlist(self.spotify, setting.MY_PLAYLIST_ID, first, last)
