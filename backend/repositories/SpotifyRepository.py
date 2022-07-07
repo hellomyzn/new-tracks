@@ -45,6 +45,7 @@ class SpotifyRepository(object):
         for name in names:
             print(f'\t[TRACK NAME] - {name}')
 
+        # TODO: If there is no track this time, return and print there is no track this time
         user_input = input(f'\nDo you want to remove these tracks above from your playlist? [y/n]: ')
         
         if helper.is_yes(user_input):
