@@ -24,6 +24,7 @@ class TrackController(object):
         else: 
             print("There is no track you are currently listening on CSV")
 
+
     def add_new_tracks_to_playlist(self) -> None:
         all_new_tracks = []
         # Add new tracks by each playlist

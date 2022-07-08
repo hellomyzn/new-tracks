@@ -56,28 +56,44 @@ class SpotifyService(object):
         tracks = []
         playlist_json_data = spotify.connect.playlist(playlist_id)
         tracks_json_data = playlist_json_data["tracks"]["items"]
-
+        i = 0
+        for t in tracks_json_data:
+            if t["track"] == None:
+                continue
+            
+            tracks.append({'name':              t["track"]["name"],
+                            'artist':           t["track"]["artists"][0]['name'],
+                            'playlist_name':    playlist_json_data["name"],
+                            'track_url':        t["track"]["external_urls"]["spotify"] ,
+                            'playlist_url':     playlist_json_data['external_urls']['spotify'],
+                            'release_date':     t["track"]["album"]["release_date"] ,
+                            'added_at':         t["added_at"] ,
+                            'created_at':       helper.get_date(),
+                            'like':             False})
+        
+            
         # Retrieve certain data from json data
-        names =         [ t["track"]["name"] for t in tracks_json_data]
-        urls =          [ t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
-        artists =       [ t["track"]["artists"][0]['name'] for t in tracks_json_data]
-        release_date =  [ t["track"]["album"]["release_date"] for t in tracks_json_data]
-        added_at =      [ t["added_at"]for t in tracks_json_data]
-        playlist_name = playlist_json_data["name"]
-        playlist_url = playlist_json_data['external_urls']['spotify']
+        # names =         [ t["track"]["name"] for t in tracks_json_data]
+        # urls =          [ t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
+        # artists =       [ t["track"]["artists"][0]['name'] for t in tracks_json_data]
+        # release_date =  [ t["track"]["album"]["release_date"] for t in tracks_json_data]
+        # added_at =      [ t["added_at"]for t in tracks_json_data]
+        # playlist_name = playlist_json_data["name"]
+        # playlist_url = playlist_json_data['external_urls']['spotify']
 
-        print(f'[IFNO] - playlist: {playlist_name}')
+        print(f'[IFNO] - playlist: {playlist_json_data["name"]}')
 
-        for i in range(len(names)):
-            tracks.append({'name': names[i],
-                                    'artist': artists[i],
-                                    'playlist_name': playlist_name,
-                                    'track_url': urls[i],
-                                    'playlist_url': playlist_url,
-                                    'release_date': release_date[i],
-                                    'added_at': added_at[i],
-                                    'created_at': helper.get_date(),
-                                    'like': False})
+        # for i in range(len(names)):
+        #     tracks.append({'name': names[i],
+        #                     'artist': artists[i],
+        #                     'playlist_name': playlist_name,
+        #                     'track_url': urls[i],
+        #                     'playlist_url': playlist_url,
+        #                     'release_date': release_date[i],
+        #                     'added_at': added_at[i],
+        #                     'created_at': helper.get_date(),
+        #                     'like': False})
+        print(len(tracks))
 
         return tracks
 
