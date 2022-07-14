@@ -5,6 +5,31 @@ from repositories.SpotifyRepository import SpotifyRepository
 
 class SpotifyService(object):
 
+    @classmethod
+    def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
+        if track_json_data:
+            track = [{ 'name': track_json_data['name'],
+                        'artist': track_json_data['artists'][0]['name'],
+                        'playlist_name': None,
+                        'track_url': track_json_data['external_urls']['spotify'],
+                        'playlist_url': None,
+                        'release_date': None,
+                        'added_at': None,
+                        'created_at': helper.get_date(),
+                        'like': False}]
+        else:
+            track = [{ 'name': None,
+                        'artist': None,
+                        'playlist_name': None,
+                        'track_url': None,
+                        'playlist_url': None,
+                        'release_date': None,
+                        'added_at': None,
+                        'created_at': helper.get_date(),
+                        'like': False}]
+
+        return track
+
     # TODO: move some functions to repository
     @classmethod
     def show_track_names(cls, tracks) -> None:
@@ -161,7 +186,7 @@ class SpotifyService(object):
     @staticmethod
     def get_current_track(spotify) -> list:
         track = SpotifyRepository.get_current_track(spotify)
-        
+        track = SpotifyService.retrieve_track_data_for_columns(track)
         return track
 
 

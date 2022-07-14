@@ -2,27 +2,19 @@ import helper
 
 class SpotifyRepository(object):
     
-    @classmethod
-    def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
-        track = [{ 'name': track_json_data['name'],
-                    'artist': track_json_data['artists'][0]['name'],
-                    'playlist_name': None,
-                    'track_url': track_json_data['external_urls']['spotify'],
-                    'playlist_url': None,
-                    'release_date': None,
-                    'added_at': None,
-                    'created_at': helper.get_date(),
-                    'like': False}]
 
-        return track
 
 
     @staticmethod
     def get_current_track(spotify) -> list:
         track_json_data = spotify.connect.current_user_playing_track()
-        track_json_data = track_json_data['item']
-        track = SpotifyRepository.retrieve_track_data_for_columns(track_json_data)
-        return track
+        try:
+            track_json_data = track_json_data['item']    
+        except TypeError:
+            print("[WARNING] - There is no current track you are listening on Spotify right now")
+            track_json_data = []
+
+        return track_json_data
 
 
     @staticmethod
