@@ -1,6 +1,7 @@
 import setting
 from models.interfaces.table import Table
 
+
 class Csv(Table):
     def __init__(self):
         self.columns = Csv.get_columns()

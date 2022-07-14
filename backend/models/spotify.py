@@ -1,15 +1,16 @@
-import setting
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy.oauth2 import SpotifyOAuth
 import os
 
+import spotipy
+
+import setting
+from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
 
 
 class Spotify(object):
     def __init__(self):
         self.connect = Spotify.connect()
-    
+
     @classmethod
     def connect(cls):
         print('[INFO] - Start connecting Spotify...')
@@ -21,9 +22,9 @@ class Spotify(object):
         """
             Scope reference:    https://developer.spotify.com/documentation/general/guides/authorization/scopes/
                 user-library-read
-                playlist-modify-private 
-                user-read-recently-played   :    for get playlist information  
-                playlist-modify-public      :    for modify public playlist (remove songs from playlist) 
+                playlist-modify-private
+                user-read-recently-played   :    for get playlist information
+                playlist-modify-public      :    for modify public playlist (remove songs from playlist)
                 user-read-currently-playing :    for getting a current track
         """
         scope = 'user-library-read \
@@ -31,10 +32,10 @@ class Spotify(object):
                  user-read-recently-played \
                  playlist-modify-public \
                  user-read-currently-playing'
-    
+
         auth_manager = SpotifyOAuth(client_id=client_id,
                                     client_secret=client_secret,
-                                    redirect_uri=redirect_uri,    
+                                    redirect_uri=redirect_uri,
                                     scope=scope,
                                     open_browser=False)
 

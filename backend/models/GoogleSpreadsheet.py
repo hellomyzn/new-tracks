@@ -7,7 +7,7 @@ import setting
 
 class GoogleSpreadsheet(Table):
     """
-        Reference: 
+        Reference:
         - https://qiita.com/164kondo/items/eec4d1d8fd7648217935
         - https://www.cdatablog.jp/entry/2019/04/16/191006
     """
@@ -22,7 +22,8 @@ class GoogleSpreadsheet(Table):
     def connect(cls):
         print("[INFO] - Start connecting GSS...")
         json_path = setting.AUTHENTICATION_JSON
-        scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+        scope = ['https://spreadsheets.google.com/feeds',
+                 'https://www.googleapis.com/auth/drive']
         key = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_KEY']
         sheet_name = setting.CONFIG['GOOGLE_API']['Spread_SHEET_NAME']
 
@@ -30,9 +31,8 @@ class GoogleSpreadsheet(Table):
         gc = gspread.authorize(credentials)
         workbook = gc.open_by_key(key)
         worksheet = workbook.worksheet(sheet_name)
-    
+
         return worksheet
-    
 
     @classmethod
     def next_available_row(cls, worksheet) -> int:
