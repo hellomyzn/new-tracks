@@ -7,7 +7,7 @@ class CsvRepository(object):
         data = []
         with open(path, 'r', newline='') as csvfile:
             csv_reader = csv.reader(csvfile)
-            header = next(csv_reader)
+            next(csv_reader)
             for row in csv_reader:
                 data.append(row)
 
@@ -20,7 +20,7 @@ class CsvRepository(object):
         data = []
         with open(path, 'r', newline='') as csvfile:
             csv_reader = csv.reader(csvfile)
-            header = next(csv_reader)
+            next(csv_reader)
             for row in csv_reader:
                 if row[0] == name and row[1] == artist:
                     data = row

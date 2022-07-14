@@ -1,9 +1,6 @@
-import os
-
 import spotipy
 
 import setting
-from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.oauth2 import SpotifyOAuth
 
 

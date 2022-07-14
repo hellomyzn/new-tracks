@@ -65,5 +65,5 @@ class CsvService(object):
             CsvRepository.add_columns(csv.file_path, csv.columns)
 
         CsvRepository.add(csv.file_path, csv.columns, tracks)
-        print(f'[INFO] -    Done to add tracks to CSV')
+        print('[INFO] - Done to add tracks to CSV')
         return

@@ -81,7 +81,6 @@ class SpotifyService(object):
         tracks = []
         playlist_json_data = spotify.connect.playlist(playlist_id)
         tracks_json_data = playlist_json_data["tracks"]["items"]
-        i = 0
         for t in tracks_json_data:
             if t["track"] is None:
                 continue
@@ -236,7 +235,7 @@ class SpotifyService(object):
                                                     playlist_id: str) -> None:
         tracks = []
         tracks_played_recently = SpotifyRepository.get_tracks_played_recently(spotify)
-        print(f'TRACKS PLAYED RECENTLY')
+        print('TRACKS PLAYED RECENTLY')
         SpotifyService.show_track_names(tracks_played_recently)
         playlist_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
         for t in tracks_played_recently:
