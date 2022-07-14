@@ -1,5 +1,6 @@
 from controllers.TrackController import TrackController
 
+
 def main():
     # TODO: Create command for choise
     track_controller = TrackController()
@@ -10,4 +11,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

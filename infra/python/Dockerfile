@@ -22,6 +22,6 @@ RUN python -m pip install \
     oauth2client \
     termcolor \
     pytest \
-    pep8 \
+    pycodestyle \
     flake8 \
     pylint
