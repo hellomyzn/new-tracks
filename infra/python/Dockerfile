@@ -21,4 +21,7 @@ RUN python -m pip install \
     gspread \
     oauth2client \
     termcolor \
-    pytest
+    pytest \
+    pep8 \
+    flake8 \
+    pylint

@@ -14,7 +14,7 @@ class TrackController(object):
         self.spotify = Spotify()
         self.google_spreadsheet = GoogleSpreadsheet()
 
-    def show_current_track_from_csv(self):
+    def show_current_track_from_csv(self) -> None:
         track = SpotifyService.get_current_track(self.spotify)
         track = CsvService.get_track_by_name_and_artist(self.csv.file_path, 
                                                         track[0]['name'], 
@@ -23,6 +23,7 @@ class TrackController(object):
             print(f'\n\tname:     {track[0]} \n\tartist:   {track[1]} \n\tplaylist: {track[2]} \n')
         else: 
             print("There is no track you are currently listening on CSV")
+        return
 
 
     def add_new_tracks_to_playlist(self) -> None:
