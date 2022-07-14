@@ -17,12 +17,21 @@ class Spotify(object):
         # get api data from environment environment variables
         client_id = setting.CONFIG['SPOTIPY']['SPOTIPY_CLIENT_ID']
         client_secret = setting.CONFIG['SPOTIPY']['SPOTIPY_CLIENT_SECRET']
-        redirect_uri = 'http://127.0.0.1:9090'
-        scope = 'user-library-read playlist-modify-private'
-            
-        # client_credentials_manager = SpotifyClientCredentials(client_id=client_id,                                                                 
-        #                                                 client_secret=client_secret)
-        # spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+        redirect_uri = 'https://google.com'
+        """
+            Scope reference:    https://developer.spotify.com/documentation/general/guides/authorization/scopes/
+                user-library-read
+                playlist-modify-private 
+                user-read-recently-played   :    for get playlist information  
+                playlist-modify-public      :    for modify public playlist (remove songs from playlist) 
+                user-read-currently-playing :    for getting a current track
+        """
+        scope = 'user-library-read \
+                 playlist-modify-private \
+                 user-read-recently-played \
+                 playlist-modify-public \
+                 user-read-currently-playing'
+    
         auth_manager = SpotifyOAuth(client_id=client_id,
                                     client_secret=client_secret,
                                     redirect_uri=redirect_uri,    
