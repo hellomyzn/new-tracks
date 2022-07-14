@@ -2,8 +2,8 @@ import gspread
 
 from repositories.GoogleSpreadsheetRepository import GoogleSpreadsheetRepository
 
-class GoogleSpreadsheetService(object):
 
+class GoogleSpreadsheetService(object):
     @classmethod
     def create_columns(cls, worksheet, columns):
         print('Create header on GSS')
@@ -12,14 +12,12 @@ class GoogleSpreadsheetService(object):
 
         return None
 
-
     @classmethod
     def is_not_columns(cls, worksheet):
         if worksheet.row_values(1) == []:
             return True
         else:
             return False
-
 
     @staticmethod
     def add_tracks(google_spreadsheet, tracks: list) -> None:
@@ -47,6 +45,4 @@ class GoogleSpreadsheetService(object):
 
             google_spreadsheet.next_row += 1
             count += 1
-        
         return
-        

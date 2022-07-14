@@ -1,33 +1,32 @@
 import helper
+
 from services.CsvService import CsvService
 from repositories.SpotifyRepository import SpotifyRepository
 
 
 class SpotifyService(object):
-
     @classmethod
     def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
         if track_json_data:
-            track = [{ 'name': track_json_data['name'],
-                        'artist': track_json_data['artists'][0]['name'],
-                        'playlist_name': None,
-                        'track_url': track_json_data['external_urls']['spotify'],
-                        'playlist_url': None,
-                        'release_date': None,
-                        'added_at': None,
-                        'created_at': helper.get_date(),
-                        'like': False}]
+            track = [{'name': track_json_data['name'],
+                      'artist': track_json_data['artists'][0]['name'],
+                      'playlist_name': None,
+                      'track_url': track_json_data['external_urls']['spotify'],
+                      'playlist_url': None,
+                      'release_date': None,
+                      'added_at': None,
+                      'created_at': helper.get_date(),
+                      'like': False}]
         else:
-            track = [{ 'name': None,
-                        'artist': None,
-                        'playlist_name': None,
-                        'track_url': None,
-                        'playlist_url': None,
-                        'release_date': None,
-                        'added_at': None,
-                        'created_at': helper.get_date(),
-                        'like': False}]
-
+            track = [{'name': None,
+                      'artist': None,
+                      'playlist_name': None,
+                      'track_url': None,
+                      'playlist_url': None,
+                      'release_date': None,
+                      'added_at': None,
+                      'created_at': helper.get_date(),
+                      'like': False}]
         return track
 
     # TODO: move some functions to repository
@@ -37,7 +36,7 @@ class SpotifyService(object):
         print("\n")
         for name in names:
             print(f'\t[TRACK NAME] - {name}')
-        return 
+        return
 
     @classmethod
     def is_in_track(cls, track: dict, tracks: list) -> bool:
@@ -48,16 +47,17 @@ class SpotifyService(object):
         else:
             return False
 
-
     @classmethod
-    def retrieve_track_data_for_columns_from_playlist(cls, tracks_json_data: dict, playlist_json_data: dict) -> list:
+    def retrieve_track_data_for_columns_from_playlist(cls,
+                                                      tracks_json_data: dict,
+                                                      playlist_json_data: dict) -> list:
         tracks = []
         # Retrieve certain data from json data
-        names =         [ t["track"]["name"] for t in tracks_json_data]
-        urls =          [ t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
-        artists =       [ t["track"]["artists"][0]['name'] for t in tracks_json_data]
-        release_date =  [ t["track"]["album"]["release_date"] for t in tracks_json_data]
-        added_at =      [ t["added_at"]for t in tracks_json_data]
+        names = [t["track"]["name"] for t in tracks_json_data]
+        urls = [t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
+        artists = [t["track"]["artists"][0]['name'] for t in tracks_json_data]
+        release_date = [t["track"]["album"]["release_date"] for t in tracks_json_data]
+        added_at = [t["added_at"]for t in tracks_json_data]
         playlist_name = playlist_json_data["name"]
         playlist_url = playlist_json_data['external_urls']['spotify']
 
@@ -65,14 +65,14 @@ class SpotifyService(object):
 
         for i in range(len(names)):
             tracks.append({'name': names[i],
-                            'artist': artists[i],
-                            'playlist_name': playlist_name,
-                            'track_url': urls[i],
-                            'playlist_url': playlist_url,
-                            'release_date': release_date[i],
-                            'added_at': added_at[i],
-                            'created_at': helper.get_date(),
-                            'like': False})
+                           'artist': artists[i],
+                           'playlist_name': playlist_name,
+                           'track_url': urls[i],
+                           'playlist_url': playlist_url,
+                           'release_date': release_date[i],
+                           'added_at': added_at[i],
+                           'created_at': helper.get_date(),
+                           'like': False})
         return tracks
 
     @staticmethod
@@ -83,43 +83,21 @@ class SpotifyService(object):
         tracks_json_data = playlist_json_data["tracks"]["items"]
         i = 0
         for t in tracks_json_data:
-            if t["track"] == None:
+            if t["track"] is None:
                 continue
-            
-            tracks.append({'name':              t["track"]["name"],
-                            'artist':           t["track"]["artists"][0]['name'],
-                            'playlist_name':    playlist_json_data["name"],
-                            'track_url':        t["track"]["external_urls"]["spotify"] ,
-                            'playlist_url':     playlist_json_data['external_urls']['spotify'],
-                            'release_date':     t["track"]["album"]["release_date"] ,
-                            'added_at':         t["added_at"] ,
-                            'created_at':       helper.get_date(),
-                            'like':             False})
-        
-            
-        # Retrieve certain data from json data
-        # names =         [ t["track"]["name"] for t in tracks_json_data]
-        # urls =          [ t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
-        # artists =       [ t["track"]["artists"][0]['name'] for t in tracks_json_data]
-        # release_date =  [ t["track"]["album"]["release_date"] for t in tracks_json_data]
-        # added_at =      [ t["added_at"]for t in tracks_json_data]
-        # playlist_name = playlist_json_data["name"]
-        # playlist_url = playlist_json_data['external_urls']['spotify']
+
+            tracks.append({'name':             t["track"]["name"],
+                           'artist':           t["track"]["artists"][0]['name'],
+                           'playlist_name':    playlist_json_data["name"],
+                           'track_url':        t["track"]["external_urls"]["spotify"],
+                           'playlist_url':     playlist_json_data['external_urls']['spotify'],
+                           'release_date':     t["track"]["album"]["release_date"],
+                           'added_at':         t["added_at"],
+                           'created_at':       helper.get_date(),
+                           'like':             False})
 
         print(f'[IFNO] - playlist: {playlist_json_data["name"]}')
-
-        # for i in range(len(names)):
-        #     tracks.append({'name': names[i],
-        #                     'artist': artists[i],
-        #                     'playlist_name': playlist_name,
-        #                     'track_url': urls[i],
-        #                     'playlist_url': playlist_url,
-        #                     'release_date': release_date[i],
-        #                     'added_at': added_at[i],
-        #                     'created_at': helper.get_date(),
-        #                     'like': False})
         print(len(tracks))
-
         return tracks
 
     @staticmethod
@@ -132,13 +110,13 @@ class SpotifyService(object):
         tracks_number = playlist_json_data['tracks']['total']
         max_number = 100
         print(f'\n[INFO] - The number of new tracks to retrieve from a playlist on Spotify is {tracks_number}')
-        
+
         while max_number < tracks_number:
             offset = len(tracks)
             tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
             tracks_json_data = tracks_json_data["items"]
             tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
-            tracks_number -= len(tracks_json_data)             
+            tracks_number -= len(tracks_json_data)
         else:
             # after while loop
             offset = len(tracks)
@@ -173,7 +151,7 @@ class SpotifyService(object):
             tracks_only_name_artist_from_new.append({
                 'name':     track['name'],
                 'artist':   track['artist']})
-        
+
         # Check which tracks are new
         for i, track in enumerate(tracks_only_name_artist_from_new):
             if track in tracks_only_name_artist_from_csv:
@@ -189,13 +167,12 @@ class SpotifyService(object):
         track = SpotifyService.retrieve_track_data_for_columns(track)
         return track
 
-
     @staticmethod
     def add_tracks_to_playlist(spotify, tracks, playlist_id: str) -> None:
         if not tracks:
             print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
             return
-        
+
         # If there are more than 100 tracks in tracks, you need to avoid exception.
         # TODO: need to care of order tracks if there are more than 100 tracks.
         tracks_number = len(tracks)
@@ -205,7 +182,7 @@ class SpotifyService(object):
         while max_number < tracks_number:
 
             piece_of_tracks, tracks = tracks[0:int(max_number)], tracks[int(max_number)::]
-            
+
             urls = []
             for track in piece_of_tracks:
                 urls.append(track['track_url'])
@@ -213,44 +190,50 @@ class SpotifyService(object):
             spotify.connect.playlist_add_items(playlist_id, urls, position=0)
 
             tracks_number = len(tracks)
-        
+
         urls = []
         for track in tracks:
             urls.append(track['track_url'])
 
         spotify.connect.playlist_add_items(playlist_id, urls, position=0)
-        return 
-
+        return
 
     @staticmethod
     def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:
         # TODO: Test to remove all tracks from a playlist even thought it's more than 100
-        tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
-        
+        tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify,
+                                                                  playlist_id)
+
         # TODO: if there are more than 100 tracks
-        SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
+        SpotifyRepository.remove_tracks_from_playlist(spotify,
+                                                      playlist_id,
+                                                      tracks)
         return
 
-
     @staticmethod
-    def remove_tracks_from_playlist(spotify, playlist_id: str, first, last) -> None:
+    def remove_tracks_from_playlist(spotify,
+                                    playlist_id: str,
+                                    first, last) -> None:
         # TODO: if there are more than 100 tracks
         all_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
 
         # TODO Manage first and last number is proper
         """
-        no: 
-            -1, -2, 
-            the number more than the number of tracks in playlist, 
+        no:
+            -1, -2,
+            the number more than the number of tracks in playlist,
             first is bigger than last
         """
         tracks = all_tracks[first-1:last]
-        
-        SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
+
+        SpotifyRepository.remove_tracks_from_playlist(spotify,
+                                                      playlist_id,
+                                                      tracks)
         return
 
     @staticmethod
-    def remove_tracks_played_recently_from_playlist(spotify, playlist_id: str) -> None:
+    def remove_tracks_played_recently_from_playlist(spotify,
+                                                    playlist_id: str) -> None:
         tracks = []
         tracks_played_recently = SpotifyRepository.get_tracks_played_recently(spotify)
         print(f'TRACKS PLAYED RECENTLY')
@@ -260,8 +243,8 @@ class SpotifyService(object):
             if SpotifyService.is_in_track(t, playlist_tracks):
                 tracks.append(t)
 
-        SpotifyRepository.remove_tracks_from_playlist(spotify, playlist_id, tracks)
+        SpotifyRepository.remove_tracks_from_playlist(spotify,
+                                                      playlist_id,
+                                                      tracks)
 
         return
-
-        
