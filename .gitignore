@@ -5,7 +5,6 @@
 *.env
 *.cache
 *src
-*config.ini
 *.viminfo
 *__pycache__
 backend/src/*.txt
@@ -16,6 +15,7 @@ backend/.bash_history
 backend/.python_history
 backend/.DS_Store
 backend/.cache/*
+backend/config/config.ini
 backend/src/*.json
 
 backend/.vimrc
