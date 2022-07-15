@@ -1,4 +1,4 @@
-import helper
+import utils.helper as helper
 
 
 class SpotifyRepository(object):
@@ -9,6 +9,7 @@ class SpotifyRepository(object):
             track_json_data = track_json_data['item']
         except TypeError:
             print("[WARNING] - There is no current track you are listening on Spotify right now")
+            # logging.critical('Exception occured: ', exc_info=True)
             track_json_data = []
 
         return track_json_data

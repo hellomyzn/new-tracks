@@ -2,7 +2,7 @@ from configparser import ConfigParser
 
 
 # Set up config as dict
-config_file = 'config.ini'
+config_file = 'config/config.ini'
 CONFIG = ConfigParser()
 CONFIG.read(config_file)
 

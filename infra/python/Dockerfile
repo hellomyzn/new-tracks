@@ -15,13 +15,11 @@ RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
 RUN python -m pip install \
-    jupyterlab \
-    spotify_dl \
-    bs4 \
+    spotipy \
     gspread \
     oauth2client \
-    termcolor \
     pytest \
     pycodestyle \
     flake8 \
-    pylint
+    pylint \
+    pyyaml

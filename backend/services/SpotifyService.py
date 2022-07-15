@@ -1,4 +1,4 @@
-import helper
+import utils.helper as helper
 
 from services.CsvService import CsvService
 from repositories.SpotifyRepository import SpotifyRepository
@@ -8,25 +8,29 @@ class SpotifyService(object):
     @classmethod
     def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
         if track_json_data:
-            track = [{'name': track_json_data['name'],
-                      'artist': track_json_data['artists'][0]['name'],
-                      'playlist_name': None,
-                      'track_url': track_json_data['external_urls']['spotify'],
-                      'playlist_url': None,
-                      'release_date': None,
-                      'added_at': None,
-                      'created_at': helper.get_date(),
-                      'like': False}]
+            track = [{
+                'name': track_json_data['name'],
+                'artist': track_json_data['artists'][0]['name'],
+                'playlist_name': None,
+                'track_url': track_json_data['external_urls']['spotify'],
+                'playlist_url': None,
+                'release_date': None,
+                'added_at': None,
+                'created_at': helper.get_date(),
+                'like': False
+            }]
         else:
-            track = [{'name': None,
-                      'artist': None,
-                      'playlist_name': None,
-                      'track_url': None,
-                      'playlist_url': None,
-                      'release_date': None,
-                      'added_at': None,
-                      'created_at': helper.get_date(),
-                      'like': False}]
+            track = [{
+                'name': None,
+                'artist': None,
+                'playlist_name': None,
+                'track_url': None,
+                'playlist_url': None,
+                'release_date': None,
+                'added_at': None,
+                'created_at': helper.get_date(),
+                'like': False
+            }]
         return track
 
     # TODO: move some functions to repository
@@ -64,15 +68,17 @@ class SpotifyService(object):
         print(f'[IFNO] - Retrieve tracks data from playlist: {playlist_name}')
 
         for i in range(len(names)):
-            tracks.append({'name': names[i],
-                           'artist': artists[i],
-                           'playlist_name': playlist_name,
-                           'track_url': urls[i],
-                           'playlist_url': playlist_url,
-                           'release_date': release_date[i],
-                           'added_at': added_at[i],
-                           'created_at': helper.get_date(),
-                           'like': False})
+            tracks.append({
+                'name': names[i],
+                'artist': artists[i],
+                'playlist_name': playlist_name,
+                'track_url': urls[i],
+                'playlist_url': playlist_url,
+                'release_date': release_date[i],
+                'added_at': added_at[i],
+                'created_at': helper.get_date(),
+                'like': False
+            })
         return tracks
 
     @staticmethod
@@ -85,15 +91,17 @@ class SpotifyService(object):
             if t["track"] is None:
                 continue
 
-            tracks.append({'name':             t["track"]["name"],
-                           'artist':           t["track"]["artists"][0]['name'],
-                           'playlist_name':    playlist_json_data["name"],
-                           'track_url':        t["track"]["external_urls"]["spotify"],
-                           'playlist_url':     playlist_json_data['external_urls']['spotify'],
-                           'release_date':     t["track"]["album"]["release_date"],
-                           'added_at':         t["added_at"],
-                           'created_at':       helper.get_date(),
-                           'like':             False})
+            tracks.append({
+                'name':             t["track"]["name"],
+                'artist':           t["track"]["artists"][0]['name'],
+                'playlist_name':    playlist_json_data["name"],
+                'track_url':        t["track"]["external_urls"]["spotify"],
+                'playlist_url':     playlist_json_data['external_urls']['spotify'],
+                'release_date':     t["track"]["album"]["release_date"],
+                'added_at':         t["added_at"],
+                'created_at':       helper.get_date(),
+                'like':             False
+            })
 
         print(f'[IFNO] - playlist: {playlist_json_data["name"]}')
         print(len(tracks))

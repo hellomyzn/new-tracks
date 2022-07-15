@@ -1,4 +1,4 @@
-import setting
+import utils.setting as setting
 from models.interfaces.table import Table
 
 

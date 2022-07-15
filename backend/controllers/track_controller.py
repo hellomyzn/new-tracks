@@ -1,6 +1,6 @@
 """Modules"""
-import setting
-import helper
+import utils.setting as setting
+import utils.helper as helper
 from models.Spotify import Spotify
 from models.Csv import Csv
 from models.GoogleSpreadsheet import GoogleSpreadsheet

@@ -1,6 +1,6 @@
 import spotipy
 
-import setting
+import utils.setting as setting
 from spotipy.oauth2 import SpotifyOAuth
 
 
