@@ -18,11 +18,7 @@ class SpotifyRepository(object):
         tracks = []
         tracks_json_data = spotify.connect.current_user_recently_played()
         tracks_json_data = tracks_json_data['items']
-        for track_json_data in tracks_json_data:
-            track_json_data = track_json_data['track']
-            tracks += SpotifyRepository.retrieve_track_data_for_columns(track_json_data)
-
-        return tracks
+        return tracks_json_data
 
     @staticmethod
     def remove_tracks_from_playlist(spotify, playlist_id, tracks) -> None:

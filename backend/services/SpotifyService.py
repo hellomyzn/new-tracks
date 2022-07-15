@@ -234,7 +234,12 @@ class SpotifyService(object):
     def remove_tracks_played_recently_from_playlist(spotify,
                                                     playlist_id: str) -> None:
         tracks = []
-        tracks_played_recently = SpotifyRepository.get_tracks_played_recently(spotify)
+        tracks_played_recently = []
+        tracks_json_data = SpotifyRepository.get_tracks_played_recently(spotify)
+        for track_json_data in tracks_json_data:
+            track_json_data = track_json_data['track']
+            tracks_played_recently += SpotifyService.retrieve_track_data_for_columns(track_json_data)
+
         print('TRACKS PLAYED RECENTLY')
         SpotifyService.show_track_names(tracks_played_recently)
         playlist_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
