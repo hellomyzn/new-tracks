@@ -2,10 +2,10 @@ version: 1
 disable_existing_loggers: false
 formatters:
   user:
-    format: '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s'
+    format: '[%(asctime)s] {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s'
     datefmt: '%H:%M:%S'
   simple:
-    format: "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
+    format: "[%(asctime)s] {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
     datefmt: '%m/%d/%Y %H:%M:%S'
 handlers:
   console:
@@ -14,20 +14,22 @@ handlers:
     formatter: user
     stream: 'ext://sys.stdout'
   file:
-    class: logging.handlers.RotatingFileHandler
+    class: logging.handlers.TimedRotatingFileHandler
     level: INFO
     formatter: simple
-    filename: src/logs/logs.log
-    maxBytes: 10485760
-    backupCount: 20
+    filename: 'src/logs/logs.log'
+    when: 'S'
+    interval: 1
+    backupCount: 14
     encoding: utf8
   file_for_error:
-    class: logging.handlers.RotatingFileHandler
+    class: logging.handlers.TimedRotatingFileHandler
     level: ERROR
     formatter: simple
     filename: src/logs/errors.log
-    maxBytes: 10485760
-    backupCount: 20
+    when: 'S'
+    interval: 1
+    backupCount: 14
     encoding: utf8
 root: # root logger
   level: INFO

@@ -19,7 +19,7 @@ def main():
     # track_controller.add_new_tracks_to_playlist()
     # track_controller.remove_tracks_from_playlist()
     # track_controller.show_current_track_from_csv()
-
+    
     logger = logging.getLogger(__name__)
     logger.critical('critical')
     logger.warning('warning')
