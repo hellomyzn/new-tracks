@@ -12,10 +12,8 @@ AUTHENTICATION_JSON = CONFIG['GOOGLE_API']['JSONF_DIR'] + CONFIG['GOOGLE_API']['
 DIR_PATH_OF_CSV = CONFIG['FILES']['DIR_CSV']
 FILE_PATH_OF_CSV = CONFIG['FILES']['DIR_CSV'] + CONFIG['FILES']['FILENAME_OF_CSV']
 
-
+# Spotify
 MY_PLAYLIST_ID = CONFIG['PLAYLIST_ID']['MY_PLAYLIST']
-
-
 PLAYLISTS_IDS = ["37i9dQZEVXbMDoHDwVN2tF",  # GLOBAL
                  "37i9dQZEVXbLRQDuF5jeBp",  # US
                  "37i9dQZEVXbKXQ4mDTEBXq",  # JP
@@ -31,3 +29,6 @@ PLAYLISTS_IDS = ["37i9dQZEVXbMDoHDwVN2tF",  # GLOBAL
                  "37i9dQZEVXbMXbN3EUUhlg",  # BR
                  "37i9dQZF1DX4JAvHpjipBk"   # New Music Friday
                  ]
+
+# Log config
+LOG_CONFIG_PATH = "config/logging_config.yaml"

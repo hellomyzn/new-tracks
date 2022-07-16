@@ -1,6 +1,7 @@
 """Entory point"""
 import logging
 
+import utils.setting as setting
 from utils.logger import SetUpLogging
 from controllers.track_controller import TrackController
 
@@ -13,7 +14,7 @@ def main():
     # TODO: Create command for choise
     
     # Init logger
-    SetUpLogging().setup_logging("config/logging_config.yaml")
+    SetUpLogging().setup_logging(setting.LOG_CONFIG_PATH)
     track_controller = TrackController()
 
     logger = logging.getLogger('production')
