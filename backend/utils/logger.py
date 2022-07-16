@@ -5,13 +5,10 @@ import os
 
 
 class SetUpLogging():
-    def __init__(self):
-        root_dir = os.path.dirname(os.path.abspath('__file__'))
-        config_path = "config/logging_config.yaml"
-        self.default_config = os.path.join(root_dir, config_path)
-
-    def setup_logging(self, default_level=logging.info):
-        path = self.default_config
+    @staticmethod
+    def setup_logging(config_path, default_level=logging.info):
+        root_dir = os.path.dirname(os.path.abspath('__file__'))        
+        path = os.path.join(root_dir, config_path)
         if os.path.exists(path):
             with open(path, 'rt') as f:
                 config = yaml.safe_load(f.read())

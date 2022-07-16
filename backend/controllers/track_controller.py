@@ -1,4 +1,6 @@
 """Modules"""
+import logging
+
 import utils.setting as setting
 import utils.helper as helper
 from models.Spotify import Spotify

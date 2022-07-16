@@ -2,15 +2,15 @@ version: 1
 disable_existing_loggers: false
 formatters:
   user:
-    format: '[%(asctime)s] {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s'
+    format: '[%(asctime)s] %(name)s {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s'
     datefmt: '%H:%M:%S'
   simple:
-    format: "[%(asctime)s] {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
+    format: "[%(asctime)s] %(name)s {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
     datefmt: '%m/%d/%Y %H:%M:%S'
 handlers:
   console:
     class: logging.StreamHandler # sends logging output to streams such as sys.stdout, sys.stderr
-    level: INFO
+    level: DEBUG
     formatter: user
     stream: 'ext://sys.stdout'
   file:
@@ -18,7 +18,7 @@ handlers:
     level: INFO
     formatter: simple
     filename: 'src/logs/logs.log'
-    when: 'S'
+    when: 'D'
     interval: 1
     backupCount: 14
     encoding: utf8
@@ -27,12 +27,35 @@ handlers:
     level: ERROR
     formatter: simple
     filename: src/logs/errors.log
-    when: 'S'
+    when: 'D'
     interval: 1
     backupCount: 14
     encoding: utf8
+  file_for_debug:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: src/logs/debugs.log
+    when: 'D'
+    interval: 1
+    backupCount: 14
+    encoding: utf8
+loggers:
+  production:
+    level: INFO
+    handlers:
+      - file
+      - file_for_error
+    propagate: no
+  develop:
+    level: DEBUG
+    handlers:
+      - file
+      - file_for_error
+      - file_for_debug
+    propagate: no
 root: # root logger
-  level: INFO
+  level: DEBUG
   handlers:
     - file
     - file_for_error

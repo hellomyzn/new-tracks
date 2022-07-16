@@ -4,13 +4,10 @@
 *.DS_Store
 *.env
 *.cache
-*src
 *.viminfo
 *__pycache__
-backend/src/*.txt
-backend/src/result/*.txt
-backend/src/*.csv
-backend/src/Bookmarks
+backend/src/logs/*.log
+backend/src/csv/*.csv
 backend/.bash_history
 backend/.python_history
 backend/.DS_Store
