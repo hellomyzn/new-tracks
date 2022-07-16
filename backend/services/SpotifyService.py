@@ -66,8 +66,7 @@ class SpotifyService(object):
         playlist_url = playlist_json_data['external_urls']['spotify']
 
         print(f'[IFNO] - Retrieve tracks data from playlist: {playlist_name}')
-
-        for i in range(len(names)):
+        for i, k in enumerate(names):
             tracks.append({
                 'name': names[i],
                 'artist': artists[i],

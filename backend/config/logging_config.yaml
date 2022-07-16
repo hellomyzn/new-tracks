@@ -14,31 +14,36 @@ handlers:
     formatter: user
     stream: 'ext://sys.stdout'
   file:
-    class: logging.handlers.TimedRotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: simple
     filename: 'src/logs/logs.log'
-    when: 'D'
-    interval: 1
-    backupCount: 14
+    maxBytes: 10485760
+    backupCount: 20
     encoding: utf8
   file_for_error:
-    class: logging.handlers.TimedRotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: ERROR
     formatter: simple
     filename: src/logs/errors.log
-    when: 'D'
-    interval: 1
-    backupCount: 14
+    maxBytes: 10485760
+    backupCount: 20
     encoding: utf8
   file_for_debug:
-    class: logging.handlers.TimedRotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: simple
     filename: src/logs/debugs.log
-    when: 'D'
-    interval: 1
-    backupCount: 14
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  file_for_root:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: src/logs/root.log
+    maxBytes: 10485760
+    backupCount: 20
     encoding: utf8
 loggers:
   production:
@@ -46,6 +51,7 @@ loggers:
     handlers:
       - file
       - file_for_error
+      - file_for_root
     propagate: no
   develop:
     level: DEBUG
@@ -53,9 +59,9 @@ loggers:
       - file
       - file_for_error
       - file_for_debug
+      - file_for_root
     propagate: no
 root: # root logger
   level: DEBUG
   handlers:
-    - file
-    - file_for_error
+    - file_for_root
