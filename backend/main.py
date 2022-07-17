@@ -6,6 +6,7 @@ from utils.logger import SetUpLogging
 from controllers.track_controller import TrackController
 
 
+logger_pro = logging.getLogger('production')
 
 def main():
     """
@@ -15,6 +16,7 @@ def main():
     
     # Init logger
     SetUpLogging().setup_logging(setting.LOG_CONFIG_PATH)
+    logger_pro.info('Start app')
     track_controller = TrackController()
 
     # track_controller.add_new_tracks_to_playlist()

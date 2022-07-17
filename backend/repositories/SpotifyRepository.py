@@ -78,7 +78,7 @@ class SpotifyRepository(object):
 
     def get_current_track_json_data(self) -> list:
         self.logger_pro.info({
-            'action': 'Get current track from spotify',
+            'action': 'Get current track data from spotify',
             'status': 'Run',
             'message': ''
         })

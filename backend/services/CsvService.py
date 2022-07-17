@@ -79,12 +79,18 @@ class CsvService(object):
         print('[INFO] - Done to add tracks to CSV')
         return
     
-    def show_track(self, track: list) -> None:
+    def show_track_info(self, track: list) -> None:
         self.logger_pro.info({
-            'action': 'Show track',
+            'action': 'Show track info',
             'status': 'Run',
             'message': '',
         })
         for column, item in zip(self.csv_model.columns, track):
             print(f'\t{column}: {item}')
+        
+        self.logger_pro.info({
+            'action': 'Show track info',
+            'status': 'Success',
+            'message': '',
+        })
         return

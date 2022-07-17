@@ -25,13 +25,12 @@ class TrackController(object):
         self.csv_service = CsvService()
 
     def show_current_track_from_csv(self) -> None:
-        self.logger_pro.info('Start')
         track_from_spotify = self.spotify_service.get_current_track()
         if track_from_spotify:
             track = CsvService.get_track_by_name_and_artist(self.csv.file_path,
                                                             track_from_spotify[0]['name'],
                                                             track_from_spotify[0]['artist'])
-            self.csv_service.show_track(track)
+            self.csv_service.show_track_info(track)
         return
 
     def add_new_tracks_to_playlist(self) -> None:
