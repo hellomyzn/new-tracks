@@ -1,15 +1,84 @@
+import logging
+
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+
+import utils.setting as setting
 import utils.helper as helper
 
 
 class SpotifyRepository(object):
-    @staticmethod
-    def get_current_track(spotify) -> list:
-        track_json_data = spotify.connect.current_user_playing_track()
+    def __init__(self):
+        self.logger_pro = logging.getLogger('production')
+        self.logger_dev = logging.getLogger('develop')
+        self.logger_con = logging.getLogger('console')
+        self.spotify = SpotifyRepository.connect(self.logger_pro, self.logger_dev, self.logger_con)
+    
+    @classmethod
+    def connect(cls, logger_pro, logger_dev, logger_con):
+        # get api data from environment environment variables
+        client_id = setting.CONFIG['SPOTIPY']['SPOTIPY_CLIENT_ID']
+        client_secret = setting.CONFIG['SPOTIPY']['SPOTIPY_CLIENT_SECRET']
+        redirect_uri = 'https://google.com'
+        """
+            Scope reference:    https://developer.spotify.com/documentation/general/guides/authorization/scopes/
+                user-library-read
+                playlist-modify-private
+                user-read-recently-played   :    for get playlist information
+                playlist-modify-public      :    for modify public playlist (remove songs from playlist)
+                user-read-currently-playing :    for getting a current track
+        """
+        scope = 'user-library-read \
+                 playlist-modify-private \
+                 user-read-recently-played \
+                 playlist-modify-public \
+                 user-read-currently-playing'
+
+        logger_con.info('Start connecting Spotify...')
+        logger_pro.info({
+            'action': 'Connect spotify api by SpotifyOAuth',
+            'status': 'Run',
+            'message': ''
+        })
+        auth_manager = SpotifyOAuth(client_id=client_id,
+                                        client_secret=client_secret,
+                                        redirect_uri=redirect_uri,
+                                        scope=scope,
+                                        open_browser=False)
+
         try:
-            track_json_data = track_json_data['item']
-        except TypeError:
-            print("[WARNING] - There is no current track you are listening on Spotify right now")
-            # logging.critical('Exception occured: ', exc_info=True)
+            spotify = spotipy.Spotify(auth_manager=auth_manager)
+            logger_con.info('Success to connect Spotify...')
+            logger_pro.info({
+                'action': 'Connect spotify api by SpotifyOAuth',
+                'status': 'Success',
+                'message': ''
+            })
+        except Exception as e:
+            self.logger_pro.error({
+                'action': 'Connect spotify api by SpotifyOAuth',
+                'status': 'Fail',
+                'message': e
+            })
+        return spotify
+
+    def get_current_track_json_data(self) -> list:
+        self.logger_pro.info({
+            'action': 'Get current track from spotify',
+            'status': 'Run',
+            'message': ''
+        })
+
+        try:
+            track_json_data = self.spotify.current_user_playing_track()
+            self.logger_pro.info({
+                'action': 'Get current track from spotify',
+                'status': 'Success',
+                'message': '',
+                'data': track_json_data
+            })
+        except Exception as e:
+            logging.exception('Exception occured: ', exc_info=True)
             track_json_data = []
 
         return track_json_data
