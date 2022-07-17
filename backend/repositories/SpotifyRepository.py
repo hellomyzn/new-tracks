@@ -86,15 +86,19 @@ class SpotifyRepository(object):
         try:
             track_json_data = self.connect.current_user_playing_track()
             self.logger_pro.info({
-                'action': 'Get current track from spotify',
+                'action': 'Get current track data from spotify',
                 'status': 'Success',
                 'message': '',
                 'data': track_json_data
             })
         except Exception as e:
             track_json_data = []
-            self.logger_pro.exception('Exception occured: ', exc_info=True)
-
+            self.logger_pro.warning({
+                'action': 'Get current track data from spotify',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
         return track_json_data
 
     @staticmethod

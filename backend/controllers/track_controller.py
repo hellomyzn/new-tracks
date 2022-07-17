@@ -32,8 +32,6 @@ class TrackController(object):
                                                             track_from_spotify[0]['name'],
                                                             track_from_spotify[0]['artist'])
             self.csv_service.show_track(track)
-        else:
-            print("There is no current track")
         return
 
     def add_new_tracks_to_playlist(self) -> None:

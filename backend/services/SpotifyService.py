@@ -164,30 +164,36 @@ class SpotifyService(object):
         return new_tracks
 
     def get_current_track(self) -> list:
-        self.logger_pro.info({
-            'action': 'Get current track',
-            'status': 'Run',
-            'message': '',
-        })
         track_json_data = self.spotify_repository.get_current_track_json_data()
         
-        try:
-            track = SpotifyService.retrieve_track_data_for_columns(track_json_data['item'])
-            self.logger_pro.info({
-                'action': 'Get',
-                'status': 'Success',
-                'message': '',
-                'data': track
+        self.logger_pro.info({
+                'action': 'Retrieve track data for columns',
+                'status': 'Run',
+                'message': ''
             })
-        except Exception as e:
+
+        if track_json_data:
+            track_json_data = track_json_data['item']
+            try:
+                track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
+                self.logger_pro.info({
+                    'action': 'Retrieve track data for columns',
+                    'status': 'Success',
+                    'message': '',
+                    'data': track
+                })
+            except Exception as e:
+                self.logger_pro.warning({
+                    'action': 'Retrieve track data for columns',
+                    'status': 'Fail',
+                    'message': '',
+                    'exception': e
+                })
+        else:
             track = track_json_data
-            self.logger_con.warning('There is no current track you are listening on Spotify right now')
-            self.logger_pro.warning({
-                'action': 'Get',
-                'status': 'Fail',
-                'message': 'There is no current track you are listening on Spotify right now',
-                'exception': e
-            })
+            message = 'There is no current track you are listening on Spotify right now'
+            self.logger_con.warning(message)
+            self.logger_pro.warning(message)
         return track
 
     @staticmethod
