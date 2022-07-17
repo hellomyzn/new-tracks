@@ -7,6 +7,9 @@ from controllers.track_controller import TrackController
 
 
 logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
+
 
 def main():
     """

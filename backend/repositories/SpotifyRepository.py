@@ -108,19 +108,23 @@ class SpotifyRepository(object):
         tracks_json_data = tracks_json_data['items']
         return tracks_json_data
 
-    def get_playlist_json_data(self, playlist_id) -> list:
+    def get_playlist_json_data(self, playlist_id: str) -> list:
         playlist_data = None
         self.logger_pro.info({
             'action': 'Get playlist json data',
             'status': 'Run',
-            'message': ''
+            'message': '',
+            'args': {
+                'args': playlist_id
+            }
         })
         try:
             playlist_data = self.connect.playlist(playlist_id)
             self.logger_pro.info({
                 'action': 'Get playlist json data',
                 'status': 'Success',
-                'message': ''
+                'message': '',
+                'data': playlist_data
             })
         except Exception as e:
             self.logger_pro.warning({
@@ -130,6 +134,40 @@ class SpotifyRepository(object):
                 'exception': e
             })
         return playlist_data
+
+    def get_playlist_items_json_data(self, playlist_id: str, offset=0) -> list:
+        playlist_items = None
+        self.logger_pro.info({
+            'action': 'Get playlist items json data',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'playlist_id': playlist_id,
+                'offset': offset
+            }
+        })
+        try:
+            playlist_items = self.connect.playlist_items(playlist_id, 
+                                                         fields=None, 
+                                                         limit=100, 
+                                                         offset=offset, 
+                                                         market=None, 
+                                                         additional_types=('track', 'episode'))
+            self.logger_pro.info({
+                'action': 'Get playlist items json data',
+                'status': 'Success',
+                'message': '',
+                'data': playlist_items
+            })
+        except Exception as e:
+            self.logger_pro.warning({
+                'action': 'Get playlist items json data',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
+        return playlist_items
+            
 
     @staticmethod
     def remove_tracks_from_playlist(spotify, playlist_id, tracks) -> None:

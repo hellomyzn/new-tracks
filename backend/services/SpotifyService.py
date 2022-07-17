@@ -5,13 +5,12 @@ import utils.helper as helper
 from services.CsvService import CsvService
 from repositories.SpotifyRepository import SpotifyRepository
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
 
 class SpotifyService(object):
     def __init__(self):
-        self.logger_pro = logging.getLogger('production')
-        self.logger_dev = logging.getLogger('develop')
-        self.logger_con = logging.getLogger('console')
-
         self.spotify_repository = SpotifyRepository()
 
     @classmethod
@@ -52,7 +51,17 @@ class SpotifyService(object):
                                                       tracks_json_data: dict,
                                                       playlist_json_data: dict) -> list:
         tracks = []
-        # Retrieve certain data from json data
+        logger_pro.info({
+            'action': 'Retrieve tracks data for columns from playlist',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'tracks_json_data': tracks_json_data,
+                'playlist_json_data': playlist_json_data
+            }
+        })
+    
+        # Retrieve certain data from json data            
         names = [t["track"]["name"] for t in tracks_json_data]
         urls = [t["track"]["external_urls"]["spotify"] for t in tracks_json_data]
         artists = [t["track"]["artists"][0]['name'] for t in tracks_json_data]
@@ -61,44 +70,69 @@ class SpotifyService(object):
         playlist_name = playlist_json_data["name"]
         playlist_url = playlist_json_data['external_urls']['spotify']
 
-        print(f'[IFNO] - Retrieve tracks data from playlist: {playlist_name}')
-        for i, k in enumerate(names):
-            tracks.append({
-                'name': names[i],
-                'artist': artists[i],
-                'playlist_name': playlist_name,
-                'track_url': urls[i],
-                'playlist_url': playlist_url,
-                'release_date': release_date[i],
-                'added_at': added_at[i],
-                'created_at': helper.get_date(),
-                'like': False
-            })
+        logger_con.info(f'Retrieve tracks data from playlist: {playlist_name}')
+        
+        for i, v in enumerate(names):
+            try:
+                track = [{
+                    'name': names[i],
+                    'artist': artists[i],
+                    'playlist_name': playlist_name,
+                    'track_url': urls[i],
+                    'playlist_url': playlist_url,
+                    'release_date': release_date[i],
+                    'added_at': added_at[i],
+                    'created_at': helper.get_date(),
+                    'like': False
+                }]
+                tracks.append(track)
+                logger_pro.info({
+                    'action': 'Retrieve tracks data for columns from playlist',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'track': track
+                    }
+                })
+            except Exception as e:
+                logger_pro.warning({
+                    'action': 'Retrieve tracks data for columns from playlist',
+                    'status': 'Fail',
+                    'message': '',
+                    'exception': e
+                })
         return tracks
 
     def retrieve_tracks_from_playlist(self, playlist_id: str) -> list:
         # TODO: there is more than 100 tracks
         tracks = []
+        playlist_id = '3QfQsNNDBixImwDCSvRYqi'
         playlist_json_data = self.spotify_repository.get_playlist_json_data(playlist_id)
-        print(playlist_json_data)
-        return
-        spotify.connect.playlist(playlist_id)
-        tracks_json_data = playlist_json_data["tracks"]["items"]
-        for t in tracks_json_data:
-            if t["track"] is None:
-                continue
+        tracks_number = playlist_json_data['tracks']['total']
+        max_number = 100
 
-            tracks.append({
-                'name':             t["track"]["name"],
-                'artist':           t["track"]["artists"][0]['name'],
-                'playlist_name':    playlist_json_data["name"],
-                'track_url':        t["track"]["external_urls"]["spotify"],
-                'playlist_url':     playlist_json_data['external_urls']['spotify'],
-                'release_date':     t["track"]["album"]["release_date"],
-                'added_at':         t["added_at"],
-                'created_at':       helper.get_date(),
-                'like':             False
-            })
+        logger_pro.info({
+            'action': 'Retrieve tracks from playlist',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'playlist_id': playlist_id
+            }
+        })
+
+        while max_number < tracks_number:
+            offset = len(tracks)
+            tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
+            tracks_json_data = tracks_json_data["items"]
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
+            tracks_number -= len(tracks_json_data)
+        else:
+            # after while loop
+            offset = len(tracks)
+            tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
+            tracks_json_data = tracks_json_data["items"]
+            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
+
 
         print(f'[IFNO] - playlist: {playlist_json_data["name"]}')
         print(len(tracks))

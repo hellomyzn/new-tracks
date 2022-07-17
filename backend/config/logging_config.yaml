@@ -2,10 +2,10 @@ version: 1
 disable_existing_loggers: false
 formatters:
   user:
-    format: '[%(asctime)s] %(name)s {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s'
+    format: '[%(levelname)s] [%(asctime)s] %(name)s {%(pathname)s@%(funcName)s:%(lineno)d} : %(message)s'
     datefmt: '%H:%M:%S'
   simple:
-    format: "[%(asctime)s] %(name)s {%(pathname)s@%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
+    format: '[%(levelname)s] [%(asctime)s] %(name)s {%(pathname)s@%(funcName)s:%(lineno)d} : %(message)s'
     datefmt: '%m/%d/%Y %H:%M:%S'
 handlers:
   console:
@@ -26,6 +26,14 @@ handlers:
     level: ERROR
     formatter: simple
     filename: src/logs/errors.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  file_for_warning:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: simple
+    filename: src/logs/warnings.log
     maxBytes: 10485760
     backupCount: 20
     encoding: utf8
@@ -51,6 +59,7 @@ loggers:
     handlers:
       - file
       - file_for_error
+      - file_for_warning
       - file_for_root
     propagate: no
   develop:
@@ -58,6 +67,7 @@ loggers:
     handlers:
       - file
       - file_for_error
+      - file_for_warning
       - file_for_debug
       - file_for_root
     propagate: no
