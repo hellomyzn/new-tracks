@@ -47,18 +47,31 @@ class SpotifyRepository(object):
                                         open_browser=False)
 
         try:
+            # Connect spotify
             spotify = spotipy.Spotify(auth_manager=auth_manager)
-            logger_con.info('Success to connect Spotify...')
+            logger_con.info('Succeed in connecting Spotify...')
             logger_pro.info({
                 'action': 'Connect spotify api by SpotifyOAuth',
                 'status': 'Success',
-                'message': ''
+                'message': '',
+                'data': {
+                    'client_id': client_id,
+                    'client_secret': client_secret,
+                    'redirect_uri': redirect_uri,
+                    'scope': scope
+                }
             })
         except Exception as e:
             self.logger_pro.error({
                 'action': 'Connect spotify api by SpotifyOAuth',
                 'status': 'Fail',
-                'message': e
+                'message': e,
+                'data': {
+                    'client_id': client_id,
+                    'client_secret': client_secret,
+                    'redirect_uri': redirect_uri,
+                    'scope': scope
+                }
             })
         return spotify
 
