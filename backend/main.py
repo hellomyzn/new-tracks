@@ -17,32 +17,9 @@ def main():
     SetUpLogging().setup_logging(setting.LOG_CONFIG_PATH)
     track_controller = TrackController()
 
-    
     # track_controller.add_new_tracks_to_playlist()
     # track_controller.remove_tracks_from_playlist()
-    # track_controller.show_current_track_from_csv()
-
-    
-    # logger = logging.getLogger('production')
-    # logger = logging.getLogger(__name__)
-    # logger.critical('critical')
-    # logger.warning('warning')
-    # logger.info(f'App started in {__name__}')
-    # logger.info('info')
-    # logging.debug('debug')
-    # logger.error({
-    #     'action': 'create',
-    #     'status': 'fail',
-    #     'message': 'Api call is failed'
-    # })
-
-    # a = 2
-    # b = 0
-
-    # try:
-    #     hoge = a / b
-    # except Exception as e:
-    #     logging.critical('Exception occured: ', exc_info=True)
+    track_controller.show_current_track_from_csv()
 
 
 if __name__ == "__main__":

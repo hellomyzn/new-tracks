@@ -10,6 +10,7 @@ class SpotifyService(object):
     def __init__(self):
         self.logger_pro = logging.getLogger('production')
         self.logger_dev = logging.getLogger('develop')
+        self.logger_con = logging.getLogger('console')
 
         self.spotify_repository = SpotifyRepository()
 
@@ -176,26 +177,30 @@ class SpotifyService(object):
         return new_tracks
 
     def get_current_track(self) -> list:
-
+        self.logger_pro.info({
+            'action': 'Get current track',
+            'status': 'Run',
+            'message': '',
+        })
         track_json_data = self.spotify_repository.get_current_track_json_data()
+        
         try:
-            track_json_data = track_json_data['item']
+            track = SpotifyService.retrieve_track_data_for_columns(track_json_data['item'])
             self.logger_pro.info({
                 'action': 'Get',
                 'status': 'Success',
                 'message': '',
-                'data': track_json_data
+                'data': track
             })
         except Exception as e:
+            track = track_json_data
+            self.logger_con.warning('There is no current track you are listening on Spotify right now')
             self.logger_pro.warning({
                 'action': 'Get',
                 'status': 'Fail',
-                'message': 'There is no current track you are listening on Spotify right now'
+                'message': 'There is no current track you are listening on Spotify right now',
+                'exception': e
             })
-            print('There is no current track you are listening on Spotify right now')
-            return
-            
-        track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
         return track
 
     @staticmethod

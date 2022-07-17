@@ -15,27 +15,23 @@ class TrackController(object):
     def __init__(self):
         self.logger_pro = logging.getLogger('production')
         self.logger_dev = logging.getLogger('develop')
+        self.logger_con = logging.getLogger('console')
 
         self.csv = Csv()
         self.spotify = Spotify()
         self.spotify_service = SpotifyService()
         self.google_spreadsheet = GoogleSpreadsheet()
+        self.google_spreadsheet_service = GoogleSpreadsheetService()
+        self.csv_service = CsvService()
 
     def show_current_track_from_csv(self) -> None:
-        self.logger_pro.info({
-            'action': 'show',
-            'status': 'run',
-            'message': 'Start'
-        })
-        track = self.spotify_service.get_current_track()
-        # track = SpotifyService.get_current_track(self.spotify)
-        if track:
+        self.logger_pro.info('Start')
+        track_from_spotify = self.spotify_service.get_current_track()
+        if track_from_spotify:
             track = CsvService.get_track_by_name_and_artist(self.csv.file_path,
-                                                            track[0]['name'],
-                                                            track[0]['artist'])
-            print(f'\n\tname:     {track[0]} \
-                    \n\tartist:   {track[1]} \
-                    \n\tplaylist: {track[2]} \n')
+                                                            track_from_spotify[0]['name'],
+                                                            track_from_spotify[0]['artist'])
+            self.csv_service.show_track(track)
         else:
             print("There is no current track")
         return

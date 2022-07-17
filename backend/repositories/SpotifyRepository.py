@@ -12,7 +12,7 @@ class SpotifyRepository(object):
         self.logger_pro = logging.getLogger('production')
         self.logger_dev = logging.getLogger('develop')
         self.logger_con = logging.getLogger('console')
-        self.spotify = SpotifyRepository.connect(self.logger_pro, self.logger_dev, self.logger_con)
+        self.connect = SpotifyRepository.connect(self.logger_pro, self.logger_dev, self.logger_con)
     
     @classmethod
     def connect(cls, logger_pro, logger_dev, logger_con):
@@ -62,6 +62,7 @@ class SpotifyRepository(object):
                 }
             })
         except Exception as e:
+            logger_con.info('Fail to connecting Spotify...')
             self.logger_pro.error({
                 'action': 'Connect spotify api by SpotifyOAuth',
                 'status': 'Fail',
@@ -83,7 +84,7 @@ class SpotifyRepository(object):
         })
 
         try:
-            track_json_data = self.spotify.current_user_playing_track()
+            track_json_data = self.connect.current_user_playing_track()
             self.logger_pro.info({
                 'action': 'Get current track from spotify',
                 'status': 'Success',
@@ -91,8 +92,8 @@ class SpotifyRepository(object):
                 'data': track_json_data
             })
         except Exception as e:
-            logging.exception('Exception occured: ', exc_info=True)
             track_json_data = []
+            self.logger_pro.exception('Exception occured: ', exc_info=True)
 
         return track_json_data
 

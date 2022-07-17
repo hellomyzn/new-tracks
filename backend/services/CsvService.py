@@ -1,8 +1,19 @@
+""" """
+import logging
+
+from models.Csv import Csv
 from repositories.CsvRepository import CsvRepository
 import utils.helper as helper
 
 
 class CsvService(object):
+    def __init__(self):
+        self.logger_pro = logging.getLogger('production')
+        self.logger_dev = logging.getLogger('develop')
+        self.logger_con = logging.getLogger('console')
+        self.csv_model = Csv()
+
+
     @classmethod
     def is_not_header(cls, path: str) -> bool:
         if not CsvRepository.get_header(path):
@@ -66,4 +77,14 @@ class CsvService(object):
 
         CsvRepository.add(csv.file_path, csv.columns, tracks)
         print('[INFO] - Done to add tracks to CSV')
+        return
+    
+    def show_track(self, track: list) -> None:
+        self.logger_pro.info({
+            'action': 'Show track',
+            'status': 'Run',
+            'message': '',
+        })
+        for column, item in zip(self.csv_model.columns, track):
+            print(f'\t{column}: {item}')
         return
