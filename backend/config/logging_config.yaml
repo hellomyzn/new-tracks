@@ -61,6 +61,11 @@ loggers:
       - file_for_debug
       - file_for_root
     propagate: no
+  console:
+    level: DEBUG
+    handlers:
+      - console
+    propagate: no
 root: # root logger
   level: DEBUG
   handlers:
