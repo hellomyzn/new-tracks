@@ -76,11 +76,13 @@ class SpotifyService(object):
             })
         return tracks
 
-    @staticmethod
-    def retrieve_tracks_from_playlist(spotify, playlist_id: str) -> list:
+    def retrieve_tracks_from_playlist(self, playlist_id: str) -> list:
         # TODO: there is more than 100 tracks
         tracks = []
-        playlist_json_data = spotify.connect.playlist(playlist_id)
+        playlist_json_data = self.spotify_repository.get_playlist_json_data(playlist_id)
+        print(playlist_json_data)
+        return
+        spotify.connect.playlist(playlist_id)
         tracks_json_data = playlist_json_data["tracks"]["items"]
         for t in tracks_json_data:
             if t["track"] is None:

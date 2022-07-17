@@ -108,6 +108,29 @@ class SpotifyRepository(object):
         tracks_json_data = tracks_json_data['items']
         return tracks_json_data
 
+    def get_playlist_json_data(self, playlist_id) -> list:
+        playlist_data = None
+        self.logger_pro.info({
+            'action': 'Get playlist json data',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            playlist_data = self.connect.playlist(playlist_id)
+            self.logger_pro.info({
+                'action': 'Get playlist json data',
+                'status': 'Success',
+                'message': ''
+            })
+        except Exception as e:
+            self.logger_pro.warning({
+                'action': 'Get playlist json data',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
+        return playlist_data
+
     @staticmethod
     def remove_tracks_from_playlist(spotify, playlist_id, tracks) -> None:
         # TODO: if there are more than 100 tracks

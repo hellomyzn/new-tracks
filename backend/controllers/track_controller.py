@@ -38,8 +38,8 @@ class TrackController(object):
         # Add new tracks by each playlist
         for playlist_id in setting.PLAYLISTS_IDS:
             # Retrieve tracks data from playlist
-            tracks = SpotifyService.retrieve_tracks_from_playlist(self.spotify,
-                                                                  playlist_id)
+            tracks = self.spotify_service.retrieve_tracks_from_playlist(playlist_id)
+            return
 
             # Retrieve only new tracks
             new_tracks = SpotifyService.retrieve_new_tracks(self.spotify,
