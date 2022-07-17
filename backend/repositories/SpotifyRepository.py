@@ -168,6 +168,9 @@ class SpotifyRepository(object):
             })
         return playlist_items
             
+    def add_tracks_to_playlist(self, playlist_id, urls):
+        self.connect.playlist_add_items(playlist_id, urls, position=0)
+
 
     @staticmethod
     def remove_tracks_from_playlist(spotify, playlist_id, tracks) -> None:

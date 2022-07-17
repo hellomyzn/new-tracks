@@ -30,8 +30,8 @@ class SpotifyService(object):
 
     @classmethod
     def retrieve_tracks_data(cls,
-                                                      tracks_json_data: dict,
-                                                      playlist_json_data: dict) -> list:
+                             tracks_json_data: dict,
+                             playlist_json_data: dict) -> list:
         tracks = []
         logger_pro.info({
             'action': 'Retrieve tracks data for columns from playlist',
@@ -54,7 +54,7 @@ class SpotifyService(object):
         
         for i, v in enumerate(names):
             try:
-                track = [{
+                track = {
                     'name': names[i],
                     'artist': artists[i],
                     'playlist_name': playlist_name,
@@ -64,7 +64,7 @@ class SpotifyService(object):
                     'added_at': added_at[i],
                     'created_at': helper.get_date(),
                     'like': False
-                }]
+                }
                 tracks.append(track)
                 logger_pro.info({
                     'action': 'Retrieve tracks data for columns from playlist',
@@ -113,8 +113,6 @@ class SpotifyService(object):
             }
         })
         try:
-            playlist_id = '3QfQsNNDBixImwDCSvRYqi'
-            # playlist_id = '3QfQsNNDBixImwDCSvRYi'
             playlist_json_data = self.spotify_repository.get_playlist_json_data(playlist_id)
             tracks_number = playlist_json_data['tracks']['total']
             playlist_name = playlist_json_data["name"]
@@ -184,8 +182,7 @@ class SpotifyService(object):
 
     #     return tracks
 
-    @staticmethod
-    def retrieve_new_tracks(spotify, tracks, csv_path) -> list:
+    def retrieve_new_tracks(self, tracks, csv_path) -> list:
         tracks_only_name_artist_from_csv = []
         tracks_only_name_artist_from_new = []
         new_tracks = []
@@ -216,7 +213,7 @@ class SpotifyService(object):
                 continue
             new_tracks.append(tracks[i])
 
-        print(f'[INFO] -    The number of new tracks is {len(new_tracks)}')
+        logger_con.info(f'The number of new tracks is {len(new_tracks)}')
         return new_tracks
 
     def get_current_track(self) -> list:
@@ -252,8 +249,8 @@ class SpotifyService(object):
             logger_pro.warning(message)
         return track
 
-    @staticmethod
-    def add_tracks_to_playlist(spotify, tracks, playlist_id: str) -> None:
+    
+    def add_tracks_to_playlist(self, tracks, playlist_id: str) -> None:
         if not tracks:
             print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
             return
@@ -272,7 +269,7 @@ class SpotifyService(object):
             for track in piece_of_tracks:
                 urls.append(track['track_url'])
 
-            spotify.connect.playlist_add_items(playlist_id, urls, position=0)
+            self.spotify_repository.add_tracks_to_playlist(playlist_id, urls)
 
             tracks_number = len(tracks)
 
@@ -280,7 +277,7 @@ class SpotifyService(object):
         for track in tracks:
             urls.append(track['track_url'])
 
-        spotify.connect.playlist_add_items(playlist_id, urls, position=0)
+        self.spotify_repository.add_tracks_to_playlist(playlist_id, urls)
         return
 
     @staticmethod

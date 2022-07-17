@@ -7,13 +7,14 @@ from oauth2client.service_account import ServiceAccountCredentials
 import utils.setting as setting
 
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
+
+
 class GoogleSpreadsheetRepository(object):
     def __init__(self):
-        self.logger_pro = logging.getLogger('production')
-        self.logger_dev = logging.getLogger('develop')
-        self.logger_con = logging.getLogger('console')
         self.connect = GoogleSpreadsheetRepository.connect()
-        self.next_row = GoogleSpreadsheet.next_available_row(self.worksheet)
         self.sleep_time_sec = 0.8
 
     @classmethod
@@ -33,22 +34,22 @@ class GoogleSpreadsheetRepository(object):
 
         return worksheet
 
-    @classmethod
-    def next_available_row(cls, worksheet) -> int:
+    def next_available_row(self) -> int:
         ''' Return the number of available row '''
 
-        str_list = list(filter(None, worksheet.col_values(1)))
+        str_list = list(filter(None, self.connect.col_values(1)))
         return int(len(str_list)+1)
 
-    @staticmethod
-    def add(google_spreadsheet,
-            column_number,
-            column_name,
-            data: list) -> None:
-        google_spreadsheet.worksheet.update_cell(google_spreadsheet.next_row,
-                                                 column_number,
-                                                 data[column_name])
+    def add(self, 
+            row_number: int,
+            column_number: int,
+            column_name: str,
+            data: dict) -> None:
+        
+        self.connect.update_cell(row_number,
+                                 column_number,
+                                 data[column_name])
         print(f"[ADD]: {column_name}:", data[column_name])
-        time.sleep(google_spreadsheet.sleep_time_sec)
+        time.sleep(self.sleep_time_sec)
 
         return
