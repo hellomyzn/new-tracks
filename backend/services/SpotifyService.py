@@ -1,3 +1,5 @@
+import logging
+
 import utils.helper as helper
 
 from services.CsvService import CsvService
@@ -5,6 +7,12 @@ from repositories.SpotifyRepository import SpotifyRepository
 
 
 class SpotifyService(object):
+    def __init__(self):
+        self.logger_pro = logging.getLogger('production')
+        self.logger_dev = logging.getLogger('develop')
+
+        self.spotify_repository = SpotifyRepository()
+
     @classmethod
     def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
         if track_json_data:
@@ -167,10 +175,27 @@ class SpotifyService(object):
         print(f'[INFO] -    The number of new tracks is {len(new_tracks)}')
         return new_tracks
 
-    @staticmethod
-    def get_current_track(spotify) -> list:
-        track = SpotifyRepository.get_current_track(spotify)
-        track = SpotifyService.retrieve_track_data_for_columns(track)
+    def get_current_track(self) -> list:
+
+        track_json_data = self.spotify_repository.get_current_track_json_data()
+        try:
+            track_json_data = track_json_data['item']
+            self.logger_pro.info({
+                'action': 'Get',
+                'status': 'Success',
+                'message': '',
+                'data': track_json_data
+            })
+        except Exception as e:
+            self.logger_pro.warning({
+                'action': 'Get',
+                'status': 'Fail',
+                'message': 'There is no current track you are listening on Spotify right now'
+            })
+            print('There is no current track you are listening on Spotify right now')
+            return
+            
+        track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
         return track
 
     @staticmethod

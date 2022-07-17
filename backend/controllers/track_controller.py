@@ -13,12 +13,22 @@ from services.GoogleSpreadsheetService import GoogleSpreadsheetService
 
 class TrackController(object):
     def __init__(self):
+        self.logger_pro = logging.getLogger('production')
+        self.logger_dev = logging.getLogger('develop')
+
         self.csv = Csv()
         self.spotify = Spotify()
+        self.spotify_service = SpotifyService()
         self.google_spreadsheet = GoogleSpreadsheet()
 
     def show_current_track_from_csv(self) -> None:
-        track = SpotifyService.get_current_track(self.spotify)
+        self.logger_pro.info({
+            'action': 'show',
+            'status': 'run',
+            'message': 'Start'
+        })
+        track = self.spotify_service.get_current_track()
+        # track = SpotifyService.get_current_track(self.spotify)
         if track:
             track = CsvService.get_track_by_name_and_artist(self.csv.file_path,
                                                             track[0]['name'],

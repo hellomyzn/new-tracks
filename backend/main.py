@@ -17,15 +17,17 @@ def main():
     SetUpLogging().setup_logging(setting.LOG_CONFIG_PATH)
     track_controller = TrackController()
 
-    logger = logging.getLogger('production')
+    
     # track_controller.add_new_tracks_to_playlist()
     # track_controller.remove_tracks_from_playlist()
-    track_controller.show_current_track_from_csv()
+    # track_controller.show_current_track_from_csv()
+
     
+    # logger = logging.getLogger('production')
     # logger = logging.getLogger(__name__)
     # logger.critical('critical')
-    logger.warning('warning')
-    logger.info(f'App started in {__name__}')
+    # logger.warning('warning')
+    # logger.info(f'App started in {__name__}')
     # logger.info('info')
     # logging.debug('debug')
     # logger.error({
