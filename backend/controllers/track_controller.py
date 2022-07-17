@@ -39,7 +39,13 @@ class TrackController(object):
         for playlist_id in setting.PLAYLISTS_IDS:
             # Retrieve tracks data from playlist
             tracks = self.spotify_service.retrieve_tracks_from_playlist(playlist_id)
-            return
+            if tracks:
+                print(len(tracks))
+                return
+            else:
+                # print(tracks)
+                return
+            
 
             # Retrieve only new tracks
             new_tracks = SpotifyService.retrieve_new_tracks(self.spotify,

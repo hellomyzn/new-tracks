@@ -14,7 +14,7 @@ class SpotifyService(object):
         self.spotify_repository = SpotifyRepository()
 
     @classmethod
-    def retrieve_track_data_for_columns(cls, track_json_data: dict) -> list:
+    def retrieve_track_data(cls, track_json_data: dict) -> list:
         track = [{
             'name': track_json_data['name'],
             'artist': track_json_data['artists'][0]['name'],
@@ -28,26 +28,8 @@ class SpotifyService(object):
         }]
         return track
 
-    # TODO: move some functions to repository
     @classmethod
-    def show_track_names(cls, tracks) -> None:
-        names = [track['name'] for track in tracks]
-        print("\n")
-        for name in names:
-            print(f'\t[TRACK NAME] - {name}')
-        return
-
-    @classmethod
-    def is_in_track(cls, track: dict, tracks: list) -> bool:
-        track = {'name': track['name'], 'artist': track['artist']}
-        tracks = [{'name': t['name'], 'artist': t['artist']} for t in tracks]
-        if track in tracks:
-            return True
-        else:
-            return False
-
-    @classmethod
-    def retrieve_track_data_for_columns_from_playlist(cls,
+    def retrieve_tracks_data(cls,
                                                       tracks_json_data: dict,
                                                       playlist_json_data: dict) -> list:
         tracks = []
@@ -69,8 +51,6 @@ class SpotifyService(object):
         added_at = [t["added_at"]for t in tracks_json_data]
         playlist_name = playlist_json_data["name"]
         playlist_url = playlist_json_data['external_urls']['spotify']
-
-        logger_con.info(f'Retrieve tracks data from playlist: {playlist_name}')
         
         for i, v in enumerate(names):
             try:
@@ -103,14 +83,27 @@ class SpotifyService(object):
                 })
         return tracks
 
+    # TODO: move some functions to repository
+    @classmethod
+    def show_track_names(cls, tracks) -> None:
+        names = [track['name'] for track in tracks]
+        print("\n")
+        for name in names:
+            print(f'\t[TRACK NAME] - {name}')
+        return
+
+    @classmethod
+    def is_in_track(cls, track: dict, tracks: list) -> bool:
+        track = {'name': track['name'], 'artist': track['artist']}
+        tracks = [{'name': t['name'], 'artist': t['artist']} for t in tracks]
+        if track in tracks:
+            return True
+        else:
+            return False
+
     def retrieve_tracks_from_playlist(self, playlist_id: str) -> list:
         # TODO: there is more than 100 tracks
         tracks = []
-        playlist_id = '3QfQsNNDBixImwDCSvRYqi'
-        playlist_json_data = self.spotify_repository.get_playlist_json_data(playlist_id)
-        tracks_number = playlist_json_data['tracks']['total']
-        max_number = 100
-
         logger_pro.info({
             'action': 'Retrieve tracks from playlist',
             'status': 'Run',
@@ -119,50 +112,77 @@ class SpotifyService(object):
                 'playlist_id': playlist_id
             }
         })
+        try:
+            playlist_id = '3QfQsNNDBixImwDCSvRYqi'
+            # playlist_id = '3QfQsNNDBixImwDCSvRYi'
+            playlist_json_data = self.spotify_repository.get_playlist_json_data(playlist_id)
+            tracks_number = playlist_json_data['tracks']['total']
+            playlist_name = playlist_json_data["name"]
+            max_number = 100
+            logger_con.info(f'Retrieve tracks data from playlist: {playlist_name}: {tracks_number}')
 
-        while max_number < tracks_number:
-            offset = len(tracks)
-            tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
-            tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
-            tracks_number -= len(tracks_json_data)
-        else:
-            # after while loop
-            offset = len(tracks)
-            tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
-            tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
+            while max_number < tracks_number:
+                offset = len(tracks)
+                tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_json_data = tracks_json_data["items"]
+                tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
+                tracks_number -= len(tracks_json_data)
+            else:
+                # after while loop
+                offset = len(tracks)
+                tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_json_data = tracks_json_data["items"]
+                tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
+            
+            logger_pro.info({
+                'action': 'Retrieve tracks from playlist',
+                'status': 'Success',
+                'message': '',
+                'data': tracks
+            })
+        except TypeError as e:
+            logger_pro.warning({
+                'action': 'Retrieve tracks from playlist',
+                'status': 'Fail',
+                'message': 'The playlist id you provided is not correct',
+                'exception': e
+            })
+        except Exception as e:
+            logger_pro.warning({
+                'action': 'Retrieve tracks from playlist',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
 
-
-        print(f'[IFNO] - playlist: {playlist_json_data["name"]}')
-        print(len(tracks))
         return tracks
 
-    @staticmethod
-    def retrieve_all_tracks_from_playlist(spotify, playlist_id: str) -> list:
-        # TODO: there is more than 100 tracks
-        tracks = []
+    # @staticmethod
+    # def retrieve_all_tracks_from_playlist(spotify, playlist_id: str) -> list:
+    #     # TODO: there is more than 100 tracks
+    #     # Remove this func
+    #     tracks = []
 
-        # Check there are more than 100 tracks in a playlist
-        playlist_json_data = spotify.connect.playlist(playlist_id)
-        tracks_number = playlist_json_data['tracks']['total']
-        max_number = 100
-        print(f'\n[INFO] - The number of new tracks to retrieve from a playlist on Spotify is {tracks_number}')
+    #     # Check there are more than 100 tracks in a playlist
+    #     playlist_json_data = spotify.connect.playlist(playlist_id)
+    #     tracks_number = playlist_json_data['tracks']['total']
+    #     max_number = 100
+    #     print(f'\n[INFO] - The number of new tracks to retrieve from a playlist on Spotify is {tracks_number}')
 
-        while max_number < tracks_number:
-            offset = len(tracks)
-            tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
-            tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
-            tracks_number -= len(tracks_json_data)
-        else:
-            # after while loop
-            offset = len(tracks)
-            tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
-            tracks_json_data = tracks_json_data["items"]
-            tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
+    #     while max_number < tracks_number:
+    #         offset = len(tracks)
+    #         tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
+    #         tracks_json_data = tracks_json_data["items"]
+    #         tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
+    #         tracks_number -= len(tracks_json_data)
+    #     else:
+    #         # after while loop
+    #         offset = len(tracks)
+    #         tracks_json_data = spotify.connect.playlist_items(playlist_id, fields=None, limit=100, offset=offset, market=None, additional_types=('track', 'episode'))
+    #         tracks_json_data = tracks_json_data["items"]
+    #         tracks += SpotifyService.retrieve_track_data_for_columns_from_playlist(tracks_json_data, playlist_json_data)
 
-        return tracks
+    #     return tracks
 
     @staticmethod
     def retrieve_new_tracks(spotify, tracks, csv_path) -> list:
@@ -202,7 +222,7 @@ class SpotifyService(object):
     def get_current_track(self) -> list:
         track_json_data = self.spotify_repository.get_current_track_json_data()
         
-        self.logger_pro.info({
+        logger_pro.info({
                 'action': 'Retrieve track data for columns',
                 'status': 'Run',
                 'message': ''
@@ -211,15 +231,15 @@ class SpotifyService(object):
         if track_json_data:
             track_json_data = track_json_data['item']
             try:
-                track = SpotifyService.retrieve_track_data_for_columns(track_json_data)
-                self.logger_pro.info({
+                track = SpotifyService.retrieve_track_data(track_json_data)
+                logger_pro.info({
                     'action': 'Retrieve track data for columns',
                     'status': 'Success',
                     'message': '',
                     'data': track
                 })
             except Exception as e:
-                self.logger_pro.warning({
+                logger_pro.warning({
                     'action': 'Retrieve track data for columns',
                     'status': 'Fail',
                     'message': '',
@@ -228,8 +248,8 @@ class SpotifyService(object):
         else:
             track = track_json_data
             message = 'There is no current track you are listening on Spotify right now'
-            self.logger_con.warning(message)
-            self.logger_pro.warning(message)
+            logger_con.warning(message)
+            logger_pro.warning(message)
         return track
 
     @staticmethod
@@ -304,7 +324,7 @@ class SpotifyService(object):
         tracks_json_data = SpotifyRepository.get_tracks_played_recently(spotify)
         for track_json_data in tracks_json_data:
             track_json_data = track_json_data['track']
-            tracks_played_recently += SpotifyService.retrieve_track_data_for_columns(track_json_data)
+            tracks_played_recently += SpotifyService.retrieve_track_data(track_json_data)
 
         print('TRACKS PLAYED RECENTLY')
         SpotifyService.show_track_names(tracks_played_recently)
