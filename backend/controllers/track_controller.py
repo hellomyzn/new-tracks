@@ -75,7 +75,9 @@ class TrackController(object):
             print('You can remove tracks between the track number(first) you choose and the track number(last) you choose')
             first = int(input('Enter a track number (first): '))
             last = int(input('Enter a track number (last): '))
-            SpotifyService.remove_tracks_from_playlist(self.spotify,
-                                                       setting.MY_PLAYLIST_ID, first,
-                                                       last)
+            tracks = self.spotify_service.retrieve_tracks_from_playlist(setting.MY_PLAYLIST_ID)
+            self.spotify_service.remove_tracks_from_playlist(setting.MY_PLAYLIST_ID,
+                                                             tracks,
+                                                             first,
+                                                             last)
         return

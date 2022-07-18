@@ -171,9 +171,7 @@ class SpotifyRepository(object):
     def add_tracks_to_playlist(self, playlist_id, urls):
         self.connect.playlist_add_items(playlist_id, urls, position=0)
 
-
-    @staticmethod
-    def remove_tracks_from_playlist(spotify, playlist_id, tracks) -> None:
+    def remove_tracks_from_playlist(self, playlist_id: str, tracks: list) -> None:
         # TODO: if there are more than 100 tracks
         items = [track['track_url'] for track in tracks]
         names = [track['name'] for track in tracks]
@@ -186,7 +184,7 @@ class SpotifyRepository(object):
         user_input = input(question)
 
         if helper.is_yes(user_input):
-            spotify.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
+            self.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
             print("It's removed")
         else:
             print("It's cancelled")

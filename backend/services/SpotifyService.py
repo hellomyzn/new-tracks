@@ -292,12 +292,11 @@ class SpotifyService(object):
                                                       tracks)
         return
 
-    @staticmethod
-    def remove_tracks_from_playlist(spotify,
+    def remove_tracks_from_playlist(self,
                                     playlist_id: str,
-                                    first, last) -> None:
-        # TODO: if there are more than 100 tracks
-        all_tracks = SpotifyService.retrieve_all_tracks_from_playlist(spotify, playlist_id)
+                                    tracks: list,
+                                    first,
+                                    last) -> None:
 
         # TODO Manage first and last number is proper
         """
@@ -306,11 +305,10 @@ class SpotifyService(object):
             the number more than the number of tracks in playlist,
             first is bigger than last
         """
-        tracks = all_tracks[first-1:last]
+        tracks = tracks[first-1:last]
 
-        SpotifyRepository.remove_tracks_from_playlist(spotify,
-                                                      playlist_id,
-                                                      tracks)
+        self.spotify_repository.remove_tracks_from_playlist(playlist_id,
+                                                            tracks)
         return
 
     @staticmethod
