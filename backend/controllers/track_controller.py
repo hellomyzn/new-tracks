@@ -45,10 +45,8 @@ class TrackController(object):
             # Retrieve only new tracks
             new_tracks = self.spotify_service.retrieve_new_tracks(tracks_from_spotify,
                                                                   tracks_from_csv)
-            print(tracks_from_csv)
-            return
             # Add tracks to CSV
-            CsvService.add_tracks(self.csv, new_tracks)
+            self.csv_service.write_tracks(self.csv, new_tracks)
 
             # Add new tracks of the playlist to total one
             if new_tracks:

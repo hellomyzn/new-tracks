@@ -184,36 +184,53 @@ class SpotifyService(object):
 
     def retrieve_new_tracks(self, tracks_from_spotify, tracks_from_csv) -> list:
         tracks_only_name_artist_from_csv = []
-        tracks_only_name_artist_from_new = []
+        tracks_only_name_artist_from_spotify = []
         new_tracks = []
-
-        # Check there is track data on csv and if so, get header data and all track data on csv
-        header, tracks_from_csv = CsvService.get_header_and_tracks(csv_path)
+        
+        logger_pro.info({
+            'action': 'Retrieve new tracks',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'tracks_from_spotify': tracks_from_spotify,
+                'tracks_from_csv': tracks_from_csv
+            }
+        })
 
         # If there is no track data, it regards all tracks as new tracks
         if not tracks_from_csv:
-            print(f'[INFO] -    The number of new tracks is {len(tracks)}')
-            return tracks
+            print(f'[INFO] -    The number of new tracks is {len(tracks_from_spotify)}')
+            return tracks_from_spotify
 
         # Prepare a list from csv to check which tracks are new for this time
         for track in tracks_from_csv:
             tracks_only_name_artist_from_csv.append({
-                'name':     track[header.index('name')],
-                'artist':   track[header.index('artist')]})
+                'name':     track['name'],
+                'artist':   track['artist']
+            })
 
         # Prepare a list from retrieved tracks to check which tracks are new for this time
-        for track in tracks:
-            tracks_only_name_artist_from_new.append({
+        for track in tracks_from_spotify:
+            tracks_only_name_artist_from_spotify.append({
                 'name':     track['name'],
-                'artist':   track['artist']})
+                'artist':   track['artist']
+            })
 
         # Check which tracks are new
-        for i, track in enumerate(tracks_only_name_artist_from_new):
+        for i, track in enumerate(tracks_only_name_artist_from_spotify):
             if track in tracks_only_name_artist_from_csv:
                 continue
-            new_tracks.append(tracks[i])
+            new_tracks.append(tracks_from_spotify[i])
 
         logger_con.info(f'The number of new tracks is {len(new_tracks)}')
+        logger_pro.info({
+            'action': 'Retrieve new tracks',
+            'status': 'Success',
+            'message': '',
+            'data': {
+                'track': new_tracks
+            }
+        })
         return new_tracks
 
     def get_current_track(self) -> list:
