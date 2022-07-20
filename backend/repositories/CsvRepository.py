@@ -1,17 +1,47 @@
 import csv
+import logging
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
 
 class CsvRepository(object):
-    @staticmethod
-    def get_data(path: str) -> list:
-        data = []
-        with open(path, 'r', newline='') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            next(csv_reader)
-            for row in csv_reader:
-                data.append(row)
+    
+    def read_tracks(self, path: str) -> list:
+        tracks = []
 
-        return data
+        logger_pro.info({
+            'action': 'Read tracks data from csv',
+            'status': 'Run',
+            'message': '',
+            'data': {
+                'path': path
+            }
+        })
+        try:
+            with open(path, 'r', newline='') as csvfile:
+                csv_reader = csv.reader(csvfile)
+                next(csv_reader)
+                for row in csv_reader:
+                    tracks.append(row)
+
+            logger_pro.info({
+                'action': 'Read tracks data from csv',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'tracks': tracks
+                }
+            })
+        except Exception as e:          
+            logger_pro.warning({
+                'action': 'Read tracks data from csv',
+                'status': 'Fails',
+                'message': '',
+                'exception': e
+            })
+
+        return tracks
 
     @staticmethod
     def get_first_data_by_name_and_artist(path: str,

@@ -8,7 +8,6 @@
 *__pycache__
 backend/src/logs/*.log
 backend/src/logs/*.log.*
-backend/src/csv/*.csv
 backend/.bash_history
 backend/.python_history
 backend/.DS_Store

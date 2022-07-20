@@ -182,7 +182,7 @@ class SpotifyService(object):
 
         return tracks
 
-    def retrieve_new_tracks(self, tracks, csv_path) -> list:
+    def retrieve_new_tracks(self, tracks_from_spotify, tracks_from_csv) -> list:
         tracks_only_name_artist_from_csv = []
         tracks_only_name_artist_from_new = []
         new_tracks = []

@@ -6,12 +6,15 @@ from repositories.CsvRepository import CsvRepository
 import utils.helper as helper
 
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
+
+
 class CsvService(object):
     def __init__(self):
-        self.logger_pro = logging.getLogger('production')
-        self.logger_dev = logging.getLogger('develop')
-        self.logger_con = logging.getLogger('console')
         self.csv_model = Csv()
+        self.repository = CsvRepository()
 
 
     @classmethod
@@ -80,7 +83,7 @@ class CsvService(object):
         return
     
     def show_track_info(self, track: list) -> None:
-        self.logger_pro.info({
+        logger_pro.info({
             'action': 'Show track info',
             'status': 'Run',
             'message': '',
@@ -88,7 +91,7 @@ class CsvService(object):
         for column, item in zip(self.csv_model.columns, track):
             print(f'\t{column}: {item}')
         
-        self.logger_pro.info({
+        logger_pro.info({
             'action': 'Show track info',
             'status': 'Success',
             'message': '',
@@ -101,7 +104,47 @@ class CsvService(object):
 
         if CsvService.is_not_header(path):
             return []
-        print(path)
 
-        data = CsvRepository.get_data(path)
-        return data
+        tracks = []
+        tracks_list = self.repository.read_tracks(path)
+
+        logger_pro.info({
+            'action': 'Retrieve tracks data from csv',
+            'status': 'Run',
+            'message': '',
+            'data': {
+                'path': path,
+                'tracks_list': tracks_list
+            }
+        })
+
+        for t in tracks_list:
+            try:
+                track = {
+                    'name': t[0],
+                    'artist': t[1],
+                    'playlist_name': t[2],
+                    'track_url': t[3],
+                    'playlist_url': t[4],
+                    'release_date': t[5],
+                    'added_at': t[6],
+                    'created_at': t[7],
+                    'like': False
+                }
+                tracks.append(track)
+                logger_pro.info({
+                    'action': 'Retrieve tracks data from csv',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'track': track
+                    }
+                })
+            except Exception as e:
+                logger_pro.warning({
+                    'action': 'Retrieve tracks data from csv',
+                    'status': 'Fails',
+                    'message': '',
+                    'exception': e
+                })
+        return tracks
