@@ -94,3 +94,14 @@ class CsvService(object):
             'message': '',
         })
         return
+
+    def retrieve_tracks(self, path: str) -> list:
+        if CsvService.is_not_csv(path):
+            return []
+
+        if CsvService.is_not_header(path):
+            return []
+        print(path)
+
+        data = CsvRepository.get_data(path)
+        return data

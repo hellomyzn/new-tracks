@@ -76,31 +76,6 @@ class SpotifyRepository(object):
             })
         return spotify
 
-    def get_current_track_json_data(self) -> list:
-        self.logger_pro.info({
-            'action': 'Get current track data from spotify',
-            'status': 'Run',
-            'message': ''
-        })
-
-        try:
-            track_json_data = self.connect.current_user_playing_track()
-            self.logger_pro.info({
-                'action': 'Get current track data from spotify',
-                'status': 'Success',
-                'message': '',
-                'data': track_json_data
-            })
-        except Exception as e:
-            track_json_data = []
-            self.logger_pro.warning({
-                'action': 'Get current track data from spotify',
-                'status': 'Fail',
-                'message': '',
-                'exception': e
-            })
-        return track_json_data
-
     @staticmethod
     def get_tracks_played_recently(spotify) -> list:
         tracks = []
@@ -167,7 +142,32 @@ class SpotifyRepository(object):
                 'exception': e
             })
         return playlist_items
-            
+
+    def get_current_track_json_data(self) -> list:
+        self.logger_pro.info({
+            'action': 'Get current track data from spotify',
+            'status': 'Run',
+            'message': ''
+        })
+
+        try:
+            track_json_data = self.connect.current_user_playing_track()
+            self.logger_pro.info({
+                'action': 'Get current track data from spotify',
+                'status': 'Success',
+                'message': '',
+                'data': track_json_data
+            })
+        except Exception as e:
+            track_json_data = []
+            self.logger_pro.warning({
+                'action': 'Get current track data from spotify',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
+        return track_json_data
+
     def add_tracks_to_playlist(self, playlist_id, urls):
         self.connect.playlist_add_items(playlist_id, urls, position=0)
 

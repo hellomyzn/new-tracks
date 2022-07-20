@@ -18,11 +18,11 @@ class TrackController(object):
         self.logger_con = logging.getLogger('console')
 
         self.csv = Csv()
+        self.csv_service = CsvService()
         self.spotify = Spotify()
         self.spotify_service = SpotifyService()
         self.google_spreadsheet = GoogleSpreadsheet()
         self.google_spreadsheet_service = GoogleSpreadsheetService()
-        self.csv_service = CsvService()
 
     def show_current_track_from_csv(self) -> None:
         track_from_spotify = self.spotify_service.get_current_track()
@@ -45,7 +45,8 @@ class TrackController(object):
             2. Provide csv data to retrieve new tracks
             3. Return new tracks
             """
-
+            tracks_from_csv = self.csv_service.retrieve_tracks(setting.FILE_PATH_OF_CSV)
+            return
             # Retrieve only new tracks
             new_tracks = self.spotify_service.retrieve_new_tracks(tracks,
                                                                   self.csv.file_path)
@@ -58,7 +59,7 @@ class TrackController(object):
                 all_new_tracks += new_tracks
 
         # Add tracks to google spreadsheet
-        # self.google_spreadsheet_service.add_tracks(all_new_tracks)
+        self.google_spreadsheet_service.add_tracks(all_new_tracks)
         
         # Add tracks to a playlist on Spotify
         self.spotify_service.add_tracks_to_playlist(all_new_tracks,
