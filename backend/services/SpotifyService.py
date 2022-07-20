@@ -145,6 +145,8 @@ class SpotifyService(object):
             playlist_name = playlist_json_data["name"]
             max_number = 100
             logger_con.info(f'Retrieve tracks data from playlist: {playlist_name}: {tracks_number}')
+            print(playlist_json_data)
+            return
 
             while max_number < tracks_number:
                 offset = len(tracks)

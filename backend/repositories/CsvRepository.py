@@ -7,9 +7,8 @@ logger_con = logging.getLogger('console')
 
 class CsvRepository(object):
     
-    def read_tracks(self, path: str) -> list:
+    def read(self, path: str) -> list:
         tracks = []
-
         logger_pro.info({
             'action': 'Read tracks data from csv',
             'status': 'Run',
@@ -18,6 +17,7 @@ class CsvRepository(object):
                 'path': path
             }
         })
+
         try:
             with open(path, 'r', newline='') as csvfile:
                 csv_reader = csv.reader(csvfile)
@@ -85,13 +85,31 @@ class CsvRepository(object):
 
         return
 
-    @staticmethod
-    def add(path: str, columns: list, data: list) -> None:
-        with open(path, 'a', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=columns)
-            for d in data:
-                writer.writerow(d)
-                # should be logging
-                # print(f"[ADD]: {d}")
+    def write(self, path: str, columns: list, data: list) -> None:
+        logger_pro.info({
+            'action': 'Write tracks data on CSV',
+            'status': 'Run',
+            'message': '',
+            'data': {
+                'path': path
+            }
+        })
+        try:
+            with open(path, 'a', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=columns)
+                for d in data:
+                    writer.writerow(d)
+            logger_pro.info({
+                'action': 'Write tracks data on CSV',
+                'status': 'Success',
+                'message': '',
+            })
+        except Exception as e:
+            logger_pro.warning({
+                'action': 'Write tracks data on CSV',
+                'status': 'Fails',
+                'message': '',
+                'exception': e
+            })
 
         return

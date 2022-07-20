@@ -13,7 +13,7 @@ logger_con = logging.getLogger('console')
 
 class CsvService(object):
     def __init__(self):
-        self.csv_model = Csv()
+        self.model = Csv()
         self.repository = CsvRepository()
 
 
@@ -68,18 +68,17 @@ class CsvService(object):
         header, data = CsvRepository.get_header_and_data(path)
         return header, data
 
-    @staticmethod
-    def add_tracks(csv, tracks: list) -> None:
+    def write_tracks(self, csv_file_path, tracks: list) -> None:
         # Check there is csv file
-        if CsvService.is_not_csv(csv.file_path):
+        if CsvService.is_not_csv(csv_file_path):
             helper.create_file(csv.file_path)
 
         # Check there is header
-        if CsvService.is_not_header(csv.file_path):
+        if CsvService.is_not_header(csv_file_path):
             CsvRepository.add_columns(csv.file_path, csv.columns)
 
-        CsvRepository.add(csv.file_path, csv.columns, tracks)
-        print('[INFO] - Done to add tracks to CSV')
+        self.repository.write(csv_file_path, self.model.columns, tracks)
+        logger_con.info('Done to add tracks to CSV')
         return
     
     def show_track_info(self, track: list) -> None:
@@ -106,7 +105,7 @@ class CsvService(object):
             return []
 
         tracks = []
-        tracks_list = self.repository.read_tracks(path)
+        tracks_list = self.repository.read(path)
 
         logger_pro.info({
             'action': 'Retrieve tracks data from csv',

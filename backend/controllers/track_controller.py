@@ -39,6 +39,7 @@ class TrackController(object):
         for playlist_id in setting.PLAYLISTS_IDS:
             # Retrieve tracks data from spotify
             tracks_from_spotify = self.spotify_service.retrieve_tracks_from_playlist(playlist_id)
+            return
             # Retrieve tracks data from csv
             tracks_from_csv = self.csv_service.retrieve_tracks(setting.FILE_PATH_OF_CSV)
             
@@ -46,12 +47,12 @@ class TrackController(object):
             new_tracks = self.spotify_service.retrieve_new_tracks(tracks_from_spotify,
                                                                   tracks_from_csv)
             # Add tracks to CSV
-            self.csv_service.write_tracks(self.csv, new_tracks)
-
+            self.csv_service.write_tracks(setting.FILE_PATH_OF_CSV, new_tracks)
             # Add new tracks of the playlist to total one
             if new_tracks:
                 all_new_tracks += new_tracks
-
+        print(len(all_new_tracks))
+        return
         # Add tracks to google spreadsheet
         self.google_spreadsheet_service.add_tracks(all_new_tracks)
         

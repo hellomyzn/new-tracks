@@ -48,7 +48,7 @@ class SpotifyRepository(object):
 
         try:
             # Connect spotify
-            spotify = spotipy.Spotify(auth_manager=auth_manager)
+            spotify = spotipy.Spotify(auth_manager=auth_manager, language='en')
             logger_con.info('Succeed in connecting Spotify...')
             logger_pro.info({
                 'action': 'Connect spotify api by SpotifyOAuth',
