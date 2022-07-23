@@ -62,13 +62,18 @@ class CsvRepository(object):
 
         Parameters
         ----------
-        path : str
+        path: str
             The path of CSV
 
         Raises
         ------
         Exception
             If you fail to read the header.
+
+        Return
+        ------
+        header: str
+            The header on the path of CSV
         """
 
         logger_pro.info({
@@ -79,7 +84,7 @@ class CsvRepository(object):
                 'path': path
             }
         })
-        
+
         try:
             with open(path, 'r', newline='') as csvfile:
                 csv_dict_reader = csv.DictReader(csvfile)
@@ -98,13 +103,17 @@ class CsvRepository(object):
                 'action': 'Read header data from csv',
                 'status': 'Fails',
                 'message': '',
-                'exception': e
+                'exception': e,
+                'data': {
+                    'path': path
+                }
             })
         if header is None:
+            logger_con.warning('There is no header on the CSV')
             logger_pro.warning({
                 'action': 'Read header data from csv',
                 'status': 'Fails',
-                'message': 'There is no header on CSV',
+                'message': 'There is no header on the CSV',
             })
             
         return header

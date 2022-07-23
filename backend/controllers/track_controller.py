@@ -41,8 +41,8 @@ class TrackController(object):
             tracks_from_spotify = self.spotify_service.get_tracks_from_playlist(playlist_id)
 
             # Retrieve tracks data from csv
-            tracks_from_csv = self.csv_service.get_tracks(setting.FILE_PATH_OF_CSV)
-            
+            tracks_from_csv = self.csv_service.read_tracks(setting.FILE_PATH_OF_CSV)
+            return
             # Retrieve only new tracks
             new_tracks = self.spotify_service.retrieve_new_tracks(tracks_from_spotify,
                                                                   tracks_from_csv)

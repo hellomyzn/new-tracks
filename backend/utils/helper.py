@@ -1,11 +1,56 @@
 import os
 import pathlib
 import datetime
+import logging
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
 
-def is_file(path: str):
+def is_file(path: str) -> bool:
+    """ Confirm the path exists
+
+    Parameters
+    ----------
+    path: str
+        A path of CSV
+
+    Raises
+    ------
+    Warning:
+        There is no file on the path
+
+    Return
+    ------
+    True/False
+    """
+
+    logger_pro.info({
+        'action': 'Confirm the path exists',
+        'status': 'Run',
+        'message': '',
+        'data': {
+            'path': path
+        }
+    })
+
     if os.path.isfile(path):
+        logger_pro.info({
+            'action': 'Confirm the path exists',
+            'status': 'Success',
+            'message': ''
+        })
         return True
+
+    logger_con.warning('There is no file or you set path up wrongly')
+    logger_pro.warning({
+        'action': 'Confirm the path exists',
+        'status': 'Warning',
+        'message': 'There is no file on the path',
+        'data': {
+            'path': path
+        }
+    })
     return False
 
 

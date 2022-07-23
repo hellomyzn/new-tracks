@@ -12,62 +12,52 @@ logger_con = logging.getLogger('console')
 
 
 class CsvService(object):
+    """
+    A class used to represent a CSV
+
+    Attributes
+    ----------
+    model:
+        A csv model
+    repository:
+        A csv repository
+
+    Method
+    ------
+
+    """
+
     def __init__(self):
+        """
+        Parameters
+        ----------
+        None
+        """
         self.model = Csv()
         self.repository = CsvRepository()
 
     def is_not_header(self, path: str) -> bool:
+        """
+
+        """
         if not self.repository.read_header(path):
             return True
         else:
             return False
 
-    @classmethod
-    def check_csv(cls, path: str, repository) -> bool:
-        if not helper.is_file(path):
-            return True
-
-        if not repository.read_header(path):
-            return True
-        
-        return False
-
-    @staticmethod
-    def get_tracks(path: str) -> list:
-        if CsvService.is_not_csv(path):
-            return []
-
-        if self.repository.is_not_header(path):
-            return []
-
-        data = CsvRepository.get_data(path)
-        return data
-
     @staticmethod
     def get_track_by_name_and_artist(path: str,
                                      name: str,
                                      artist: str) -> list:
-        if CsvService.is_not_csv(path):
+        if not helper.is_file(path):
             return []
-
-        if self.repository.is_not_header(path):
+        if not self.repository.read_header(path):
             return []
 
         track = CsvRepository.get_first_data_by_name_and_artist(path,
                                                                 name,
                                                                 artist)
         return track
-
-    @staticmethod
-    def get_header_and_tracks(path: str) -> list:
-        if CsvService.is_not_csv(path):
-            return [], []
-
-        if self.repository.is_not_header(path):
-            return [], []
-
-        header, data = CsvRepository.get_header_and_data(path)
-        return header, data
 
     def write_tracks(self, csv_file_path, tracks: list) -> None:
         # Check there is csv file
@@ -98,8 +88,32 @@ class CsvService(object):
         })
         return
 
-    def get_tracks(self, path: str) -> list:
-        if CsvService.check_csv(path, self.repository):
+    def read_tracks(self, path: str) -> list:
+        """ Read tracks data from CSV
+        
+        If there is no file or there is no any track data,
+        return a empty list
+
+        Parameters
+        ----------
+        path: str
+            A path of csv
+        
+        Raises
+        ------
+            if there is no file or you set path up wrongly
+            if there is no any track data in csv file
+
+        Return
+        ------
+        tracks: list
+            A tracks data list read on CSV
+        """
+
+        if not helper.is_file(path):
+            return []
+
+        if not self.repository.read_header(path):
             return []
 
         tracks = []
@@ -110,7 +124,8 @@ class CsvService(object):
             'status': 'Run',
             'message': '',
             'data': {
-                'path': path
+                'path': path,
+                'tracks_list': tracks_list
             }
         })
 
@@ -125,7 +140,7 @@ class CsvService(object):
                     'release_date': t[5],
                     'added_at': t[6],
                     'created_at': t[7],
-                    'like': False
+                    'like': t[8]
                 }
                 tracks.append(track)
                 logger_pro.info({
@@ -137,10 +152,13 @@ class CsvService(object):
                     }
                 })
             except Exception as e:
-                logger_pro.warning({
+                logger_pro.error({
                     'action': 'Retrieve tracks data from csv',
                     'status': 'Fails',
                     'message': '',
-                    'exception': e
+                    'exception': e,
+                    'data': {
+                        'track': t
+                    }
                 })
         return tracks
