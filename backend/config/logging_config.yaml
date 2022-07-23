@@ -13,43 +13,44 @@ handlers:
     level: DEBUG
     formatter: user
     stream: 'ext://sys.stdout'
-  file:
+  info_file_handler:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: simple
-    filename: 'src/logs/logs.log'
+    filename: src/logs/logs/logs.log
     maxBytes: 10485760
     backupCount: 20
     encoding: utf8
-  file_for_error:
+    mode: 'w'
+  error_file_handler:
     class: logging.handlers.RotatingFileHandler
     level: ERROR
     formatter: simple
-    filename: src/logs/errors.log
+    filename: src/logs/errors/errors.log
     maxBytes: 10485760
     backupCount: 20
     encoding: utf8
-  file_for_warning:
+  warning_file_handler:
     class: logging.handlers.RotatingFileHandler
     level: WARNING
     formatter: simple
-    filename: src/logs/warnings.log
+    filename: src/logs/warnings/warnings.log
     maxBytes: 10485760
     backupCount: 20
     encoding: utf8
-  file_for_debug:
+  debug_file_handler:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: simple
-    filename: src/logs/debugs.log
+    filename: src/logs/debugs/debugs.log
     maxBytes: 10485760
     backupCount: 20
     encoding: utf8
-  file_for_root:
+  root_file_handler:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: simple
-    filename: src/logs/root.log
+    filename: src/logs/root/root.log
     maxBytes: 10485760
     backupCount: 20
     encoding: utf8
@@ -57,19 +58,19 @@ loggers:
   production:
     level: INFO
     handlers:
-      - file
-      - file_for_error
-      - file_for_warning
-      - file_for_root
+      - info_file_handler
+      - error_file_handler
+      - warning_file_handler
+      - root_file_handler
     propagate: no
   develop:
     level: DEBUG
     handlers:
-      - file
-      - file_for_error
-      - file_for_warning
-      - file_for_debug
-      - file_for_root
+      - info_file_handler
+      - error_file_handler
+      - warning_file_handler
+      - debug_file_handler
+      - root_file_handler
     propagate: no
   console:
     level: DEBUG
@@ -79,4 +80,4 @@ loggers:
 root: # root logger
   level: DEBUG
   handlers:
-    - file_for_root
+    - root_file_handler

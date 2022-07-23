@@ -6,13 +6,12 @@
 *.cache
 *.viminfo
 *__pycache__
-backend/src/logs/*.log
-backend/src/logs/*.log.*
+*.log
+*.log.*
 backend/.bash_history
 backend/.python_history
 backend/.DS_Store
 backend/.cache/*
 backend/config/config.ini
 backend/src/*.json
-
 backend/.vimrc
