@@ -11,7 +11,7 @@ logger_con = logging.getLogger('console')
 
 class SpotifyService(object):
     def __init__(self):
-        self.spotify_repository = SpotifyRepository()
+        self.repository = SpotifyRepository()
 
     @classmethod
     def retrieve_track_data(cls, track_json_data: dict) -> list:
@@ -140,7 +140,7 @@ class SpotifyService(object):
             }
         })
         try:
-            playlist_json_data = self.spotify_repository.fetch_playlist_json_data(playlist_id)
+            playlist_json_data = self.repository.fetch_playlist_json_data(playlist_id)
             tracks_number = playlist_json_data['tracks']['total']
             playlist_name = playlist_json_data["name"]
             max_number = 100
@@ -148,14 +148,14 @@ class SpotifyService(object):
 
             while max_number < tracks_number:
                 offset = len(tracks)
-                tracks_json_data = self.spotify_repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_json_data = self.repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
                 tracks_json_data = tracks_json_data["items"]
                 tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
                 tracks_number -= len(tracks_json_data)
             else:
                 # after while loop
                 offset = len(tracks)
-                tracks_json_data = self.spotify_repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_json_data = self.repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
                 tracks_json_data = tracks_json_data["items"]
                 tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
             
@@ -234,7 +234,7 @@ class SpotifyService(object):
         return new_tracks
 
     def get_current_track(self) -> list:
-        track_json_data = self.spotify_repository.get_current_track_json_data()
+        track_json_data = self.repository.get_current_track_json_data()
         
         logger_pro.info({
                 'action': 'Retrieve track data for columns',
@@ -286,7 +286,7 @@ class SpotifyService(object):
             for track in piece_of_tracks:
                 urls.append(track['track_url'])
 
-            self.spotify_repository.add_tracks_to_playlist(playlist_id, urls)
+            self.repository.add_tracks_to_playlist(playlist_id, urls)
 
             tracks_number = len(tracks)
 
@@ -294,7 +294,7 @@ class SpotifyService(object):
         for track in tracks:
             urls.append(track['track_url'])
 
-        self.spotify_repository.add_tracks_to_playlist(playlist_id, urls)
+        self.repository.add_tracks_to_playlist(playlist_id, urls)
         return
 
     @staticmethod
@@ -324,7 +324,7 @@ class SpotifyService(object):
         """
         tracks = tracks[first-1:last]
 
-        self.spotify_repository.remove_tracks_from_playlist(playlist_id,
+        self.repository.remove_tracks_from_playlist(playlist_id,
                                                             tracks)
         return
 

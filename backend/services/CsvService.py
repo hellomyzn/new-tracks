@@ -16,27 +16,28 @@ class CsvService(object):
         self.model = Csv()
         self.repository = CsvRepository()
 
-
-    @classmethod
-    def is_not_header(cls, path: str) -> bool:
-        if not CsvRepository.get_header(path):
+    def is_not_header(self, path: str) -> bool:
+        if not self.repository.read_header(path):
             return True
         else:
             return False
 
     @classmethod
-    def is_not_csv(cls, path: str) -> bool:
+    def check_csv(cls, path: str, repository) -> bool:
         if not helper.is_file(path):
             return True
-        else:
-            return False
+
+        if not repository.read_header(path):
+            return True
+        
+        return False
 
     @staticmethod
     def get_tracks(path: str) -> list:
         if CsvService.is_not_csv(path):
             return []
 
-        if CsvService.is_not_header(path):
+        if self.repository.is_not_header(path):
             return []
 
         data = CsvRepository.get_data(path)
@@ -49,7 +50,7 @@ class CsvService(object):
         if CsvService.is_not_csv(path):
             return []
 
-        if CsvService.is_not_header(path):
+        if self.repository.is_not_header(path):
             return []
 
         track = CsvRepository.get_first_data_by_name_and_artist(path,
@@ -62,7 +63,7 @@ class CsvService(object):
         if CsvService.is_not_csv(path):
             return [], []
 
-        if CsvService.is_not_header(path):
+        if self.repository.is_not_header(path):
             return [], []
 
         header, data = CsvRepository.get_header_and_data(path)
@@ -70,11 +71,11 @@ class CsvService(object):
 
     def write_tracks(self, csv_file_path, tracks: list) -> None:
         # Check there is csv file
-        if CsvService.is_not_csv(csv_file_path):
+        if not helper.is_file(csv_file_path):
             helper.create_file(csv.file_path)
 
         # Check there is header
-        if CsvService.is_not_header(csv_file_path):
+        if self.is_not_header(csv_file_path):
             CsvRepository.add_columns(csv.file_path, csv.columns)
 
         self.repository.write(csv_file_path, self.model.columns, tracks)
@@ -97,11 +98,8 @@ class CsvService(object):
         })
         return
 
-    def retrieve_tracks(self, path: str) -> list:
-        if CsvService.is_not_csv(path):
-            return []
-
-        if CsvService.is_not_header(path):
+    def get_tracks(self, path: str) -> list:
+        if CsvService.check_csv(path, self.repository):
             return []
 
         tracks = []
@@ -112,8 +110,7 @@ class CsvService(object):
             'status': 'Run',
             'message': '',
             'data': {
-                'path': path,
-                'tracks_list': tracks_list
+                'path': path
             }
         })
 
