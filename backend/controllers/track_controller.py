@@ -38,7 +38,7 @@ class TrackController(object):
         # Add new tracks by each playlist
         for playlist_id in setting.PLAYLISTS_IDS:
             # Retrieve tracks data from spotify
-            tracks_from_spotify = self.spotify_service.retrieve_tracks_from_playlist(playlist_id)
+            tracks_from_spotify = self.spotify_service.get_tracks_from_playlist(playlist_id)
 
             # Retrieve tracks data from csv
             tracks_from_csv = self.csv_service.retrieve_tracks(setting.FILE_PATH_OF_CSV)
@@ -52,12 +52,12 @@ class TrackController(object):
             if new_tracks:
                 all_new_tracks += new_tracks
         
-        # Add tracks to google spreadsheet
-        self.google_spreadsheet_service.add_tracks(all_new_tracks)
+        # # Add tracks to google spreadsheet
+        # self.google_spreadsheet_service.add_tracks(all_new_tracks)
         
-        # Add tracks to a playlist on Spotify
+        # # Add tracks to a playlist on Spotify
         # self.spotify_service.add_tracks_to_playlist(all_new_tracks,
-                                                    # setting.MY_PLAYLIST_ID)
+        #                                             setting.MY_PLAYLIST_ID)
 
         return
 
@@ -70,7 +70,7 @@ class TrackController(object):
             print('You can remove tracks between the track number(first) you choose and the track number(last) you choose')
             first = int(input('Enter a track number (first): '))
             last = int(input('Enter a track number (last): '))
-            tracks = self.spotify_service.retrieve_tracks_from_playlist(setting.MY_PLAYLIST_ID)
+            tracks = self.spotify_service.get_tracks_from_playlist(setting.MY_PLAYLIST_ID)
             self.spotify_service.remove_tracks_from_playlist(setting.MY_PLAYLIST_ID,
                                                              tracks,
                                                              first,

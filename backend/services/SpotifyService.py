@@ -128,7 +128,7 @@ class SpotifyService(object):
         else:
             return False
 
-    def retrieve_tracks_from_playlist(self, playlist_id: str) -> list:
+    def get_tracks_from_playlist(self, playlist_id: str) -> list:
         # TODO: there is more than 100 tracks
         tracks = []
         logger_pro.info({
@@ -140,7 +140,7 @@ class SpotifyService(object):
             }
         })
         try:
-            playlist_json_data = self.spotify_repository.get_playlist_json_data(playlist_id)
+            playlist_json_data = self.spotify_repository.fetch_playlist_json_data(playlist_id)
             tracks_number = playlist_json_data['tracks']['total']
             playlist_name = playlist_json_data["name"]
             max_number = 100
@@ -148,14 +148,14 @@ class SpotifyService(object):
 
             while max_number < tracks_number:
                 offset = len(tracks)
-                tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_json_data = self.spotify_repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
                 tracks_json_data = tracks_json_data["items"]
                 tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
                 tracks_number -= len(tracks_json_data)
             else:
                 # after while loop
                 offset = len(tracks)
-                tracks_json_data = self.spotify_repository.get_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_json_data = self.spotify_repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
                 tracks_json_data = tracks_json_data["items"]
                 tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
             
