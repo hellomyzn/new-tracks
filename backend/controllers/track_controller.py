@@ -56,8 +56,8 @@ class TrackController(object):
         self.google_spreadsheet_service.add_tracks(all_new_tracks)
         
         # Add tracks to a playlist on Spotify
-        self.spotify_service.add_tracks_to_playlist(all_new_tracks,
-                                                    setting.MY_PLAYLIST_ID)
+        # self.spotify_service.add_tracks_to_playlist(all_new_tracks,
+                                                    # setting.MY_PLAYLIST_ID)
 
         return
 
