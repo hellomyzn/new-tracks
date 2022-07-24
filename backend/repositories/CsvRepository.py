@@ -6,6 +6,16 @@ logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 class CsvRepository(object):
+    """
+    A class used to represent a CSV repository
+
+    Attributes
+    ----------
+    None
+    
+    Methods
+    ------
+    """
     
     def read(self, path: str) -> list:
         tracks = []

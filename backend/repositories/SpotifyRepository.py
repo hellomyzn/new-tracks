@@ -6,9 +6,28 @@ from spotipy.oauth2 import SpotifyOAuth
 import utils.setting as setting
 import utils.helper as helper
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
 
 class SpotifyRepository(object):
+    """
+    A class used to represent a spotify repository
+
+    Attributes
+    ----------
+    connect:
+        An instance to connect spotify API
+
+    Methods
+    -------
+    """
     def __init__(self):
+        """
+        Parameters
+        ----------
+        None
+        """
         self.logger_pro = logging.getLogger('production')
         self.logger_dev = logging.getLogger('develop')
         self.logger_con = logging.getLogger('console')
@@ -84,6 +103,25 @@ class SpotifyRepository(object):
         return tracks_json_data
 
     def fetch_playlist_json_data(self, playlist_id: str) -> list:
+        """ Fetch a playlist json data
+
+        Parameters
+        ----------
+        playlist_id: str
+            A playlist ID to fetch tracks from.
+
+        Raises
+        ------
+        Exception
+            If you can not fetch playlist json data through Spotify API
+
+        Return
+        ------
+        playlist_data: list
+            A playlist json data
+
+        """
+
         playlist_data = None
         self.logger_pro.info({
             'action': 'Get playlist json data',
@@ -99,14 +137,19 @@ class SpotifyRepository(object):
                 'action': 'Get playlist json data',
                 'status': 'Success',
                 'message': '',
-                'data': playlist_data
+                'data': {
+                    'playlist_data': playlist_data
+                }
             })
         except Exception as e:
-            self.logger_pro.warning({
+            self.logger_pro.error({
                 'action': 'Get playlist json data',
                 'status': 'Fail',
                 'message': '',
-                'exception': e
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
             })
         return playlist_data
 

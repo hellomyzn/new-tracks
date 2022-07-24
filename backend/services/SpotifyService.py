@@ -10,7 +10,24 @@ logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 class SpotifyService(object):
+    """
+    A class used to represent a spotify service
+
+    Attributes
+    ----------
+    repository:
+        A spotify repository
+
+    Methods
+    ------
+    """
+
     def __init__(self):
+        """
+        Parameters
+        ----------
+        None
+        """
         self.repository = SpotifyRepository()
 
     @classmethod
@@ -31,7 +48,30 @@ class SpotifyService(object):
     @classmethod
     def retrieve_tracks_data(cls,
                              tracks_json_data: dict,
-                             playlist_json_data: dict) -> list:
+                             playlist_name: str = None,
+                             playlist_url: str = None) -> list:
+        """ Retrieve only tracks data from tracks json data.
+
+        Parameters
+        ----------
+        tracks_json_data: dict
+            A tracks json data.
+        playlist_name: str, optional
+            A playlist name (default is None).
+        playlist_url: str
+            A playlist url (default is None).
+
+        Raises
+        ------
+        Exception
+            If it fail to append track data.
+
+        Return
+        ------
+        tracks: list
+            A track data with certain columns
+        """
+        
         tracks = []
     
         # Retrieve certain data from json data            
@@ -40,8 +80,8 @@ class SpotifyService(object):
         artists = [t["track"]["artists"][0]['name'] for t in tracks_json_data]
         release_date = [t["track"]["album"]["release_date"] for t in tracks_json_data]
         added_at = [t["added_at"]for t in tracks_json_data]
-        playlist_name = playlist_json_data["name"]
-        playlist_url = playlist_json_data['external_urls']['spotify']
+        playlist_name = playlist_name
+        playlist_url = playlist_url
         
         logger_pro.info({
             'action': 'Retrieve tracks data for columns from playlist',
@@ -106,7 +146,11 @@ class SpotifyService(object):
                     'action': 'Retrieve tracks data for columns from playlist',
                     'status': 'Fail',
                     'message': '',
-                    'exception': e
+                    'exception': e,
+                    'data': {
+                        'i': i,
+                        'v': v
+                    }
                 })
         return tracks
 
@@ -128,8 +172,27 @@ class SpotifyService(object):
         else:
             return False
 
-    def get_tracks_from_playlist(self, playlist_id: str) -> list:
-        # TODO: there is more than 100 tracks
+    def fetch_tracks_from_playlist(self, playlist_id: str) -> list:
+        """ Fetch tracks from certain playlist.
+        
+        Parameters
+        ----------
+        playlist_id: str
+            A playlist ID to fetch tracks from.
+
+        Raises
+        ------
+        TypeError
+            The playlist id you provided is not correct.
+        Exception
+
+
+        Return
+        ------
+        tracks: list
+            A tracks data list gotten from the playlist.
+        """
+
         tracks = []
         logger_pro.info({
             'action': 'Retrieve tracks from playlist',
@@ -140,9 +203,11 @@ class SpotifyService(object):
             }
         })
         try:
+            # playlist_id = "hogehoge"
             playlist_json_data = self.repository.fetch_playlist_json_data(playlist_id)
             tracks_number = playlist_json_data['tracks']['total']
             playlist_name = playlist_json_data["name"]
+            playlist_url = playlist_json_data['external_urls']['spotify']
             max_number = 100
             logger_con.info(f'Retrieve tracks data from playlist: {playlist_name}: {tracks_number}')
 
@@ -150,14 +215,18 @@ class SpotifyService(object):
                 offset = len(tracks)
                 tracks_json_data = self.repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
                 tracks_json_data = tracks_json_data["items"]
-                tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
+                tracks += SpotifyService.retrieve_tracks_data(tracks_json_data,
+                                                              playlist_name = playlist_name,
+                                                              playlist_url = playlist_url)
                 tracks_number -= len(tracks_json_data)
             else:
                 # after while loop
                 offset = len(tracks)
                 tracks_json_data = self.repository.fetch_playlist_items_json_data(playlist_id, offset=offset)
                 tracks_json_data = tracks_json_data["items"]
-                tracks += SpotifyService.retrieve_tracks_data(tracks_json_data, playlist_json_data)
+                tracks += SpotifyService.retrieve_tracks_data(tracks_json_data,
+                                                              playlist_name = playlist_name,
+                                                              playlist_url = playlist_url)
             
             logger_pro.info({
                 'action': 'Retrieve tracks from playlist',
@@ -166,18 +235,24 @@ class SpotifyService(object):
                 'data': tracks
             })
         except TypeError as e:
-            logger_pro.warning({
+            logger_pro.error({
                 'action': 'Retrieve tracks from playlist',
                 'status': 'Fail',
                 'message': 'The playlist id you provided is not correct',
-                'exception': e
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
             })
         except Exception as e:
-            logger_pro.warning({
+            logger_pro.error({
                 'action': 'Retrieve tracks from playlist',
                 'status': 'Fail',
                 'message': '',
-                'exception': e
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
             })
 
         return tracks

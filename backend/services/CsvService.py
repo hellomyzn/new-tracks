@@ -13,7 +13,7 @@ logger_con = logging.getLogger('console')
 
 class CsvService(object):
     """
-    A class used to represent a CSV
+    A class used to represent a CSV service
 
     Attributes
     ----------
@@ -22,9 +22,8 @@ class CsvService(object):
     repository:
         A csv repository
 
-    Method
+    Methods
     ------
-
     """
 
     def __init__(self):
@@ -89,25 +88,26 @@ class CsvService(object):
         return
 
     def read_tracks(self, path: str) -> list:
-        """ Read tracks data from CSV
+        """ Read tracks data from CSV.
         
         If there is no file or there is no any track data,
-        return a empty list
+        return a empty list.
 
         Parameters
         ----------
         path: str
-            A path of csv
+            A path of csv.
         
         Raises
         ------
-            if there is no file or you set path up wrongly
-            if there is no any track data in csv file
+        Warning
+            if there is no file or you set path up wrongly.
+            if there is no any track data in csv file.
 
         Return
         ------
         tracks: list
-            A tracks data list read on CSV
+            A tracks data list read on CSV.
         """
 
         if not helper.is_file(path):

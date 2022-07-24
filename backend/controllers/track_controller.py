@@ -38,14 +38,15 @@ class TrackController(object):
         # Add new tracks by each playlist
         for playlist_id in setting.PLAYLISTS_IDS:
             # Retrieve tracks data from spotify
-            tracks_from_spotify = self.spotify_service.get_tracks_from_playlist(playlist_id)
+            tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlist(playlist_id)
 
             # Retrieve tracks data from csv
             tracks_from_csv = self.csv_service.read_tracks(setting.FILE_PATH_OF_CSV)
-            return
+
             # Retrieve only new tracks
             new_tracks = self.spotify_service.retrieve_new_tracks(tracks_from_spotify,
                                                                   tracks_from_csv)
+            return
             # Add tracks to CSV
             self.csv_service.write_tracks(setting.FILE_PATH_OF_CSV, new_tracks)
             # Add new tracks of the playlist to total one
