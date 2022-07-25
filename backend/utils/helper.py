@@ -13,7 +13,7 @@ def exists_file(path: str) -> bool:
     Parameters
     ----------
     path: str
-        A path of CSV
+        A path to be checked
 
     Raises
     ------
@@ -53,26 +53,63 @@ def exists_file(path: str) -> bool:
     })
     return False
 
+def create_file(path: str) -> None:
+    """ Create a file
 
-def create_file(path: str):
-    pathlib.Path(path).touch()
+    Parameters
+    ----------
+    path: str
+        A path that will be created
 
+    Raises
+    ------
+    Exception
+        If it fails to create a file
+
+    Return
+    ------
+    None
+    """ 
+      
+    logger_pro.info({
+        'action': 'Create a file',
+        'status': 'Run',
+        'message': '',
+        'data': {
+            'path': path
+        }
+    })
+    try:
+        pathlib.Path(path).touch()
+        logger_pro.info({
+            'action': 'Create a file',
+            'status': 'Success',
+            'message': ''
+        })
+    except Exception as e:
+        logger_pro.error({
+            'action': 'Create a file',
+            'status': 'Warning',
+            'message': 'There is no file on the path',
+            'data': {
+                'path': path
+            }
+        })
+
+    return
 
 def delete_file(path: str):
     os.remove(path)
-
 
 def is_yes(user_input):
     if user_input.lower() == 'y' or user_input.lower() == 'yes':
         return True
     return False
 
-
 def is_no(user_input):
     if user_input.lower() == 'n' or user_input.lower() == 'no':
         return True
     return False
-
 
 def get_date():
     t_delta = datetime.timedelta(hours=9)
