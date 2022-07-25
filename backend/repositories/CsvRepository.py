@@ -16,20 +16,29 @@ class CsvRepository(object):
     Methods
     ------
     """
+
+    def __init__(self, path: str):
+        """
+        Parameters
+        ----------
+        path:
+            A path of csv to manage tracks
+        """
+        self.path = path
     
-    def read(self, path: str) -> list:
+    def read(self) -> list:
         tracks = []
         logger_pro.info({
             'action': 'Read tracks data from csv',
             'status': 'Run',
             'message': '',
             'data': {
-                'path': path
+                'path': self.path
             }
         })
 
         try:
-            with open(path, 'r', newline='') as csvfile:
+            with open(self.path, 'r', newline='') as csvfile:
                 csv_reader = csv.reader(csvfile)
                 next(csv_reader)
                 for row in csv_reader:
@@ -48,7 +57,10 @@ class CsvRepository(object):
                 'action': 'Read tracks data from csv',
                 'status': 'Fails',
                 'message': '',
-                'exception': e
+                'exception': e,
+                'data': {
+                    'path': self.path
+                }
             })
 
         return tracks
@@ -67,13 +79,12 @@ class CsvRepository(object):
                     return data
         return []
 
-    def read_header(self, path: str) -> list:
+    def read_header(self) -> list:
         """Read header data on CSV
 
         Parameters
         ----------
-        path: str
-            The path of CSV
+        None
 
         Raises
         ------
@@ -91,12 +102,12 @@ class CsvRepository(object):
             'status': 'Run',
             'message': '',
             'data': {
-                'path': path
+                'path': self.path
             }
         })
 
         try:
-            with open(path, 'r', newline='') as csvfile:
+            with open(self.path, 'r', newline='') as csvfile:
                 csv_dict_reader = csv.DictReader(csvfile)
                 header = csv_dict_reader.fieldnames
 
@@ -115,15 +126,18 @@ class CsvRepository(object):
                 'message': '',
                 'exception': e,
                 'data': {
-                    'path': path
+                    'path': self.path
                 }
             })
         if header is None:
-            logger_con.warning('There is no header on the CSV')
+            logger_con.warning(f'There is no header on the CSV ({self.path})')
             logger_pro.warning({
                 'action': 'Read header data from csv',
                 'status': 'Fails',
                 'message': 'There is no header on the CSV',
+                'data': {
+                    'path': self.path
+                }
             })
             
         return header

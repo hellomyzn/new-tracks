@@ -7,7 +7,7 @@ logger_pro = logging.getLogger('production')
 logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
-def is_file(path: str) -> bool:
+def exists_file(path: str) -> bool:
     """ Confirm the path exists
 
     Parameters

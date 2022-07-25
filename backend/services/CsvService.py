@@ -4,6 +4,7 @@ import logging
 from models.Csv import Csv
 from repositories.CsvRepository import CsvRepository
 import utils.helper as helper
+import utils.setting as setting
 
 
 logger_pro = logging.getLogger('production')
@@ -30,10 +31,13 @@ class CsvService(object):
         """
         Parameters
         ----------
-        None
+        model:
+            A csv model
+        repository:
+            A csv repository
         """
         self.model = Csv()
-        self.repository = CsvRepository()
+        self.repository = CsvRepository(setting.FILE_PATH_OF_CSV)
 
     def is_not_header(self, path: str) -> bool:
         """
@@ -48,7 +52,7 @@ class CsvService(object):
     def get_track_by_name_and_artist(path: str,
                                      name: str,
                                      artist: str) -> list:
-        if not helper.is_file(path):
+        if not helper.exists_file(path):
             return []
         if not self.repository.read_header(path):
             return []
@@ -60,7 +64,7 @@ class CsvService(object):
 
     def write_tracks(self, csv_file_path, tracks: list) -> None:
         # Check there is csv file
-        if not helper.is_file(csv_file_path):
+        if not helper.exists_file(csv_file_path):
             helper.create_file(csv.file_path)
 
         # Check there is header
@@ -87,7 +91,7 @@ class CsvService(object):
         })
         return
 
-    def read_tracks(self, path: str) -> list:
+    def read_tracks(self) -> list:
         """ Read tracks data from CSV.
         
         If there is no file or there is no any track data,
@@ -95,8 +99,7 @@ class CsvService(object):
 
         Parameters
         ----------
-        path: str
-            A path of csv.
+        None
         
         Raises
         ------
@@ -110,21 +113,20 @@ class CsvService(object):
             A tracks data list read on CSV.
         """
 
-        if not helper.is_file(path):
+        if not helper.exists_file(self.repository.path):
             return []
 
-        if not self.repository.read_header(path):
+        if not self.repository.read_header():
             return []
 
         tracks = []
-        tracks_list = self.repository.read(path)
+        tracks_list = self.repository.read()
 
         logger_pro.info({
             'action': 'Retrieve tracks data from csv',
             'status': 'Run',
             'message': '',
             'data': {
-                'path': path,
                 'tracks_list': tracks_list
             }
         })
@@ -162,3 +164,86 @@ class CsvService(object):
                     }
                 })
         return tracks
+
+    def distinct_tracks_by_csv(self, tracks: list) -> list:
+        """ distinct tracks by csv
+        
+        Parameters
+        ----------
+        tracks: list
+            A tracks data
+
+        Raises
+        ------
+        TypeError
+            The playlist id you provided is not correct.
+
+        Return
+        ------
+        new_tracks: list
+            A new tracks list from tracks data which doesn't exist 
+            in the tracks_from_csv
+                
+        """
+        tracks_only_name_artist_from_csv = []
+        tracks_only_name_artist_from_spotify = []
+        new_tracks = []
+        
+        tracks_from_csv = self.read_tracks()
+
+        logger_pro.info({
+            'action': 'Select new tracks from csv tracks data',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'tracks': tracks,
+                'tracks_from_csv': tracks_from_csv
+            }
+        })
+
+        # If there is no track data, it regards all tracks as new tracks
+        if not tracks_from_csv:
+            logger_con.info(f'The number of new tracks is {len(new_tracks)}')
+            logger_pro.warning({
+                'action': 'Select new tracks from csv tracks data',
+                'status': 'Warning',
+                'message': 'There is no tracks data in on csv ',
+                'args': {
+                    'tracks': tracks,
+                    'tracks_from_csv': tracks_from_csv
+                }
+            })
+
+            return tracks
+
+        # Prepare a list from csv to check which tracks are new for this time
+        for track in tracks_from_csv:
+            tracks_only_name_artist_from_csv.append({
+                'name': track['name'],
+                'artist': track['artist']
+            })
+
+        # Prepare a list from retrieved tracks to check which tracks are new for this time
+        for track in tracks:
+            tracks_only_name_artist_from_spotify.append({
+                'name': track['name'],
+                'artist': track['artist']
+            })
+
+        # Check which tracks are new
+        for i, track in enumerate(tracks_only_name_artist_from_spotify):
+            if track in tracks_only_name_artist_from_csv:
+                continue
+            new_tracks.append(tracks[i])
+
+        logger_con.info(f'The number of new tracks is {len(new_tracks)}')
+        logger_pro.info({
+            'action': 'Select new tracks from csv tracks data',
+            'status': 'Success',
+            'message': '',
+            'data': {
+                'track': new_tracks
+            }
+        })
+
+        return new_tracks
