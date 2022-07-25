@@ -3,11 +3,9 @@ import logging
 
 import utils.setting as setting
 import utils.helper as helper
-from models.Spotify import Spotify
-from models.Csv import Csv
-from models.GoogleSpreadsheet import GoogleSpreadsheet
-from services.SpotifyService import SpotifyService
+from services.track_service import TrackService
 from services.CsvService import CsvService
+from services.SpotifyService import SpotifyService
 from services.GoogleSpreadsheetService import GoogleSpreadsheetService
 
 
@@ -17,6 +15,7 @@ class TrackController(object):
         self.logger_dev = logging.getLogger('develop')
         self.logger_con = logging.getLogger('console')
 
+        self.track_service = TrackService()
         self.csv_service = CsvService()
         self.spotify_service = SpotifyService()    
         self.google_spreadsheet_service = GoogleSpreadsheetService()
@@ -31,21 +30,24 @@ class TrackController(object):
         return
 
     def add_new_tracks_to_playlist(self) -> None:
-        all_new_tracks = []
+        new_tracks = []
+        tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlists(setting.PLAYLISTS_IDS)
+        print(len(tracks_from_spotify))
+        return
         # Add new tracks by each playlist
         for playlist_id in setting.PLAYLISTS_IDS:
             # Retrieve tracks data from spotify
             tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlist(playlist_id)            
 
-            # Retrieve only new tracks
-            new_tracks = self.csv_service.distinct_tracks_by_csv(tracks_from_spotify)
-            return
-            # Add tracks to CSV
-            self.csv_service.write_tracks(setting.FILE_PATH_OF_CSV, new_tracks)
-            # Add new tracks of the playlist to total one
-            if new_tracks:
-                all_new_tracks += new_tracks
-        
+            new_tracks += self.track_service.distinct_tracks_by(tracks_from_spotify,
+                                                                new_tracks)
+        # Retrieve only new tracks
+        new_tracks = self.csv_service.distinct_tracks_by_csv(all_new_tracks)
+        return
+            
+        # Add tracks to CSV
+        self.csv_service.write_tracks(setting.FILE_PATH_OF_CSV, new_tracks)
+
         # Add tracks to google spreadsheet
         self.google_spreadsheet_service.add_tracks(all_new_tracks)
         
@@ -64,7 +66,7 @@ class TrackController(object):
             print('You can remove tracks between the track number(first) you choose and the track number(last) you choose')
             first = int(input('Enter a track number (first): '))
             last = int(input('Enter a track number (last): '))
-            tracks = self.spotify_service.get_tracks_from_playlist(setting.MY_PLAYLIST_ID)
+            tracks = self.spotify_service.fetch_tracks_from_playlist(setting.MY_PLAYLIST_ID)
             self.spotify_service.remove_tracks_from_playlist(setting.MY_PLAYLIST_ID,
                                                              tracks,
                                                              first,

@@ -195,7 +195,7 @@ class SpotifyService(object):
 
         tracks = []
         logger_pro.info({
-            'action': 'Retrieve tracks from playlist',
+            'action': f'Retrieve tracks from {playlist_id}',
             'status': 'Run',
             'message': '',
             'args': {
@@ -203,7 +203,6 @@ class SpotifyService(object):
             }
         })
         try:
-            # playlist_id = "hogehoge"
             playlist_json_data = self.repository.fetch_playlist_json_data(playlist_id)
             tracks_number = playlist_json_data['tracks']['total']
             playlist_name = playlist_json_data["name"]
@@ -236,7 +235,7 @@ class SpotifyService(object):
             })
         except TypeError as e:
             logger_pro.error({
-                'action': 'Retrieve tracks from playlist',
+                'action': f'Retrieve tracks from {playlist_id}',
                 'status': 'Fail',
                 'message': 'The playlist id you provided is not correct',
                 'exception': e,
@@ -246,7 +245,7 @@ class SpotifyService(object):
             })
         except Exception as e:
             logger_pro.error({
-                'action': 'Retrieve tracks from playlist',
+                'action': f'Retrieve tracks from {playlist_id}',
                 'status': 'Fail',
                 'message': '',
                 'exception': e,
@@ -256,6 +255,150 @@ class SpotifyService(object):
             })
 
         return tracks
+
+    def fetch_tracks_from_playlists(self, playlist_ids: list) -> list:
+        """ Fetch tracks from playlists set up on setting file.
+        
+        Parameters
+        ----------
+        playlist_ids: str
+            playlist IDs to fetch tracks from.
+
+        Raises
+        ------
+        TypeError
+            The playlist id you provided is not correct.
+        Exception
+
+        Return
+        ------
+        all_tracks: list
+            A tracks data list gotten from the playlist.
+        """
+        all_tracks = []
+        logger_pro.info({
+            'action': 'Retrieve tracks from playlists',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'playlist_ids': playlist_ids
+            }
+        })
+
+        try:
+            for playlist_id in playlist_ids:
+                tracks = self.fetch_tracks_from_playlist(playlist_id)
+                all_tracks += self.distinct_tracks_by(tracks, all_tracks)
+        except TypeError as e:
+            logger_pro.error({
+                'action': 'Retrieve tracks from playlists',
+                'status': 'Fail',
+                'message': 'The playlist ids you provided is not correct',
+                'exception': e,
+                'data': {
+                    'playlist_ids': playlist_ids
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Retrieve tracks from playlists',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'playlist_ids': playlist_ids
+                }
+            })
+
+        return all_tracks
+
+    def distinct_tracks_by(self, tracks: list, by_tracks: list) -> list:
+        """ Remove duplicate tracks by 'by_tracks'
+
+        Parameters
+        ----------
+        tracks: list
+            A tracks list to be compared
+        by_tracks: list
+            A tracks list to be compared tracks with
+
+        Raises
+        ------
+        TypeError
+            If tracks and/or by_tracks are not list.
+        Exception
+            If it fails to distinc track by by_tracks.
+
+        Return
+        ------
+        distincted_tracks: list
+            A tracks list removed duplicate tracks
+        """
+        
+        tracks_only_name_artist_from_csv = []
+        tracks_only_name_artist_from_spotify = []
+        distincted_tracks = []
+
+        logger_pro.info({
+            'action': 'Select new tracks from csv tracks data',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'tracks': tracks,
+                'tracks_from_csv': by_tracks
+            }
+        })
+
+        # If there is no track data, it regards all tracks as new tracks
+        if not by_tracks:
+            logger_con.info(f'The number of new tracks is {len(tracks)}')
+            logger_pro.warning({
+                'action': 'Select new tracks from csv tracks data',
+                'status': 'Warning',
+                'message': 'There is no tracks data in on csv ',
+                'args': {
+                    'tracks': tracks,
+                    'tracks_from_csv': by_tracks
+                }
+            })
+
+            return tracks
+
+        # Prepare a list from csv to check which tracks are new for this time
+        for track in by_tracks:
+            tracks_only_name_artist_from_csv.append({
+                'name': track['name'],
+                'artist': track['artist']
+            })
+
+        # Prepare a list from retrieved tracks to check which tracks are new for this time
+        for track in tracks:
+            tracks_only_name_artist_from_spotify.append({
+                'name': track['name'],
+                'artist': track['artist']
+            })
+
+        # Check which tracks are new
+        for i, track in enumerate(tracks_only_name_artist_from_spotify):
+            if track in tracks_only_name_artist_from_csv:
+                continue
+            distincted_tracks.append(tracks[i])
+
+        logger_con.info(f'The number of new tracks is {len(distincted_tracks)}')
+        logger_pro.info({
+            'action': 'Select new tracks from csv tracks data',
+            'status': 'Success',
+            'message': '',
+            'data': {
+                'tracks': distincted_tracks
+            }
+        })
+
+        return distincted_tracks
+
+    def convert_tracks_into_name_and_artist(self, tracks) -> list:
+        """
+        """
 
     def get_current_track(self) -> list:
         track_json_data = self.repository.get_current_track_json_data()
@@ -289,7 +432,6 @@ class SpotifyService(object):
             logger_con.warning(message)
             logger_pro.warning(message)
         return track
-
     
     def add_tracks_to_playlist(self, tracks, playlist_id: str) -> None:
         if not tracks:
