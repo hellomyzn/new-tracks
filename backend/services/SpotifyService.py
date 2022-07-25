@@ -258,6 +258,8 @@ class SpotifyService(object):
 
     def fetch_tracks_from_playlists(self, playlist_ids: list) -> list:
         """ Fetch tracks from playlists set up on setting file.
+        If there are duplicate tracks amound the playlist ids,
+        it will be removed.
         
         Parameters
         ----------
@@ -296,7 +298,7 @@ class SpotifyService(object):
                 'message': 'The playlist ids you provided is not correct',
                 'exception': e,
                 'data': {
-                    'playlist_ids': playlist_ids
+                    'playlist_id': playlist_id
                 }
             })
         except Exception as e:
@@ -306,7 +308,7 @@ class SpotifyService(object):
                 'message': '',
                 'exception': e,
                 'data': {
-                    'playlist_ids': playlist_ids
+                    'playlist_id': playlist_id
                 }
             })
 
@@ -334,13 +336,9 @@ class SpotifyService(object):
         distincted_tracks: list
             A tracks list removed duplicate tracks
         """
-        
-        tracks_only_name_artist_from_csv = []
-        tracks_only_name_artist_from_spotify = []
         distincted_tracks = []
-
         logger_pro.info({
-            'action': 'Select new tracks from csv tracks data',
+            'action': 'Remove duplicate tracks by by_tracks',
             'status': 'Run',
             'message': '',
             'args': {
@@ -353,7 +351,7 @@ class SpotifyService(object):
         if not by_tracks:
             logger_con.info(f'The number of new tracks is {len(tracks)}')
             logger_pro.warning({
-                'action': 'Select new tracks from csv tracks data',
+                'action': 'Remove duplicate tracks by by_tracks',
                 'status': 'Warning',
                 'message': 'There is no tracks data in on csv ',
                 'args': {
@@ -365,40 +363,92 @@ class SpotifyService(object):
             return tracks
 
         # Prepare a list from csv to check which tracks are new for this time
-        for track in by_tracks:
-            tracks_only_name_artist_from_csv.append({
-                'name': track['name'],
-                'artist': track['artist']
-            })
-
+        tracks_only_name_and_artist_from_tracks = self.convert_tracks_into_name_and_artist(tracks)
+        
         # Prepare a list from retrieved tracks to check which tracks are new for this time
-        for track in tracks:
-            tracks_only_name_artist_from_spotify.append({
-                'name': track['name'],
-                'artist': track['artist']
+        tracks_only_name_and_artist_from_by_tracks = self.convert_tracks_into_name_and_artist(by_tracks)
+
+        try:        
+            # Check which tracks are new
+            for i, track in enumerate(tracks_only_name_and_artist_from_tracks):
+                if track in tracks_only_name_and_artist_from_by_tracks:
+                    continue
+                distincted_tracks.append(tracks[i])
+
+            logger_con.info(f'The number of new tracks is {len(distincted_tracks)}')
+            logger_pro.info({
+                'action': 'Remove duplicate tracks by by_tracks',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'tracks': distincted_tracks
+                }
             })
-
-        # Check which tracks are new
-        for i, track in enumerate(tracks_only_name_artist_from_spotify):
-            if track in tracks_only_name_artist_from_csv:
-                continue
-            distincted_tracks.append(tracks[i])
-
-        logger_con.info(f'The number of new tracks is {len(distincted_tracks)}')
-        logger_pro.info({
-            'action': 'Select new tracks from csv tracks data',
-            'status': 'Success',
-            'message': '',
-            'data': {
-                'tracks': distincted_tracks
-            }
-        })
-
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Remove duplicate tracks by by_tracks',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'length': len(tracks),
+                    'tracks': tracks
+                }
+            })
         return distincted_tracks
 
-    def convert_tracks_into_name_and_artist(self, tracks) -> list:
+    def convert_tracks_into_name_and_artist(self, tracks: list) -> list:
+        """ Convert tracks into name and artist
+
+        Parameters
+        ----------
+        tracks: list
+            A tracks list to be converted into a list 
+            containing dict which key sare name and artist
+
+        Raises
+        ------
+        Exception
+            If it fails to convert them
+
+        Return
+        ------
+        converted_tracks: list
+            A tracks list converted into a list 
+            containing dict which keys are name and artist
         """
-        """
+        logger_pro.info({
+            'action': 'Convert tracks into name and artist',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'length': len(tracks),
+                'tracks': tracks
+            }
+        })
+        try:
+            converted_tracks = [{'name': t['name'], 'artist': t['artist']} for t in tracks]
+            logger_pro.info({
+                'action': 'Convert tracks into name and artist',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'length': len(converted_tracks),
+                    'converted_tracks': converted_tracks
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Retrieve tracks from playlists',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'length': len(tracks),
+                    'tracks': tracks
+                }
+            })
+        return converted_tracks
 
     def get_current_track(self) -> list:
         track_json_data = self.repository.get_current_track_json_data()
