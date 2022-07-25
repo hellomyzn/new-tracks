@@ -153,8 +153,7 @@ class CsvRepository(object):
 
         return header, data
 
-    @staticmethod
-    def add_columns(path: str, columns: list) -> None:
+    def write_columns(self, columns: list) -> None:
         print('[INFO] - Add header on CSV')
         with open(path, 'a', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=columns)
@@ -162,17 +161,17 @@ class CsvRepository(object):
 
         return
 
-    def write(self, path: str, columns: list, data: list) -> None:
+    def write(self, columns: list, data: list) -> None:
         logger_pro.info({
             'action': 'Write tracks data on CSV',
             'status': 'Run',
             'message': '',
             'data': {
-                'path': path
+                'path': self.path
             }
         })
         try:
-            with open(path, 'a', newline='') as csvfile:
+            with open(self.path, 'a', newline='') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=columns)
                 for d in data:
                     writer.writerow(d)

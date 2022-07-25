@@ -3,19 +3,17 @@ import logging
 
 import utils.setting as setting
 import utils.helper as helper
-from services.track_service import TrackService
 from services.CsvService import CsvService
 from services.SpotifyService import SpotifyService
 from services.GoogleSpreadsheetService import GoogleSpreadsheetService
 
+logger_pro = logging.getLogger('production')
+logger_dev = logging.getLogger('develop')
+logger_con = logging.getLogger('console')
+
 
 class TrackController(object):
     def __init__(self):
-        self.logger_pro = logging.getLogger('production')
-        self.logger_dev = logging.getLogger('develop')
-        self.logger_con = logging.getLogger('console')
-
-        self.track_service = TrackService()
         self.csv_service = CsvService()
         self.spotify_service = SpotifyService()    
         self.google_spreadsheet_service = GoogleSpreadsheetService()
@@ -30,20 +28,21 @@ class TrackController(object):
         return
 
     def add_new_tracks_to_playlist(self) -> None:
+        # Fetch tracks from playlists
         tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlists(setting.PLAYLISTS_IDS)
         
         # Retrieve only new tracks
-        new_tracks = self.csv_service.distinct_tracks_by_csv(tracks_from_spotify)
+        new_tracks = self.csv_service.retrieve_unique_tracks(tracks_from_spotify)
             
         # Add tracks to CSV
-        self.csv_service.write_tracks(setting.FILE_PATH_OF_CSV, new_tracks)
+        self.csv_service.write_tracks(new_tracks)
 
         # Add tracks to google spreadsheet
-        # self.google_spreadsheet_service.add_tracks(new_tracks)
+        self.google_spreadsheet_service.add_tracks(new_tracks)
         
         # Add tracks to a playlist on Spotify
-        # self.spotify_service.add_tracks_to_playlist(new_tracks,
-        #                                             setting.MY_PLAYLIST_ID)
+        self.spotify_service.add_tracks_to_playlist(new_tracks,
+                                                    setting.MY_PLAYLIST_ID)
 
         return
 

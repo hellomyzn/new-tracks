@@ -62,16 +62,16 @@ class CsvService(object):
                                                                 artist)
         return track
 
-    def write_tracks(self, csv_file_path, tracks: list) -> None:
+    def write_tracks(self, tracks: list) -> None:
         # Check there is csv file
-        if not helper.exists_file(csv_file_path):
-            helper.create_file(csv.file_path)
+        if not helper.exists_file(self.repository.path):
+            helper.create_file(self.repository.path)
 
         # Check there is header
-        if self.is_not_header(csv_file_path):
-            CsvRepository.add_columns(csv.file_path, csv.columns)
+        if not self.repository.read_header():
+            self.repository.write_columns(self.model.columns)
 
-        self.repository.write(csv_file_path, self.model.columns, tracks)
+        self.repository.write(self.model.columns, tracks)
         logger_con.info('Done to add tracks to CSV')
         return
     
@@ -165,8 +165,8 @@ class CsvService(object):
                 })
         return tracks
 
-    def distinct_tracks_by_csv(self, tracks: list) -> list:
-        """ distinct tracks by csv
+    def retrieve_new_tracks(self, tracks: list) -> list:
+        """ Retrieve new tracks by comparing to tracks on csv file.
         
         Parameters
         ----------
@@ -175,8 +175,8 @@ class CsvService(object):
 
         Raises
         ------
-        TypeError
-            The playlist id you provided is not correct.
+        Exception
+            It fails to retreive new tracks
 
         Return
         ------
@@ -185,10 +185,7 @@ class CsvService(object):
             in the tracks_from_csv
                 
         """
-        tracks_only_name_artist_from_csv = []
-        tracks_only_name_artist_from_spotify = []
         new_tracks = []
-        
         tracks_from_csv = self.read_tracks()
 
         logger_pro.info({
@@ -203,7 +200,7 @@ class CsvService(object):
 
         # If there is no track data, it regards all tracks as new tracks
         if not tracks_from_csv:
-            logger_con.info(f'The number of new tracks is {len(new_tracks)}')
+            logger_con.info(f'The number of new tracks is {len(tracks)}')
             logger_pro.warning({
                 'action': 'Select new tracks from csv tracks data',
                 'status': 'Warning',
@@ -217,18 +214,10 @@ class CsvService(object):
             return tracks
 
         # Prepare a list from csv to check which tracks are new for this time
-        for track in tracks_from_csv:
-            tracks_only_name_artist_from_csv.append({
-                'name': track['name'],
-                'artist': track['artist']
-            })
+        converted_csv_tracks = self.convert_tracks_into_name_and_artist(tracks_from_csv)
 
         # Prepare a list from retrieved tracks to check which tracks are new for this time
-        for track in tracks:
-            tracks_only_name_artist_from_spotify.append({
-                'name': track['name'],
-                'artist': track['artist']
-            })
+        converted_tracks = self.convert_tracks_into_name_and_artist(tracks)
 
         # Check which tracks are new
         for i, track in enumerate(tracks_only_name_artist_from_spotify):
@@ -247,3 +236,56 @@ class CsvService(object):
         })
 
         return new_tracks
+
+    def convert_tracks_into_name_and_artist(self, tracks: list) -> list:
+        """ Convert tracks into name and artist
+
+        Parameters
+        ----------
+        tracks: list
+            A tracks list to be converted into a list 
+            containing dict which key sare name and artist
+
+        Raises
+        ------
+        Exception
+            If it fails to convert them
+
+        Return
+        ------
+        converted_tracks: list
+            A tracks list converted into a list 
+            containing dict which keys are name and artist
+        """
+        logger_pro.info({
+            'action': 'Convert tracks into name and artist',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'length': len(tracks),
+                'tracks': tracks
+            }
+        })
+        try:
+            converted_tracks = [{'name': t['name'], 'artist': t['artist']} for t in tracks]
+            logger_pro.info({
+                'action': 'Convert tracks into name and artist',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'length': len(converted_tracks),
+                    'converted_tracks': converted_tracks
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Retrieve tracks from playlists',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'length': len(tracks),
+                    'tracks': tracks
+                }
+            })
+        return converted_tracks

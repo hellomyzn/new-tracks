@@ -21,7 +21,6 @@ class GoogleSpreadsheetRepository(object):
     def connect(cls):
         print("[INFO] - Start connecting GSS...")
         json_path = setting.AUTHENTICATION_JSON
-        print(json_path)
         scope = ['https://spreadsheets.google.com/feeds',
                  'https://www.googleapis.com/auth/drive']
         key = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_KEY']
