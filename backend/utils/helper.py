@@ -81,6 +81,7 @@ def create_file(path: str) -> None:
     })
     try:
         pathlib.Path(path).touch()
+        logger_pro.warning(f'Create a file {path}')
         logger_pro.info({
             'action': 'Create a file',
             'status': 'Success',
