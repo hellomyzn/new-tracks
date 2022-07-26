@@ -457,6 +457,72 @@ class SpotifyService(object):
             })
         return converted_tracks
 
+    def add_tracks_to_playlist(self, tracks: list, playlist_id: str) -> None:
+        """ Add tracks to a playlist.
+
+        Parameters
+        ----------
+        tracks: list
+            A tracks list to add
+        playlist_id: str
+            A playlist id to add to 
+        
+        Raises
+        ------
+        Exception
+            If you can not add tracks to the playlist
+
+        Return
+        ------
+        None
+        """
+        if not tracks:
+            logger_con.info('There is no new tracks to add to playlist on Spotify this time.')
+            logger_pro.info('There is no new tracks to add to playlist on Spotify this time.')
+            return
+
+        tracks_number = len(tracks)
+        max_number = 100
+        logger_pro.info({
+            'action': 'Add tracks between certain indexs',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'tracks_number': tracks_number
+            }
+        })
+        while max_number < tracks_number:
+            
+            extracted_tracks, tracks = tracks[0:int(max_number)], tracks[int(max_number)::]
+            track_urls = [t['track_url'] for t in extracted_tracks]
+
+            logger_pro.info({
+                'action': 'Add tracks between certain indexs',
+                'status': 'Success',
+                'message': '',
+                'args': {
+                    'extracted_tracks': len(extracted_tracks),
+                    'remaining_track': len(tracks),
+                    'track_urls': len(track_urls)
+                }
+            })
+
+            self.repository.add_tracks_to_playlist(track_urls, playlist_id)
+            tracks_number = len(tracks)
+
+        track_urls = [t['track_url'] for t in tracks]
+        logger_pro.info({
+            'action': 'Add tracks between certain indexs',
+            'status': 'Success',
+            'message': '',
+            'args': {
+                'tracks': len(tracks),
+                'track_urls': len(track_urls)
+            }
+        })
+        self.repository.add_tracks_to_playlist(track_urls, playlist_id)
+        return
+
     def get_current_track(self) -> list:
         track_json_data = self.repository.get_current_track_json_data()
         
@@ -489,36 +555,6 @@ class SpotifyService(object):
             logger_con.warning(message)
             logger_pro.warning(message)
         return track
-    
-    def add_tracks_to_playlist(self, tracks, playlist_id: str) -> None:
-        if not tracks:
-            print('[INFO] - There is no new tracks to add to playlist on Spotify this time.')
-            return
-
-        # If there are more than 100 tracks in tracks, you need to avoid exception.
-        # TODO: need to care of order tracks if there are more than 100 tracks.
-        tracks_number = len(tracks)
-        print(f'\n[INFO] - The number of new tracks to add to a playlist on Spotify is {tracks_number}')
-
-        max_number = 99
-        while max_number < tracks_number:
-
-            piece_of_tracks, tracks = tracks[0:int(max_number)], tracks[int(max_number)::]
-
-            urls = []
-            for track in piece_of_tracks:
-                urls.append(track['track_url'])
-
-            self.repository.add_tracks_to_playlist(playlist_id, urls)
-
-            tracks_number = len(tracks)
-
-        urls = []
-        for track in tracks:
-            urls.append(track['track_url'])
-
-        self.repository.add_tracks_to_playlist(playlist_id, urls)
-        return
 
     @staticmethod
     def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:

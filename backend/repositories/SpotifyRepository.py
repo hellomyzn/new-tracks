@@ -160,10 +160,29 @@ class SpotifyRepository(object):
             })
         return playlist_data
 
-    def fetch_playlist_items_json_data(self, playlist_id: str, offset=0) -> list:
+    def fetch_playlist_items_json_data(self, playlist_id: str, offset: int=0) -> list:
+        """ Fetch a playlist items json data
+
+        Parameters
+        ----------
+        playlist_id: str
+            A playlist ID to fetch tracks from.
+        offset: int, optional
+            the index of the first item to return. (default is 0)
+        Raises
+        ------
+        Exception
+            If you can not fetch playlist items json data through Spotify API
+
+        Return
+        ------
+        playlist_items: list
+            A playlist items json data
+
+        """
         playlist_items = None
         logger_pro.info({
-            'action': 'Get playlist items json data',
+            'action': 'Fetch a playlist items json data',
             'status': 'Run',
             'message': '',
             'args': {
@@ -179,19 +198,64 @@ class SpotifyRepository(object):
                                                          market=None, 
                                                          additional_types=('track', 'episode'))
             logger_pro.info({
-                'action': 'Get playlist items json data',
+                'action': 'Fetch a playlist items json data',
                 'status': 'Success',
                 'message': '',
                 'data': playlist_items
             })
         except Exception as e:
             logger_pro.warning({
-                'action': 'Get playlist items json data',
+                'action': 'Fetch a playlist items json data',
                 'status': 'Fail',
                 'message': '',
                 'exception': e
             })
         return playlist_items
+
+    def add_tracks_to_playlist(self, track_urls: list, playlist_id: str) -> None:
+        """ Add tracks to a playlist.
+
+        Parameters
+        ----------
+        track_urls: list
+            A list of track urls to add
+        playlist_id: str
+            A playlist ID to add to.
+        
+        Raises
+        ------
+        Exception
+            If you can not add tracks to the playlist
+
+        Return
+        ------
+        None
+        """
+        logger_pro.info({
+            'action': 'Add tracks to a playlist',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'length': len(track_urls),
+                'track_urls': track_urls,
+                'playlist_id': playlist_id
+            }
+        })
+        try:
+            self.connect.playlist_add_items(playlist_id, track_urls, position=0)
+            logger_pro.info({
+                'action': 'Add tracks to a playlist',
+                'status': 'Success',
+                'message': ''
+            })
+        except Exception as e:
+            logger_pro.warning({
+                'action': 'Add tracks to a playlist',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
+        return
 
     def get_current_track_json_data(self) -> list:
         logger_pro.info({
@@ -218,8 +282,6 @@ class SpotifyRepository(object):
             })
         return track_json_data
 
-    def add_tracks_to_playlist(self, playlist_id, urls):
-        self.connect.playlist_add_items(playlist_id, urls, position=0)
 
     def remove_tracks_from_playlist(self, playlist_id: str, tracks: list) -> None:
         # TODO: if there are more than 100 tracks
