@@ -1,5 +1,5 @@
 from models.interfaces.table import Table
-
+import utils.setting as setting
 
 class GoogleSpreadsheet(Table):
     """

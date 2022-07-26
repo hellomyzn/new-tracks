@@ -26,14 +26,14 @@ class TrackController(object):
         new_tracks = self.csv_service.retrieve_new_tracks(tracks_from_spotify)
 
         # Add tracks to CSV
-        # self.csv_service.write_tracks(new_tracks)
+        self.csv_service.write_tracks(new_tracks)
         
         # Add tracks to google spreadsheet
-        # self.google_spreadsheet_service.add_tracks(new_tracks)
+        self.google_spreadsheet_service.add_tracks(new_tracks)
 
         # Add tracks to a playlist on Spotify
-        # my_playlist_id = setting.MY_PLAYLIST_ID
-        my_playlist_id = setting.MY_PLAYLIST_ID_TEST
+        my_playlist_id = setting.MY_PLAYLIST_ID
+        # my_playlist_id = setting.MY_PLAYLIST_ID_TEST
         self.spotify_service.add_tracks_to_playlist(new_tracks,
                                                     my_playlist_id)
 
@@ -49,8 +49,8 @@ class TrackController(object):
         return
 
     def remove_tracks_from_playlist(self) -> None:
-        # my_playlist_id = setting.MY_PLAYLIST_ID
-        my_playlist_id = setting.MY_PLAYLIST_ID_TEST
+        my_playlist_id = setting.MY_PLAYLIST_ID
+        # my_playlist_id = setting.MY_PLAYLIST_ID_TEST
         question = "\nDo you want to remove some tracks you've already listened from playlist? (y/n): "
         if helper.is_yes(input(question)):
             SpotifyService.remove_tracks_played_recently_from_playlist(self.spotify,

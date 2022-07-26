@@ -34,8 +34,8 @@ class CsvService(object):
         ----------
         None
         """
-        # self.model = Csv()
-        self.model = TestCsvModel()
+        self.model = Csv()
+        # self.model = TestCsvModel()
         self.repository = CsvRepository(self.model)
     
     @classmethod
@@ -99,7 +99,7 @@ class CsvService(object):
                     }
                 })
         return converted_tracks
-
+    # TODO: Change from retrieve to convert
     def retrieve_new_tracks(self, tracks: list) -> list:
         """ Retrieve new tracks by comparing to tracks on csv file.
         
