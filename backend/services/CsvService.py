@@ -2,6 +2,7 @@
 import logging
 
 from models.Csv import Csv
+from models.tests.csv import TestCsvModel
 from repositories.CsvRepository import CsvRepository
 import utils.helper as helper
 import utils.setting as setting
@@ -31,12 +32,10 @@ class CsvService(object):
         """
         Parameters
         ----------
-        model:
-            A csv model
-        repository:
-            A csv repository
+        None
         """
-        self.model = Csv()
+        # self.model = Csv()
+        self.model = TestCsvModel()
         self.repository = CsvRepository(self.model)
     
     @classmethod
@@ -69,7 +68,7 @@ class CsvService(object):
         })
         for c in csv:
             try:
-                converted_tracks += {
+                track_dict = {
                     'name': c[0],
                     'artist': c[1],
                     'playlist_name': c[2],
@@ -80,12 +79,13 @@ class CsvService(object):
                     'created_at': c[7],
                     'like': c[8]
                 }
+                converted_tracks.append(track_dict)
                 logger_pro.info({
                     'action': 'Convert csv list into tracks dict',
                     'status': 'Success',
                     'message': '',
                     'data': {
-                        'track': c
+                        'track': track_dict
                     }
                 })
             except Exception as e:
@@ -122,7 +122,7 @@ class CsvService(object):
         """
         new_tracks = []
         tracks_from_csv = self.read_tracks_all()
-
+        
         logger_pro.info({
             'action': 'Retrieve new tracks by comparing to tracks on csv file.',
             'status': 'Run',
@@ -147,7 +147,7 @@ class CsvService(object):
             })
 
             return tracks
-
+        
         # Prepare a list from retrieved tracks to check which tracks are new for this time
         converted_tracks = self.convert_tracks_into_name_and_artist(tracks)
 
@@ -270,6 +270,9 @@ class CsvService(object):
         ------
         None
         """
+        if not tracks:
+            logger_con.warning('There is no new tracks to add to CSV this time.')
+            logger_pro.warning('There is no new tracks to add to CSV this time.')
 
         self.repository.write(tracks)
         return

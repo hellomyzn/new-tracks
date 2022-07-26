@@ -28,13 +28,26 @@ class SpotifyRepository(object):
         ----------
         None
         """
-        self.logger_pro = logging.getLogger('production')
-        self.logger_dev = logging.getLogger('develop')
-        self.logger_con = logging.getLogger('console')
-        self.connect = SpotifyRepository.connect(self.logger_pro, self.logger_dev, self.logger_con)
+        self.connect = SpotifyRepository.connect()
     
     @classmethod
-    def connect(cls, logger_pro, logger_dev, logger_con):
+    def connect(cls):
+        """ Connect spotify api by SpotifyOAuth.
+
+        Parameters
+        ----------
+        None
+
+        Raises
+        ------
+        Exception
+            If it fails to connect spotify.
+
+        Return
+        ------
+        spotify:
+            a object to connect spotify.
+        """
         # get api data from environment environment variables
         client_id = setting.CONFIG['SPOTIPY']['SPOTIPY_CLIENT_ID']
         client_secret = setting.CONFIG['SPOTIPY']['SPOTIPY_CLIENT_SECRET']
@@ -57,7 +70,13 @@ class SpotifyRepository(object):
         logger_pro.info({
             'action': 'Connect spotify api by SpotifyOAuth',
             'status': 'Run',
-            'message': ''
+            'message': '',
+            'data': {
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'redirect_uri': redirect_uri,
+                'scope': scope
+            }
         })
         auth_manager = SpotifyOAuth(client_id=client_id,
                                         client_secret=client_secret,
@@ -72,26 +91,14 @@ class SpotifyRepository(object):
             logger_pro.info({
                 'action': 'Connect spotify api by SpotifyOAuth',
                 'status': 'Success',
-                'message': '',
-                'data': {
-                    'client_id': client_id,
-                    'client_secret': client_secret,
-                    'redirect_uri': redirect_uri,
-                    'scope': scope
-                }
+                'message': ''
             })
         except Exception as e:
-            logger_con.info('Fail to connecting Spotify...')
-            self.logger_pro.error({
+            logger_con.error('Fail to connecting Spotify...')
+            logger_pro.error({
                 'action': 'Connect spotify api by SpotifyOAuth',
                 'status': 'Fail',
-                'message': e,
-                'data': {
-                    'client_id': client_id,
-                    'client_secret': client_secret,
-                    'redirect_uri': redirect_uri,
-                    'scope': scope
-                }
+                'message': e
             })
         return spotify
 
@@ -123,7 +130,7 @@ class SpotifyRepository(object):
         """
 
         playlist_data = None
-        self.logger_pro.info({
+        logger_pro.info({
             'action': 'Get playlist json data',
             'status': 'Run',
             'message': '',
@@ -133,7 +140,7 @@ class SpotifyRepository(object):
         })
         try:
             playlist_data = self.connect.playlist(playlist_id)
-            self.logger_pro.info({
+            logger_pro.info({
                 'action': 'Get playlist json data',
                 'status': 'Success',
                 'message': '',
@@ -142,7 +149,7 @@ class SpotifyRepository(object):
                 }
             })
         except Exception as e:
-            self.logger_pro.error({
+            logger_pro.error({
                 'action': 'Get playlist json data',
                 'status': 'Fail',
                 'message': '',
@@ -155,7 +162,7 @@ class SpotifyRepository(object):
 
     def fetch_playlist_items_json_data(self, playlist_id: str, offset=0) -> list:
         playlist_items = None
-        self.logger_pro.info({
+        logger_pro.info({
             'action': 'Get playlist items json data',
             'status': 'Run',
             'message': '',
@@ -171,14 +178,14 @@ class SpotifyRepository(object):
                                                          offset=offset, 
                                                          market=None, 
                                                          additional_types=('track', 'episode'))
-            self.logger_pro.info({
+            logger_pro.info({
                 'action': 'Get playlist items json data',
                 'status': 'Success',
                 'message': '',
                 'data': playlist_items
             })
         except Exception as e:
-            self.logger_pro.warning({
+            logger_pro.warning({
                 'action': 'Get playlist items json data',
                 'status': 'Fail',
                 'message': '',
@@ -187,7 +194,7 @@ class SpotifyRepository(object):
         return playlist_items
 
     def get_current_track_json_data(self) -> list:
-        self.logger_pro.info({
+        logger_pro.info({
             'action': 'Get current track data from spotify',
             'status': 'Run',
             'message': ''
@@ -195,7 +202,7 @@ class SpotifyRepository(object):
 
         try:
             track_json_data = self.connect.current_user_playing_track()
-            self.logger_pro.info({
+            logger_pro.info({
                 'action': 'Get current track data from spotify',
                 'status': 'Success',
                 'message': '',
@@ -203,7 +210,7 @@ class SpotifyRepository(object):
             })
         except Exception as e:
             track_json_data = []
-            self.logger_pro.warning({
+            logger_pro.warning({
                 'action': 'Get current track data from spotify',
                 'status': 'Fail',
                 'message': '',

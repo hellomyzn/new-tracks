@@ -13,9 +13,12 @@ class CsvRepository(object):
 
     Attributes
     ----------
+    model:
+        A csv model
     path: str
-        the csv path
-    
+        A path of csv to manage tracks set up on model
+    columns: list
+        Columns set up on model
     Methods
     ------
     """
@@ -25,11 +28,7 @@ class CsvRepository(object):
         Parameters
         ----------
         model:
-            A model
-        path: str
-            A path of csv to manage tracks set up on model
-        columns: list
-            Columns set up on model
+            A csv model
         """
         self.model = model
         self.path = model.path
@@ -77,7 +76,6 @@ class CsvRepository(object):
                 next(csv_reader)
                 for row in csv_reader:
                     tracks.append(row)
-
             logger_pro.info({
                 'action': 'Read all tracks from csv',
                 'status': 'Success',
@@ -96,7 +94,6 @@ class CsvRepository(object):
                     'path': self.path
                 }
             })
-
         return tracks
 
     def read_header(self) -> list:

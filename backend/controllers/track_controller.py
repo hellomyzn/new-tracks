@@ -27,7 +27,7 @@ class TrackController(object):
 
         # Add tracks to CSV
         self.csv_service.write_tracks(new_tracks)
-        return        
+        return
         # Add tracks to google spreadsheet
         self.google_spreadsheet_service.add_tracks(new_tracks)
         
