@@ -52,8 +52,8 @@ class GoogleSpreadsheetService(object):
         None
         """
         if not tracks:
-            logger_con.warning('There is no new tracks to add to Google Spreadsheet this time.')
-            logger_pro.warning('There is no new tracks to add to Google Spreadsheet this time.')
+            logger_con.info('There is no new tracks to add to Google Spreadsheet this time.')
+            logger_pro.info('There is no new tracks to add to Google Spreadsheet this time.')
             return
 
         # If the spreadsheet is empty, Add column on header(from (1,1))

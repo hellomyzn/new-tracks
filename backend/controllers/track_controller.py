@@ -27,10 +27,10 @@ class TrackController(object):
 
         # Add tracks to CSV
         self.csv_service.write_tracks(new_tracks)
-        return
+
         # Add tracks to google spreadsheet
         self.google_spreadsheet_service.add_tracks(new_tracks)
-        
+        return
         # Add tracks to a playlist on Spotify
         self.spotify_service.add_tracks_to_playlist(new_tracks,
                                                     setting.MY_PLAYLIST_ID)
