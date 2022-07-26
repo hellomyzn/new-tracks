@@ -20,14 +20,14 @@ class TrackController(object):
 
     def add_new_tracks_to_playlist(self) -> None:
         # Fetch tracks from playlists
-        # tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlists(setting.PLAYLISTS_IDS)
+        tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlists(setting.PLAYLISTS_IDS)
         
         # Retrieve new tracks
-        # new_tracks = self.csv_service.retrieve_new_tracks(tracks_from_spotify)
+        new_tracks = self.csv_service.retrieve_new_tracks(tracks_from_spotify)
 
         # Add tracks to CSV
-        # self.csv_service.write_tracks(new_tracks)
-        new_tracks = ["hoge"]
+        self.csv_service.write_tracks(new_tracks)
+        
         # Add tracks to google spreadsheet
         self.google_spreadsheet_service.add_tracks(new_tracks)
         return

@@ -56,45 +56,8 @@ class GoogleSpreadsheetService(object):
             logger_pro.info('There is no new tracks to add to Google Spreadsheet this time.')
             return
 
-        # If the spreadsheet is empty, Add column on header(from (1,1))
-        if not self.repository.has_header():
-            self.repository.add_header()
-            return
+        for i, track in enumerate(tracks, start=1):
+            logger_con.info(f'[{i}/{len(tracks)}]')
+            logger_con.info(f'[TRACK]: {track}')
+            self.repository.add_track(track)
         return
-
-        # If the spreadsheet is empty, Add column on header(from (1,1))
-        # if GoogleSpreadsheetService.is_not_columns(google_spreadsheet.worksheet):
-        #     GoogleSpreadsheetService.create_columns(google_spreadsheet.worksheet, google_spreadsheet.columns)
-        #     google_spreadsheet.next_row += 1
-
-        count = 1
-        print(f'\n[INFO] - The number of new tracks to add to Google Spreadsheet is {len(tracks)}')
-
-        for track in tracks:
-            print(f'\n[{count}/{len(tracks)}]')
-            print(f'[TRACK]: {track}')
-            row_number = self.repository.next_available_row()
-            print(row_number)
-            
-            for column_number, column in enumerate(self.model.columns, start=1):
-                print(column_number,row_number, column )
-                self.repository.add(row_number, column_number, column, track)
- 
-            row_number += 1
-            count += 1
-        return        
-
-    @classmethod
-    def create_columns(cls, worksheet, columns):
-        print('Create header on GSS')
-        for i, column in enumerate(columns, start=1):
-            worksheet.update_cell(1, i, column)
-
-        return None
-
-    @classmethod
-    def is_not_columns(cls, worksheet):
-        if worksheet.row_values(1) == []:
-            return True
-        else:
-            return False

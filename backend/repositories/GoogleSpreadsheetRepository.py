@@ -161,38 +161,69 @@ class GoogleSpreadsheetRepository(object):
         
         return None
 
-    def add(self, 
-            row_number: int,
-            column_number: int,
-            column_name: str,
-            data: dict) -> None:
-        """ Connect Google Spreadsheet.
+    def add_track(self, track: dict) -> None:
+        """ Add a track on CSV
 
         Parameters
         ----------
-        None
+        track: dict
+            A dict to be add on GSS
 
         Raises
         ------
         Exception
-            If it fails to connect.
+            If it fails to add a track.
 
         Return
         ------
-        worksheet:
-            the worksheet to be written
+        None
         """
+        # If the spreadsheet is empty, Add column on header(from (1,1))
+        if not self.has_header():
+            self.add_header()
+
+        logger_pro.info({
+            'action': 'Add a track',
+            'status': 'Run',
+            'message': '',
+            'args': {
+                'track': track
+            }
+        })
         
-        self.worksheet.update_cell(row_number,
-                                 column_number,
-                                 data[column_name])
-        print(f"[ADD]: {column_name}:", data[column_name])
-        time.sleep(self.sleep_time_sec)
+        row_num = self.find_next_available_row()
+        
+        for col_num, column in enumerate(self.columns, start=1):
+            try:
+                self.worksheet.update_cell(row_num,
+                                           col_num,
+                                           track[column])
+                logger_con.info(f'{column}: {track[column]}')
+                time.sleep(self.sleep_time_sec)
+            except Exception as e:
+                logger_pro.error({
+                    'action': 'Add a track',
+                    'status': 'Fail',
+                    'message': e,
+                    'data': {
+                        'row_num': row_num,
+                        'col_num': col_num,
+                        'column': column,
+                        'track': track
+                    }
+                })
 
+        logger_pro.info({
+            'action': 'Add a track',
+            'status': 'Success',
+            'message': ''
+        })
         return
-
-    def next_available_row(self) -> int:
-        """ Connect Google Spreadsheet.
+    
+    def find_next_available_row(self) -> int:
+        """ Find a next available row on GSS
+        This is for confirming from which row is available
+        when you add data on GSS.
 
         Parameters
         ----------
@@ -201,14 +232,14 @@ class GoogleSpreadsheetRepository(object):
         Raises
         ------
         Exception
-            If it fails to connect.
+            If it fails to find an available row.
 
         Return
         ------
-        worksheet:
-            the worksheet to be written
+        available_row: int
+            The number of next available row number.
         """
-
-        str_list = list(filter(None, self.worksheet.col_values(1)))
-        return int(len(str_list)+1)
-
+        # it is a list which contains all data on first column
+        fist_column_data = list(filter(None, self.worksheet.col_values(1)))
+        available_row = int(len(fist_column_data)) + 1
+        return available_row
