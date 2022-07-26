@@ -57,6 +57,12 @@ class GoogleSpreadsheetService(object):
             return
 
         # If the spreadsheet is empty, Add column on header(from (1,1))
+        if not self.repository.has_header():
+            self.repository.add_header()
+            return
+        return
+
+        # If the spreadsheet is empty, Add column on header(from (1,1))
         # if GoogleSpreadsheetService.is_not_columns(google_spreadsheet.worksheet):
         #     GoogleSpreadsheetService.create_columns(google_spreadsheet.worksheet, google_spreadsheet.columns)
         #     google_spreadsheet.next_row += 1

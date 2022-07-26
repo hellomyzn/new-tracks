@@ -100,6 +100,67 @@ class GoogleSpreadsheetRepository(object):
             })
         return worksheet
 
+    def has_header(self) -> bool:
+        """ Confirm there is header on GSS
+
+        Parameters
+        ----------
+        None
+
+        Raises
+        ------
+        Exception
+            If it fails to connect.
+
+        Return
+        ------
+        True or False:
+            There is header or no.
+        """
+        header = self.worksheet.row_values(1)
+        if header == self.columns:
+            return True
+        else:
+            return False
+
+    def add_header(self) -> None:
+        """ Add header
+
+        Parameters
+        ----------
+        None
+
+        Raises
+        ------
+        Exception
+            If it fails to add.
+
+        Return
+        ------
+        None
+        """
+        logger_pro.info({
+            'action': 'Add header',
+            'status': 'Run',
+            'message': '',
+        })
+        try:
+            for i, column in enumerate(self.columns, start=1):
+                self.worksheet.update_cell(1, i, column)
+            logger_pro.info({
+                'action': 'Add header',
+                'status': 'Success',
+                'message': ''
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Add header',
+                'status': 'Fail',
+                'message': e
+            })
+        
+        return None
+
     def add(self, 
             row_number: int,
             column_number: int,
