@@ -359,16 +359,14 @@ class SpotifyService(object):
         # If there is no track data, it regards all tracks as new tracks
         if not by_tracks:
             logger_con.info(f'The number of new tracks is {len(tracks)}')
-            logger_pro.warning({
+            logger_pro.info({
                 'action': 'Remove duplicate tracks by by_tracks',
-                'status': 'Warning',
-                'message': 'There is no tracks data in on csv ',
-                'args': {
-                    'tracks': tracks,
-                    'tracks_from_csv': by_tracks
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'tracks': tracks
                 }
             })
-
             return tracks
 
         # Prepare a list from csv to check which tracks are new for this time
