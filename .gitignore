@@ -14,4 +14,5 @@ backend/.DS_Store
 backend/.cache/*
 backend/config/config.ini
 backend/src/*.json
+backend/src/csv/test.csv
 backend/.vimrc

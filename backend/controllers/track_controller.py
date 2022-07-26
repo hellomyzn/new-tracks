@@ -18,25 +18,16 @@ class TrackController(object):
         self.spotify_service = SpotifyService()    
         self.google_spreadsheet_service = GoogleSpreadsheetService()
 
-    def show_current_track_from_csv(self) -> None:
-        track_from_spotify = self.spotify_service.get_current_track()
-        if track_from_spotify:
-            track = CsvService.get_track_by_name_and_artist(self.csv.file_path,
-                                                            track_from_spotify[0]['name'],
-                                                            track_from_spotify[0]['artist'])
-            self.csv_service.show_track_info(track)
-        return
-
     def add_new_tracks_to_playlist(self) -> None:
         # Fetch tracks from playlists
         tracks_from_spotify = self.spotify_service.fetch_tracks_from_playlists(setting.PLAYLISTS_IDS)
         
-        # Retrieve only new tracks
-        new_tracks = self.csv_service.retrieve_unique_tracks(tracks_from_spotify)
-            
+        # Retrieve new tracks
+        new_tracks = self.csv_service.retrieve_new_tracks(tracks_from_spotify)
+
         # Add tracks to CSV
         self.csv_service.write_tracks(new_tracks)
-
+        return        
         # Add tracks to google spreadsheet
         self.google_spreadsheet_service.add_tracks(new_tracks)
         
@@ -44,6 +35,15 @@ class TrackController(object):
         self.spotify_service.add_tracks_to_playlist(new_tracks,
                                                     setting.MY_PLAYLIST_ID)
 
+        return
+
+    def show_current_track_from_csv(self) -> None:
+        track_from_spotify = self.spotify_service.get_current_track()
+        if track_from_spotify:
+            track = CsvService.get_track_by_name_and_artist(self.csv.file_path,
+                                                            track_from_spotify[0]['name'],
+                                                            track_from_spotify[0]['artist'])
+            self.csv_service.show_track_info(track)
         return
 
     def remove_tracks_from_playlist(self) -> None:

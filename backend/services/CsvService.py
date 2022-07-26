@@ -37,133 +37,68 @@ class CsvService(object):
             A csv repository
         """
         self.model = Csv()
-        self.repository = CsvRepository(setting.FILE_PATH_OF_CSV)
-
-    def is_not_header(self, path: str) -> bool:
-        """
-
-        """
-        if not self.repository.read_header(path):
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def get_track_by_name_and_artist(path: str,
-                                     name: str,
-                                     artist: str) -> list:
-        if not helper.exists_file(path):
-            return []
-        if not self.repository.read_header(path):
-            return []
-
-        track = CsvRepository.get_first_data_by_name_and_artist(path,
-                                                                name,
-                                                                artist)
-        return track
-
-    def write_tracks(self, tracks: list) -> None:
-        # Check there is csv file
-        if not helper.exists_file(self.repository.path):
-            helper.create_file(self.repository.path)
-
-        # Check there is header
-        if not self.repository.read_header():
-            self.repository.write_columns(self.model.columns)
-
-        self.repository.write(self.model.columns, tracks)
-        logger_con.info('Done to add tracks to CSV')
-        return
+        self.repository = CsvRepository(self.model)
     
-    def show_track_info(self, track: list) -> None:
-        logger_pro.info({
-            'action': 'Show track info',
-            'status': 'Run',
-            'message': '',
-        })
-        for column, item in zip(self.csv_model.columns, track):
-            print(f'\t{column}: {item}')
-        
-        logger_pro.info({
-            'action': 'Show track info',
-            'status': 'Success',
-            'message': '',
-        })
-        return
-
-    def read_tracks(self) -> list:
-        """ Read tracks data from CSV.
-        
-        If there is no file or there is no any track data,
-        return a empty list.
+    @classmethod
+    def convert_csv_into_tracks_dict(cls, csv: list) -> list:
+        """ Convert csv list (without keys) into tracks dict
 
         Parameters
         ----------
-        None
+        csv: list
+            A csv tracks to be converted into tracks dict
         
         Raises
         ------
         Warning
-            if there is no file or you set path up wrongly.
-            if there is no any track data in csv file.
 
         Return
         ------
-        tracks: list
-            A tracks data list read on CSV.
+        converted_tracks: list
+            A tracks dict data
         """
 
-        if not helper.exists_file(self.repository.path):
-            return []
-
-        if not self.repository.read_header():
-            return []
-
-        tracks = []
-        tracks_list = self.repository.read()
-
+        converted_tracks = []
         logger_pro.info({
-            'action': 'Retrieve tracks data from csv',
+            'action': 'Convert csv list into tracks dict',
             'status': 'Run',
             'message': '',
-            'data': {
-                'tracks_list': tracks_list
+            'args': {
+                'csv': csv
             }
         })
-
-        for t in tracks_list:
+        for c in csv:
             try:
-                track = {
-                    'name': t[0],
-                    'artist': t[1],
-                    'playlist_name': t[2],
-                    'track_url': t[3],
-                    'playlist_url': t[4],
-                    'release_date': t[5],
-                    'added_at': t[6],
-                    'created_at': t[7],
-                    'like': t[8]
+                converted_tracks += {
+                    'name': c[0],
+                    'artist': c[1],
+                    'playlist_name': c[2],
+                    'track_url': c[3],
+                    'playlist_url': c[4],
+                    'release_date': c[5],
+                    'added_at': c[6],
+                    'created_at': c[7],
+                    'like': c[8]
                 }
-                tracks.append(track)
                 logger_pro.info({
-                    'action': 'Retrieve tracks data from csv',
+                    'action': 'Convert csv list into tracks dict',
                     'status': 'Success',
                     'message': '',
                     'data': {
-                        'track': track
+                        'track': c
                     }
                 })
             except Exception as e:
                 logger_pro.error({
-                    'action': 'Retrieve tracks data from csv',
+                    'action': 'Convert csv list into tracks dict',
                     'status': 'Fails',
                     'message': '',
                     'exception': e,
                     'data': {
-                        'track': t
+                        'track': c
                     }
                 })
-        return tracks
+        return converted_tracks
 
     def retrieve_new_tracks(self, tracks: list) -> list:
         """ Retrieve new tracks by comparing to tracks on csv file.
@@ -186,10 +121,10 @@ class CsvService(object):
                 
         """
         new_tracks = []
-        tracks_from_csv = self.read_tracks()
+        tracks_from_csv = self.read_tracks_all()
 
         logger_pro.info({
-            'action': 'Select new tracks from csv tracks data',
+            'action': 'Retrieve new tracks by comparing to tracks on csv file.',
             'status': 'Run',
             'message': '',
             'args': {
@@ -202,7 +137,7 @@ class CsvService(object):
         if not tracks_from_csv:
             logger_con.info(f'The number of new tracks is {len(tracks)}')
             logger_pro.warning({
-                'action': 'Select new tracks from csv tracks data',
+                'action': 'Retrieve new tracks by comparing to tracks on csv file.',
                 'status': 'Warning',
                 'message': 'There is no tracks data in on csv ',
                 'args': {
@@ -213,21 +148,21 @@ class CsvService(object):
 
             return tracks
 
-        # Prepare a list from csv to check which tracks are new for this time
-        converted_csv_tracks = self.convert_tracks_into_name_and_artist(tracks_from_csv)
-
         # Prepare a list from retrieved tracks to check which tracks are new for this time
         converted_tracks = self.convert_tracks_into_name_and_artist(tracks)
 
+        # Prepare a list from csv to check which tracks are new for this time
+        converted_csv_tracks = self.convert_tracks_into_name_and_artist(tracks_from_csv)    
+
         # Check which tracks are new
-        for i, track in enumerate(tracks_only_name_artist_from_spotify):
-            if track in tracks_only_name_artist_from_csv:
+        for i, track in enumerate(converted_tracks):
+            if track in converted_csv_tracks:
                 continue
             new_tracks.append(tracks[i])
 
         logger_con.info(f'The number of new tracks is {len(new_tracks)}')
         logger_pro.info({
-            'action': 'Select new tracks from csv tracks data',
+            'action': 'Retrieve new tracks by comparing to tracks on csv file.',
             'status': 'Success',
             'message': '',
             'data': {
@@ -236,6 +171,33 @@ class CsvService(object):
         })
 
         return new_tracks
+
+    def read_tracks_all(self) -> list:
+        """ Read all tracks data and convert csv data to dict from CSV.
+        
+        If there is no file or there is no any track data,
+        return a empty list.
+
+        Parameters
+        ----------
+        None
+        
+        Raises
+        ------
+        None
+
+        Return
+        ------
+        tracks: list
+            A tracks data list read on CSV.
+        """
+
+        tracks = []
+        tracks_csv = self.repository.read_all()
+
+        tracks = CsvService.convert_csv_into_tracks_dict(tracks_csv)
+
+        return tracks
 
     def convert_tracks_into_name_and_artist(self, tracks: list) -> list:
         """ Convert tracks into name and artist
@@ -257,6 +219,7 @@ class CsvService(object):
             A tracks list converted into a list 
             containing dict which keys are name and artist
         """
+        converted_tracks = []
         logger_pro.info({
             'action': 'Convert tracks into name and artist',
             'status': 'Run',
@@ -289,3 +252,56 @@ class CsvService(object):
                 }
             })
         return converted_tracks
+
+    def write_tracks(self, tracks: list) -> None:
+        """ Write tracks on CSV.
+
+        Parameters
+        ----------
+        tracks: list
+            A tracks list to be written on CSV.
+
+        Raises
+        ------
+        Exception
+            If it fails to write on CSV
+
+        Return
+        ------
+        None
+        """
+
+        self.repository.write(tracks)
+        return
+
+
+
+    @staticmethod
+    def get_track_by_name_and_artist(path: str,
+                                     name: str,
+                                     artist: str) -> list:
+        if not helper.exists_file(path):
+            return []
+        if not self.repository.read_header(path):
+            return []
+
+        track = CsvRepository.get_first_data_by_name_and_artist(path,
+                                                                name,
+                                                                artist)
+        return track
+    
+    def show_track_info(self, track: list) -> None:
+        logger_pro.info({
+            'action': 'Show track info',
+            'status': 'Run',
+            'message': '',
+        })
+        for column, item in zip(self.csv_model.columns, track):
+            print(f'\t{column}: {item}')
+        
+        logger_pro.info({
+            'action': 'Show track info',
+            'status': 'Success',
+            'message': '',
+        })
+        return

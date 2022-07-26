@@ -228,7 +228,7 @@ class SpotifyService(object):
                                                               playlist_url = playlist_url)
             
             logger_pro.info({
-                'action': 'Retrieve tracks from playlist',
+                'action': f'Retrieve tracks from {playlist_id}',
                 'status': 'Success',
                 'message': '',
                 'data': tracks
@@ -279,7 +279,7 @@ class SpotifyService(object):
         """
         all_tracks = []
         logger_pro.info({
-            'action': 'Retrieve tracks from playlists',
+            'action': 'Fetch tracks from playlists set up on setting file',
             'status': 'Run',
             'message': '',
             'args': {
@@ -291,9 +291,18 @@ class SpotifyService(object):
             for playlist_id in playlist_ids:
                 tracks = self.fetch_tracks_from_playlist(playlist_id)
                 all_tracks += self.distinct_tracks_by(tracks, all_tracks)
+                logger_pro.info({
+                    'action': 'Fetch tracks from playlists set up on setting file',
+                    'status': 'Run',
+                    'message': '',
+                    'args': {
+                        'playlist_ids': playlist_id,
+                        'all_tracks': all_tracks
+                    }
+                })
         except TypeError as e:
             logger_pro.error({
-                'action': 'Retrieve tracks from playlists',
+                'action': 'Fetch tracks from playlists set up on setting file',
                 'status': 'Fail',
                 'message': 'The playlist ids you provided is not correct',
                 'exception': e,
@@ -303,7 +312,7 @@ class SpotifyService(object):
             })
         except Exception as e:
             logger_pro.error({
-                'action': 'Retrieve tracks from playlists',
+                'action': 'Fetch tracks from playlists set up on setting file',
                 'status': 'Fail',
                 'message': '',
                 'exception': e,
@@ -363,15 +372,15 @@ class SpotifyService(object):
             return tracks
 
         # Prepare a list from csv to check which tracks are new for this time
-        tracks_only_name_and_artist_from_tracks = self.convert_tracks_into_name_and_artist(tracks)
+        converted_tracks = self.convert_tracks_into_name_and_artist(tracks)
         
         # Prepare a list from retrieved tracks to check which tracks are new for this time
-        tracks_only_name_and_artist_from_by_tracks = self.convert_tracks_into_name_and_artist(by_tracks)
+        converted_by_tracks = self.convert_tracks_into_name_and_artist(by_tracks)
 
         try:        
             # Check which tracks are new
-            for i, track in enumerate(tracks_only_name_and_artist_from_tracks):
-                if track in tracks_only_name_and_artist_from_by_tracks:
+            for i, track in enumerate(converted_tracks):
+                if track in converted_by_tracks:
                     continue
                 distincted_tracks.append(tracks[i])
 
