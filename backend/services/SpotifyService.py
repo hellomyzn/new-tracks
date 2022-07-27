@@ -31,18 +31,59 @@ class SpotifyService(object):
         self.repository = SpotifyRepository()
 
     @classmethod
-    def retrieve_track_data(cls, track_json_data: dict) -> list:
-        track = [{
-            'name': track_json_data['name'],
-            'artist': track_json_data['artists'][0]['name'],
-            'playlist_name': None,
-            'track_url': track_json_data['external_urls']['spotify'],
-            'playlist_url': None,
-            'release_date': None,
-            'added_at': None,
-            'created_at': helper.get_date(),
-            'like': False
-        }]
+    def extract_track_data(cls, track_json_data: dict) -> dict:
+        """ Extract only tracks data from tracks json data.
+
+        Parameters
+        ----------
+        tracks_json_data: dict
+            A tracks json data.
+
+        Raises
+        ------
+        Exception
+            If it fail to extract track data.
+
+        Return
+        ------
+        track: dict
+            A track dict with certain keys
+        """
+        logger_pro.info({
+            'action': 'Extract only tracks data from tracks json data.',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            track = {
+                'name': track_json_data['name'],
+                'artist': track_json_data['artists'][0]['name'],
+                'playlist_name': None,
+                'track_url': track_json_data['external_urls']['spotify'],
+                'playlist_url': None,
+                'release_date': None,
+                'added_at': None,
+                'created_at': helper.get_date(),
+                'like': False
+            }
+            logger_pro.info({
+                'action': 'Extract only tracks data from tracks json data.',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'track': track
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Extract only tracks data from tracks json data.',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'track_json_data': track_json_data
+                }
+            })
         return track
 
     @classmethod
@@ -477,8 +518,9 @@ class SpotifyService(object):
         None
         """
         if not tracks:
-            logger_con.info('There is no new tracks to add to playlist on Spotify this time.')
-            logger_pro.info('There is no new tracks to add to playlist on Spotify this time.')
+            message = 'There is no new tracks to add to playlist on Spotify this time.'
+            logger_con.info(message)
+            logger_pro.info(message)
             return
 
         tracks_number = len(tracks)
@@ -523,34 +565,33 @@ class SpotifyService(object):
         self.repository.add_tracks_to_playlist(track_urls, playlist_id)
         return
 
-    def get_current_track(self) -> list:
-        track_json_data = self.repository.get_current_track_json_data()
-        
-        logger_pro.info({
-                'action': 'Retrieve track data for columns',
-                'status': 'Run',
-                'message': ''
-            })
+    def fetch_current_track(self) -> list:
+        """ Fetch a track data you are listening.
 
+        if there is no track you are listening,
+        return empty list.
+
+        Parameters
+        ----------
+        None
+        
+        Raises
+        ------
+        Exception
+            If you can not fetch current track.
+
+        Return
+        ------
+        track: list
+            A track you are listening.
+        """
+        track_json_data = self.repository.fetch_current_track_json_data()
+        
         if track_json_data:
             track_json_data = track_json_data['item']
-            try:
-                track = SpotifyService.retrieve_track_data(track_json_data)
-                logger_pro.info({
-                    'action': 'Retrieve track data for columns',
-                    'status': 'Success',
-                    'message': '',
-                    'data': track
-                })
-            except Exception as e:
-                logger_pro.warning({
-                    'action': 'Retrieve track data for columns',
-                    'status': 'Fail',
-                    'message': '',
-                    'exception': e
-                })
+            track = SpotifyService.extract_track_data(track_json_data)
         else:
-            track = track_json_data
+            track = []
             message = 'There is no current track you are listening on Spotify right now'
             logger_con.warning(message)
             logger_pro.warning(message)

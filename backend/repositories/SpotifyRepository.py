@@ -257,9 +257,25 @@ class SpotifyRepository(object):
             })
         return
 
-    def get_current_track_json_data(self) -> list:
+    def fetch_current_track_json_data(self) -> list:
+        """ Fetch a track data you are listening.
+
+        Parameters
+        ----------
+        None
+        
+        Raises
+        ------
+        Exception
+            If you can not fetch current track.
+
+        Return
+        ------
+        track: list
+            A track you are listening.
+        """
         logger_pro.info({
-            'action': 'Get current track data from spotify',
+            'action': 'Fetch current track data from spotify',
             'status': 'Run',
             'message': ''
         })
@@ -267,15 +283,14 @@ class SpotifyRepository(object):
         try:
             track_json_data = self.connect.current_user_playing_track()
             logger_pro.info({
-                'action': 'Get current track data from spotify',
+                'action': 'Fetch current track data from spotify',
                 'status': 'Success',
-                'message': '',
-                'data': track_json_data
+                'message': ''
             })
         except Exception as e:
             track_json_data = []
             logger_pro.warning({
-                'action': 'Get current track data from spotify',
+                'action': 'Fetch current track data from spotify',
                 'status': 'Fail',
                 'message': '',
                 'exception': e

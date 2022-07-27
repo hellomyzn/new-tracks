@@ -23,8 +23,8 @@ def main():
     track_controller = TrackController()
 
     # track_controller.add_new_tracks_to_playlist()
-    track_controller.remove_tracks_from_playlist()
-    # track_controller.show_current_track_from_csv()
+    # track_controller.remove_tracks_from_playlist()
+    track_controller.show_current_track_from_csv()
     logger_pro.info('End app')
 
 
