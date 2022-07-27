@@ -8,7 +8,6 @@ import utils.setting as setting
 import utils.helper as helper
 
 logger_pro = logging.getLogger('production')
-logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 class SpotifyNewTrackRepository(object):
@@ -54,6 +53,7 @@ class SpotifyNewTrackRepository(object):
         #     "37i9dQZF1DX4JAvHpjipBk"   # New Music Friday
         # ]
         self.playlist_ids = ["74ADq6td6OPgGD8fhihTBm", "1gJIaZ9p6Q9awFopFxC74G"]
+        # self.playlist_ids = ["74ADq6td6OPgGD8fhihTBm", "1gJIaZ9p6Q9awFopFxC"]
         self.my_playlist_id = setting.CONFIG['PLAYLIST_ID']['MY_PLAYLIST']
         self.connect = SpotifyNewTrackRepository.connect()
     
@@ -128,7 +128,7 @@ class SpotifyNewTrackRepository(object):
                 'message': e
             })
         return spotify
-
+    # ログをもっとみやすくするために、工程、メソッドのの流れをinfoに、データのやり取りをdebugで出力する
     def fetch_tracks_from_playlists(self) -> list:
         """ Fetch tracks from multiple playlists.
         
@@ -146,10 +146,42 @@ class SpotifyNewTrackRepository(object):
             A tracks list
         """
         tracks = []
+        logger_pro.info({
+            'action': 'Fetch tracks from multiple playlists.',
+            'status': 'Run',
+            'message': ''
+        })
         for p_id in self.playlist_ids:
-
-            tracks = self.fetch_tracks_from_playlist(p_id)
-            print(len(tracks))
+            try:
+                p_tracks= self.fetch_tracks_from_playlist(p_id)
+                print(len(p_tracks))
+                tracks += p_tracks
+                logger_pro.debug({
+                    'action': 'Fetch tracks from multiple playlists.',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'id': p_id,
+                        'p_tracks_len': len(p_tracks),
+                        'tracks_len': len(tracks)
+                    }
+                })
+            except Exception as e:
+                logger_pro.error({
+                    'action': 'Fetch tracks from multiple playlists.',
+                    'status': 'Fail',
+                    'message': 'This is in a while loop',
+                    'exception': e,
+                    'data': {
+                        'playlist_id': p_id
+                    }
+                })
+                return []
+        logger_pro.info({
+            'action': 'Fetch tracks from multiple playlists.',
+            'status': 'Success',
+            'message': ''
+        })
 
         return tracks
 
@@ -175,28 +207,87 @@ class SpotifyNewTrackRepository(object):
         """
         playlist_json_data = self.fetch_playlist_json_data(playlist_id)
         max_number = 100
-        tracks_number = playlist_json_data['tracks']['total']
         tracks_json = []
+        logger_pro.info({
+            'action': f'Fetch tracks from a playlist ({playlist_id}).',
+            'status': 'Run',
+            'message': ''
+        })
 
-        # logger_con.info(f'Retrieve tracks data from playlist: {playlist_name}: {tracks_number}')
-        while max_number < tracks_number:
-            offset = len(tracks_json)
-            tracks_json += self.fetch_playlist_items_json_data(playlist_id, offset=offset)
-            tracks_number -= len(tracks_json) - offset
-        else:
-            # after while loop
-            offset = len(tracks_json)
-            tracks_json += self.fetch_playlist_items_json_data(playlist_id, offset=offset)
+        try:
+            tracks_number = playlist_json_data['tracks']['total']
+            playlist_name = playlist_json_data["name"]
+            playlist_url = playlist_json_data['external_urls']['spotify']
+            
+            logger_con.info(f'Fetch tracks from playlist ({playlist_name}): {tracks_number}')
+            logger_pro.info({'data': {
+                'playlist_name': playlist_name,
+                'tracks_number': tracks_number    
+                }
+            })
 
+            while max_number < tracks_number:
+                offset = len(tracks_json)
+                tracks_json += self.fetch_playlist_items_json_data(playlist_id, offset=offset)
+                tracks_number -= len(tracks_json) - offset
+            else:
+                # after while loop
+                offset = len(tracks_json)
+                tracks_json += self.fetch_playlist_items_json_data(playlist_id, offset=offset)
+        except Exception as e:
+            logger_pro.error({
+                'action': f'Fetch tracks from a playlist ({playlist_id}).',
+                'status': 'Fail',
+                'message': 'This is in a while loop',
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
+            })
+            raise Exception
+
+        logger_pro.info({
+            'action': f'Fetch tracks from a playlist ({playlist_id}).',
+            'status': 'Success',
+            'message': '',
+            'data': {
+                'playlist_name': playlist_name,
+                'tracks_number': len(tracks_json)
+            }
+        })
+
+        logger_pro.info({
+            'action': f'Extract tracks from json and add some playlist data ({playlist_id}).',
+            'status': 'Run',
+            'message': ''
+        })
         tracks = []
-        playlist_name = playlist_json_data["name"]
-        playlist_url = playlist_json_data['external_urls']['spotify']
 
         for t_json in tracks_json:
-            track = self.extract_track_from_json(t_json)
-            track['playlist_name'] = playlist_name
-            track['playlist_url'] = playlist_url
-            tracks.append(track)
+            try:
+                track = self.extract_track_from_json(t_json)
+                track['playlist_name'] = playlist_name
+                track['playlist_url'] = playlist_url
+                tracks.append(track)
+            except Exception as e:
+                tracks = []
+                logger_pro.error({
+                    'action': f'Fetch tracks from a playlist ({playlist_id}).',
+                    'status': 'Fail',
+                    'message': 'This is in a for loop',
+                    'exception': e,
+                    'data': {
+                        'playlist_id': playlist_id,
+                        'len_tracks_json': len(tracks_json),
+                        't_json': t_json
+                    }
+                })
+                raise Exception
+        logger_pro.info({
+            'action': f'Extract tracks from json and add some playlist data ({playlist_id}).',
+            'status': 'Success',
+            'message': ''
+        })
         return tracks
     
     def fetch_playlist_json_data(self, playlist_id: str) -> list:
@@ -221,20 +312,20 @@ class SpotifyNewTrackRepository(object):
 
         playlist_data = []
         logger_pro.info({
-            'action': 'Get playlist json data',
+            'action': f'Fetch a playlist json data ({playlist_id}) ',
             'status': 'Run',
             'message': ''
         })
         try:
             playlist_data = self.connect.playlist(playlist_id)
             logger_pro.info({
-                'action': 'Get playlist json data',
+                'action': f'Fetch a playlist json data ({playlist_id}) ',
                 'status': 'Success',
                 'message': ''
             })
         except Exception as e:
             logger_pro.error({
-                'action': 'Get playlist json data',
+                'action': f'Fetch a playlist json data ({playlist_id}) ',
                 'status': 'Fail',
                 'message': '',
                 'exception': e,
@@ -242,6 +333,7 @@ class SpotifyNewTrackRepository(object):
                     'playlist_id': playlist_id
                 }
             })
+            raise Exception
         return playlist_data
 
     def fetch_playlist_items_json_data(self, playlist_id: str, offset: int=0) -> list:
@@ -253,6 +345,7 @@ class SpotifyNewTrackRepository(object):
             A playlist ID to fetch tracks from.
         offset: int, optional
             the index of the first item to return. (default is 0)
+        
         Raises
         ------
         Exception
@@ -262,12 +355,11 @@ class SpotifyNewTrackRepository(object):
         ------
         playlist_items: list
             A playlist items json data
-
         """
         playlist_items = []
         additional_types = ['track', 'episode']
         logger_pro.info({
-            'action': 'Fetch a playlist items json data',
+            'action': f'Fetch a playlist items json data ({playlist_id})',
             'status': 'Run',
             'message': ''
         })
@@ -280,13 +372,18 @@ class SpotifyNewTrackRepository(object):
                                                          additional_types=additional_types)
             playlist_items = playlist_items_json['items']
             logger_pro.info({
-                'action': 'Fetch a playlist items json data',
+                'action': f'Fetch a playlist items json data ({playlist_id})',
                 'status': 'Success',
-                'message': ''
+                'message': '',
+                'data': {
+                    'offset': offset,
+                    'until': offset + len(playlist_items),
+                    'length': len(playlist_items)
+                }
             })
         except Exception as e:
-            logger_pro.warning({
-                'action': 'Fetch a playlist items json data',
+            logger_pro.error({
+                'action': f'Fetch a playlist items json data ({playlist_id})',
                 'status': 'Fail',
                 'message': '',
                 'exception': e,
@@ -295,6 +392,7 @@ class SpotifyNewTrackRepository(object):
                     'offset': offset
                 }
             })
+            raise Exception
         
         return playlist_items
 
@@ -316,7 +414,7 @@ class SpotifyNewTrackRepository(object):
         track: list
             A track list with certain keys
         """
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Extract only tracks data from tracks json data.',
             'status': 'Run',
             'message': ''
@@ -333,10 +431,11 @@ class SpotifyNewTrackRepository(object):
                 'created_at': helper.get_date(),
                 'like': False
             }
-            logger_pro.info({
+            logger_pro.debug({
                 'action': 'Extract only tracks data from tracks json data.',
                 'status': 'Success',
-                'message': ''
+                'message': '',
+                'track': track
             })
         except Exception as e:
             logger_pro.error({
@@ -348,6 +447,7 @@ class SpotifyNewTrackRepository(object):
                     'track_json': track_json
                 }
             })
+            raise Exception
         return track
 
     def add_tracks_to_playlist(self, track_urls: list, playlist_id: str) -> None:

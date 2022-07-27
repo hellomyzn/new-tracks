@@ -37,7 +37,7 @@ class NewTrackController(object):
         """
 
         new_track_service = NewTrackService()
-        tracks_from_spotify = new_track_service.add_new_tracks()
+        new_track_service.add_new_tracks()
         return
 
     # def add_new_tracks_to_playlist(self) -> None:

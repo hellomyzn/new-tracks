@@ -237,7 +237,7 @@ class NewTrackService(object):
         # Fetch tracks from playlists
         spotify_repo = SpotifyNewTrackRepository()
         tracks_spotify = spotify_repo.fetch_tracks_from_playlists()
-
+        print(len(tracks_spotify))
         return
 
     def fetch_tracks_from_playlist(self, playlist_id: str) -> list:
