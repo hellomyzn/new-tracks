@@ -43,8 +43,6 @@ class TrackController(object):
         track_from_spotify = self.spotify_service.fetch_current_track()
         if track_from_spotify:
             track = self.csv_service.show_track(track_from_spotify)
-            return
-            self.csv_service.show_track_info(track)
         return
 
     def remove_tracks_from_playlist(self) -> None:

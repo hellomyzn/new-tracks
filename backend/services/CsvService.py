@@ -52,8 +52,8 @@ class CsvService(object):
 
         Return
         ------
-        converted_tracks: list
-            A track dict data
+        converted_track: list
+            A track dict data converted
         """
 
         converted_track = {}
@@ -182,8 +182,9 @@ class CsvService(object):
 
         tracks = []
         tracks_csv = self.repository.read_all()
-        tracks = CsvService.convert_csv_into_tracks_dict(tracks_csv)
-
+        for track_csv in tracks_csv:
+            track_dict = self.convert_csv_into_track_dict(track_csv)
+            tracks.append(track_dict)
         return tracks
 
     def convert_tracks_into_name_and_artist(self, tracks: list) -> list:

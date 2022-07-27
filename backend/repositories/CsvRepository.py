@@ -296,14 +296,3 @@ class CsvRepository(object):
                 if row[0] == track['name'] and row[1] == track['artist']:
                     track_from_csv = row
                     return track_from_csv
-
-    @staticmethod
-    def get_header_and_data(path: str) -> list:
-        data = []
-        with open(path, 'r', newline='') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            header = next(csv_reader)
-            for row in csv_reader:
-                data.append(row)
-
-        return header, data
