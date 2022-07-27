@@ -42,9 +42,8 @@ class TrackController(object):
     def show_current_track_from_csv(self) -> None:
         track_from_spotify = self.spotify_service.fetch_current_track()
         if track_from_spotify:
-            track = CsvService.get_track_by_name_and_artist(self.csv.file_path,
-                                                            track_from_spotify[0]['name'],
-                                                            track_from_spotify[0]['artist'])
+            track = self.csv_service.show_track(track_from_spotify)
+            return
             self.csv_service.show_track_info(track)
         return
 

@@ -56,10 +56,10 @@ class CsvRepository(object):
         """
         tracks = []
         if not helper.exists_file(self.path):
-            return []
+            return tracks
 
         if not self.read_header():
-            return []
+            return tracks
 
         logger_pro.info({
             'action': 'Read all tracks from csv',
@@ -264,20 +264,38 @@ class CsvRepository(object):
                     })
         return
 
+    def find_track_first(self, track: dict) -> list:
+        """ find the first track by name and artist on CSV
 
-    @staticmethod
-    def get_first_data_by_name_and_artist(path: str,
-                                          name: str,
-                                          artist: str) -> list:
-        data = []
-        with open(path, 'r', newline='') as csvfile:
+        Parameters
+        ----------
+        track: dict
+            A track dict to find
+
+        Raises
+        ------
+        Exception
+            If it fails to find it
+
+        Return
+        ------
+        track_from_csv: list
+            the first track found on CSV
+        """
+        track_from_csv = []
+        if not helper.exists_file(self.path):
+            return track_from_csv
+
+        if not self.read_header():
+            return track_from_csv
+
+        with open(self.path, 'r', newline='') as csvfile:
             csv_reader = csv.reader(csvfile)
             next(csv_reader)
             for row in csv_reader:
-                if row[0] == name and row[1] == artist:
-                    data = row
-                    return data
-        return []
+                if row[0] == track['name'] and row[1] == track['artist']:
+                    track_from_csv = row
+                    return track_from_csv
 
     @staticmethod
     def get_header_and_data(path: str) -> list:

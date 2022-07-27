@@ -37,15 +37,14 @@ class CsvService(object):
         self.model = Csv()
         # self.model = TestCsvModel()
         self.repository = CsvRepository(self.model)
-    
-    @classmethod
-    def convert_csv_into_tracks_dict(cls, csv: list) -> list:
-        """ Convert csv list (without keys) into tracks dict
+
+    def convert_csv_into_track_dict(self, csv: list) -> list:
+        """ Convert one track of csv list (without keys) into track dict
 
         Parameters
         ----------
         csv: list
-            A csv tracks to be converted into tracks dict
+            A csv track to be converted into track dict
         
         Raises
         ------
@@ -54,52 +53,41 @@ class CsvService(object):
         Return
         ------
         converted_tracks: list
-            A tracks dict data
+            A track dict data
         """
 
-        converted_tracks = []
+        converted_track = {}
         logger_pro.info({
-            'action': 'Convert csv list into tracks dict',
+            'action': 'Convert csv list into track dict',
             'status': 'Run',
             'message': '',
             'args': {
                 'csv': csv
             }
         })
-        for c in csv:
-            try:
+        try:
+            for i, v in enumerate(csv):
                 track_dict = {
-                    'name': c[0],
-                    'artist': c[1],
-                    'playlist_name': c[2],
-                    'track_url': c[3],
-                    'playlist_url': c[4],
-                    'release_date': c[5],
-                    'added_at': c[6],
-                    'created_at': c[7],
-                    'like': c[8]
+                    self.model.columns[i]: v
                 }
-                converted_tracks.append(track_dict)
-                logger_pro.info({
-                    'action': 'Convert csv list into tracks dict',
-                    'status': 'Success',
-                    'message': '',
-                    'data': {
-                        'track': track_dict
-                    }
-                })
-            except Exception as e:
-                logger_pro.error({
-                    'action': 'Convert csv list into tracks dict',
-                    'status': 'Fails',
-                    'message': '',
-                    'exception': e,
-                    'data': {
-                        'track': c
-                    }
-                })
-        return converted_tracks
-    # TODO: Change from retrieve to convert
+                converted_track.update(track_dict)
+            logger_pro.info({
+                'action': 'Convert csv list into track dict',
+                'status': 'Success',
+                'message': ''
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Convert csv list into track dict',
+                'status': 'Fails',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'csv': csv
+                }
+            })
+        return converted_track
+    
     def retrieve_new_tracks(self, tracks: list) -> list:
         """ Retrieve new tracks by comparing to tracks on csv file.
         
@@ -194,30 +182,29 @@ class CsvService(object):
 
         tracks = []
         tracks_csv = self.repository.read_all()
-
         tracks = CsvService.convert_csv_into_tracks_dict(tracks_csv)
 
         return tracks
 
     def convert_tracks_into_name_and_artist(self, tracks: list) -> list:
-        """ Convert tracks into name and artist
+        """ Convert tracks into name and artist.
 
         Parameters
         ----------
         tracks: list
-            A tracks list to be converted into a list 
-            containing dict which key sare name and artist
+            A tracks list converted into a list 
+            containing dict which key are name and artist.
 
         Raises
         ------
         Exception
-            If it fails to convert them
+            If it fails to convert them.
 
         Return
         ------
         converted_tracks: list
             A tracks list converted into a list 
-            containing dict which keys are name and artist
+            containing dict which keys are name and artist.
         """
         converted_tracks = []
         logger_pro.info({
@@ -242,13 +229,61 @@ class CsvService(object):
             })
         except Exception as e:
             logger_pro.error({
-                'action': 'Retrieve tracks from playlists',
+                'action': 'Convert tracks into name and artist',
                 'status': 'Fail',
                 'message': '',
                 'exception': e,
                 'data': {
                     'length': len(tracks),
                     'tracks': tracks
+                }
+            })
+        return converted_tracks
+
+    def convert_track_into_name_and_artist(self, track: dict) -> dict:
+        """ Convert track into name and artist.
+
+        Parameters
+        ----------
+        tracks: dict
+            A track dict converted into a dict 
+            containing name and artist.
+
+        Raises
+        ------
+        Exception
+            If it fails to convert it.
+
+        Return
+        ------
+        converted_tracks: list
+            A track dict converted into a dict 
+            containing name and artist.
+        """
+        converted_track = []
+        logger_pro.info({
+            'action': 'Convert track into name and artist',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            converted_tracks = {
+                'name': track['name'], 
+                'artist': track['artist']
+            }
+            logger_pro.info({
+                'action': 'Convert track into name and artist',
+                'status': 'Success',
+                'message': ''
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Convert track into name and artist',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'track': track
                 }
             })
         return converted_tracks
@@ -277,34 +312,48 @@ class CsvService(object):
         self.repository.write(tracks)
         return
 
+    def show_track(self, track: dict) -> None:
+        """ Show a track if there is the track on CSV
 
+        Parameters
+        ----------
+        track: dict
+            A track dict to show.
 
-    @staticmethod
-    def get_track_by_name_and_artist(path: str,
-                                     name: str,
-                                     artist: str) -> list:
-        if not helper.exists_file(path):
-            return []
-        if not self.repository.read_header(path):
-            return []
+        Raises
+        ------
+        Exception
+            If it fails to show.
 
-        track = CsvRepository.get_first_data_by_name_and_artist(path,
-                                                                name,
-                                                                artist)
-        return track
-    
-    def show_track_info(self, track: list) -> None:
+        Return
+        ------
+        None
+        """
+        track_from_csv = self.repository.find_track_first(track)
+        if track_from_csv:
+            track = self.convert_csv_into_track_dict(track_from_csv)
+        
         logger_pro.info({
             'action': 'Show track info',
             'status': 'Run',
             'message': '',
         })
-        for column, item in zip(self.csv_model.columns, track):
-            print(f'\t{column}: {item}')
-        
-        logger_pro.info({
-            'action': 'Show track info',
-            'status': 'Success',
-            'message': '',
-        })
-        return
+    
+        try:
+            for column in self.model.columns:
+                logger_con.info(f'{column}: {track[column]}')
+            logger_pro.info({
+                'action': 'Show track info',
+                'status': 'Success',
+                'message': '',
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Show track info',
+                'status': 'Fail',
+                'message': '',
+                'data': {
+                    'columns': self.model.columns,
+                    'track': track
+                }
+            })
