@@ -213,9 +213,7 @@ class SpotifyNewTrackRepository(object):
         tracks_json = self.fetch_tracks_json_from_playlist(playlist_id)
         tracks_dict = self.extract_tracks_from_json(tracks_json)
         tracks_dict = self.put_playlist_data_to_tracks_dict(playlist_id, tracks_dict)
-        track['playlist_name'] = self.fetch_playlist_name()
-        track['playlist_url'] = self.fetch_playlist_url()
-        print(tracks_dict)
+        print(tracks_dict[0])
         return
         
         logger_pro.info({
@@ -578,23 +576,15 @@ class SpotifyNewTrackRepository(object):
             'status': 'Run',
             'message': ''
         })
+        tracks = []
         try:
-            track = {
-                'name': track_json['track']['name'],
-                'artist': track_json['track']['artists'][0]['name'],
-                'playlist_name': None,
-                'track_url': track_json['track']['external_urls']['spotify'],
-                'playlist_url': None,
-                'release_date': track_json["track"]["album"]["release_date"],
-                'added_at': track_json['added_at'],
-                'created_at': helper.get_date(),
-                'like': False
-            }
+            p_name = self.fetch_playlist_name(playlist_id)
+            p_url = self.fetch_playlist_url(playlist_id)
+            tracks = [self.put_playlist_data_to_track_dict(t, p_name, p_url) for t in tracks_dict]
             logger_pro.info({
                 'action': 'Put playlist name and url to tracks dict',
                 'status': 'Success',
-                'message': '',
-                'track': track
+                'message': ''
             })
         except Exception as e:
             logger_pro.error({
@@ -603,13 +593,17 @@ class SpotifyNewTrackRepository(object):
                 'message': '',
                 'exception': e,
                 'data': {
+                    'playlist_id': playlist_id,
                     'tracks_dict': tracks_dict
                 }
             })
             raise Exception
-        return track
+        return tracks
 
-    def put_playlist_data_to_track_dict(self, track_dict: dict) -> dict:
+    def put_playlist_data_to_track_dict(self, 
+                                        track_dict: dict,
+                                        p_name: str,
+                                        p_url: str) -> dict:
         """ 
             Put playlist name and url to a track dict
 
@@ -617,6 +611,10 @@ class SpotifyNewTrackRepository(object):
             ----------
             tracks_dict: dict
                 A tracks dict without playlist data.
+            p_name: str
+                A playlist name to add
+            p_url: str
+                A playlist url to add
 
             Raises
             ------
@@ -634,22 +632,13 @@ class SpotifyNewTrackRepository(object):
             'message': ''
         })
         try:
-            track = {
-                'name': track_json['track']['name'],
-                'artist': track_json['track']['artists'][0]['name'],
-                'playlist_name': None,
-                'track_url': track_json['track']['external_urls']['spotify'],
-                'playlist_url': None,
-                'release_date': track_json["track"]["album"]["release_date"],
-                'added_at': track_json['added_at'],
-                'created_at': helper.get_date(),
-                'like': False
-            }
+            track_dict['playlist_name'] = p_name
+            track_dict['playlist_url'] = p_url
             logger_pro.debug({
                 'action': 'Put playlist name and url to a track dict',
                 'status': 'Success',
                 'message': '',
-                'track': track
+                'track_dict': track_dict
             })
         except Exception as e:
             logger_pro.error({
@@ -662,7 +651,7 @@ class SpotifyNewTrackRepository(object):
                 }
             })
             raise Exception
-        return track
+        return track_dict
 
     def add_tracks_to_playlist(self, track_urls: list, playlist_id: str) -> None:
         """ Add tracks to a playlist.
