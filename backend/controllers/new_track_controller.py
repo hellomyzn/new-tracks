@@ -3,22 +3,15 @@ import logging
 
 import utils.setting as setting
 import utils.helper as helper
-# from services.CsvService import CsvService
-# from services.SpotifyService import SpotifyService
-# from services.GoogleSpreadsheetService import GoogleSpreadsheetService
 from services.new_track_service import NewTrackService
 
 logger_pro = logging.getLogger('production')
-logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 
 class NewTrackController(object):
     def __init__(self, env: str='pro'):
         pass
-        # self.csv_service = CsvService()
-        # self.spotify_service = SpotifyService()    
-        # self.google_spreadsheet_service = GoogleSpreadsheetService()
 
     def add_new_tracks(self) -> None:
         """ Add new tracks

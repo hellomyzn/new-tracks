@@ -1,7 +1,7 @@
 import abc
 
 
-class NewTrack(metaclass=abc.ABCMeta):
+class Track(metaclass=abc.ABCMeta):
     def __init__(self):
         pass
 

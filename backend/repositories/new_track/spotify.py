@@ -51,8 +51,7 @@ class SpotifyNewTrackRepository(object):
         #     "37i9dQZEVXbMXbN3EUUhlg",  # BR
         #     "37i9dQZF1DX4JAvHpjipBk"   # New Music Friday
         # ]
-        self.playlist_ids = ["74ADq6td6OPgGD8fhihTBm", "1gJIaZ9p6Q9awFopFxC74G"]
-        # self.playlist_ids = ["74ADq6td6OPgGD8fhihTBm", "1gJIaZ9p6Q9awFopFxC"]
+        self.playlist_ids = ["37i9dQZEVXbMDoHDwVN2tF", "37i9dQZEVXbLRQDuF5jeBp"]
         self.my_playlist_id = setting.CONFIG['PLAYLIST_ID']['MY_PLAYLIST']
         self.connect = SpotifyNewTrackRepository.connect()
     
@@ -145,7 +144,7 @@ class SpotifyNewTrackRepository(object):
             tracks: list
                 A tracks list
         """
-        tracks = []
+        new_tracks_dict = []
         logger_pro.info({
             'action': 'Fetch tracks from multiple playlists.',
             'status': 'Run',
@@ -153,17 +152,19 @@ class SpotifyNewTrackRepository(object):
         })
         for p_id in self.playlist_ids:
             try:
-                p_tracks= self.fetch_tracks_from_playlist(p_id)
-                print(len(p_tracks))
-                tracks += p_tracks
+                tracks_json = self.fetch_tracks_json_from_playlist(p_id)
+                tracks_dict = self.extract_tracks_from_json(tracks_json)
+                tracks_dict = self.put_playlist_data_to_tracks_dict(p_id, tracks_dict)
+                tracks_dict = self.retrieve_unique_tracks_dict(tracks_dict, new_tracks_dict)
+                new_tracks_dict += tracks_dict
                 logger_pro.debug({
                     'action': 'Fetch tracks from multiple playlists.',
                     'status': 'Success',
                     'message': '',
                     'data': {
                         'id': p_id,
-                        'p_tracks_len': len(p_tracks),
-                        'tracks_len': len(tracks)
+                        'p_tracks_len': len(tracks_dict),
+                        'tracks_len': len(new_tracks_dict)
                     }
                 })
             except Exception as e:
@@ -183,45 +184,7 @@ class SpotifyNewTrackRepository(object):
             'status': 'Success',
             'message': ''
         })
-
-        return tracks
-
-    def fetch_tracks_from_playlist(self, playlist_id: str) -> list:
-        """ 
-            Fetch tracks from a playlist.
-            
-            Parameters
-            ----------
-            playlist_id: str
-                A playlist ID to fetch tracks from.
-
-            Raises
-            ------
-            Exception
-                The playlist id you provided is not correct.
-
-            Return
-            ------
-            tracks: list
-                A tracks data list gotten from the playlist.
-        """
-        # logger_con.info(f'Fetch tracks from playlist ({playlist_name}): {tracks_number}')
-        # logger_pro.info({'data': {
-        #     'playlist_name': playlist_name,
-        #     'tracks_number': tracks_number    
-        #     }
-        # })
-        tracks_json = self.fetch_tracks_json_from_playlist(playlist_id)
-        tracks_dict = self.extract_tracks_from_json(tracks_json)
-        tracks_dict = self.put_playlist_data_to_tracks_dict(playlist_id, tracks_dict)
-        new_tracks = self.convert_tracks_dict_into_new_tracks(tracks_dict)
-        
-        
-        # logger_pro.info({
-        #     'action': f'Extract tracks from json and add some playlist data ({playlist_id}).',
-        #     'status': 'Run',
-        #     'message': ''
-        # })
+        new_tracks = self.convert_tracks_dict_into_new_tracks(new_tracks_dict)
         return new_tracks
     
     def fetch_tracks_json_from_playlist(self, playlist_id: str) -> list:
@@ -654,6 +617,79 @@ class SpotifyNewTrackRepository(object):
             raise Exception
         return track_dict
 
+    def retrieve_unique_tracks_dict(self, tracks: list, from_tracks: list) -> list:
+        """
+            Retrieve unique tracks dict from tracks dict
+
+            Parameters
+            ----------
+            tracks: list
+                A tracks list to confirm It's unique or no.
+            from_tracks: list
+                A tracks list to confirm from.
+
+            Raises
+            ------
+            Exception
+                If it fail to retrieve
+
+            Return
+            ------
+            unique_tracks: list
+                a unique tracks list.
+        """
+        logger_pro.info({
+            'action': 'Retrieve unique tracks dict from tracks dict',
+            'status': 'Run',
+            'message': ''
+        })
+        
+        if not from_tracks:
+            logger_con.info(f'The number of new tracks is {len(tracks)}')
+            logger_pro.info({
+                'action': 'Retrieve unique tracks dict from tracks dict',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'tracks_len': len(tracks)
+                }
+            })
+            return tracks
+
+        unique_tracks = []
+        try:
+            from_track_names = [t['name'] for t in from_tracks]
+            from_track_artists = [t['artist'] for t in from_tracks]
+            for track in tracks:
+                if track['name'] in from_track_names and track['artist'] in from_track_artists:
+                    continue
+                unique_tracks.append(track)
+            
+            logger_con.info(f'The number of new tracks is {len(unique_tracks)}')
+            logger_pro.info({
+                'action': 'Retrieve unique tracks dict from tracks dict',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'tracks_len': len(tracks)
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Retrieve unique tracks dict from tracks dict',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'tracks_len': len(tracks),
+                    'from_tracks_len': len(from_tracks),
+                    'tracks': tracks,
+                    'from_tracks': from_tracks
+                }
+            })
+            raise Exception
+        return unique_tracks
+
     def convert_tracks_dict_into_new_tracks(self, tracks_dict) -> NewTrackModel:
         """
             Convert tracks dict into new tracks model
@@ -717,7 +753,7 @@ class SpotifyNewTrackRepository(object):
                 
             })
             raise Exception
-        return new_tracks            
+        return new_tracks
 
     def add_tracks_to_playlist(self, track_urls: list, playlist_id: str) -> None:
         """ Add tracks to a playlist.

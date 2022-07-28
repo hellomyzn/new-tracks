@@ -1,16 +1,18 @@
 import utils.setting as setting
-from models.interfaces.new_track import NewTrack
+from models.interfaces.new_track import Track
 
-class NewTrackModel(NewTrack):
-    def __init__(self):
-        self.name = None
-        self.artist = None
-        self.playlist_name = None
-        self.track_url = None
-        self.playlist_url = None
-        self.added_at = None
-        self.created_at = None
-        self.like = None
+class NewTrackModel(Track):
+    def __init__(self, name, artist, playlist_name, 
+                 track_url, playlist_url, added_at, 
+                 created_at, like):
+        self.name = name
+        self.artist = artist
+        self.playlist_name = playlist_name
+        self.track_url = track_url
+        self.playlist_url = playlist_url
+        self.added_at = added_at
+        self.created_at = created_at
+        self.like = like
     
     def get_columns(self):
         columns = [

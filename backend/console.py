@@ -6,7 +6,6 @@ from controllers.new_track_controller import NewTrackController
 
 
 logger_pro = logging.getLogger('production')
-logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 class Console(object):
