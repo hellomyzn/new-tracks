@@ -167,6 +167,7 @@ class SpotifyNewTrackRepository(object):
                     }
                 })
             except Exception as e:
+                logger_con.error(f"Stoped while fetching tracks:': ({e})")
                 logger_pro.error({
                     'action': 'Fetch tracks from multiple playlists.',
                     'status': 'Fail',
@@ -205,23 +206,23 @@ class SpotifyNewTrackRepository(object):
                 A tracks data list gotten from the playlist.
         """
         # logger_con.info(f'Fetch tracks from playlist ({playlist_name}): {tracks_number}')
-            # logger_pro.info({'data': {
-            #     'playlist_name': playlist_name,
-            #     'tracks_number': tracks_number    
-            #     }
-            # })
+        # logger_pro.info({'data': {
+        #     'playlist_name': playlist_name,
+        #     'tracks_number': tracks_number    
+        #     }
+        # })
         tracks_json = self.fetch_tracks_json_from_playlist(playlist_id)
         tracks_dict = self.extract_tracks_from_json(tracks_json)
         tracks_dict = self.put_playlist_data_to_tracks_dict(playlist_id, tracks_dict)
-        print(tracks_dict[0])
-        return
+        new_tracks = self.convert_tracks_dict_into_new_tracks(tracks_dict)
         
-        logger_pro.info({
-            'action': f'Extract tracks from json and add some playlist data ({playlist_id}).',
-            'status': 'Run',
-            'message': ''
-        })
-        return tracks
+        
+        # logger_pro.info({
+        #     'action': f'Extract tracks from json and add some playlist data ({playlist_id}).',
+        #     'status': 'Run',
+        #     'message': ''
+        # })
+        return new_tracks
     
     def fetch_tracks_json_from_playlist(self, playlist_id: str) -> list:
         """ 
@@ -652,6 +653,71 @@ class SpotifyNewTrackRepository(object):
             })
             raise Exception
         return track_dict
+
+    def convert_tracks_dict_into_new_tracks(self, tracks_dict) -> NewTrackModel:
+        """
+            Convert tracks dict into new tracks model
+
+            Parameters
+            ----------
+            tracks_dict: dict
+                A tracks dict
+
+            Raises
+            ------
+            Exception
+                If it fail to convert
+
+            Return
+            ------
+            new_tracks: NewTrackModel
+                new_tracks model put each columns data
+        """
+        logger_pro.info({
+            'action': 'Convert tracks dict into new tracks model',
+            'status': 'Run',
+            'message': ''
+        })
+        new_tracks = []
+        try:
+            for t_dic in tracks_dict:
+                new_track = NewTrackModel(t_dic['name'],
+                                          t_dic['artist'],
+                                          t_dic['playlist_name'],
+                                          t_dic['track_url'],
+                                          t_dic['playlist_url'],
+                                          t_dic['added_at'],
+                                          t_dic['created_at'],
+                                          t_dic['like'])
+                new_tracks.append(new_track)
+                logger_pro.debug({
+                    'action': 'Convert tracks dict into new tracks model',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'new_track': new_track
+                    }
+                })
+            logger_pro.info({
+                'action': 'Convert tracks dict into new tracks model',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'new_tracks_len': len(new_tracks)
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Convert tracks dict into new tracks model',
+                'status': 'Fails',
+                'exception': e,
+                'data': {
+                    'tracks_dict': tracks_dict
+                }
+                
+            })
+            raise Exception
+        return new_tracks            
 
     def add_tracks_to_playlist(self, track_urls: list, playlist_id: str) -> None:
         """ Add tracks to a playlist.
