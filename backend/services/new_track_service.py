@@ -84,18 +84,20 @@ class NewTrackService(object):
             'created_at': "test_created_at",
             'like': "test_like"
         }        
-        start = time.time()
+
         spotify_repo = SpotifyNewTrackRepository()
+        csv_repo = CsvNewTrackRepository()
+        gss_repo =  GssNewTrackRepository()
+        
         tracks_spotify = self.fetch_tracks_from_playlists()
         
-        csv_repo = CsvNewTrackRepository()
+        
         tracks_csv = csv_repo.all()
         
         new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
-
-        print(len(tracks_spotify))
-        print(time.time() - start)
-        print(tracks_spotify[0])
+        for track in new_tracks:
+            # spotify_repo.add(track)
+            csv_repo.add(track)
         return
 
     def fetch_tracks_from_playlists(self) -> list:
@@ -638,9 +640,6 @@ class NewTrackService(object):
             from_track_names = [t['name'] for t in from_tracks]
             from_track_artists = [t['artist'] for t in from_tracks]
             for track in tracks:
-                if track['name'] in from_track_names:
-                    print(track['name'])
-
                 if track['name'] in from_track_names and track['artist'] in from_track_artists:
                     continue
                 unique_tracks.append(track)

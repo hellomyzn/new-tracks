@@ -45,6 +45,7 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
     
     def add(self, data: dict) -> None:
         url = [data['track_url']]
+        
         self.add_tracks_to_playlist(url)
         return
     

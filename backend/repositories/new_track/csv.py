@@ -33,8 +33,8 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         """
         self.model = NewTrackModel()
         self.columns = self.model.get_columns()
-        self.path = setting.FILE_PATH_OF_CSV
-        # self.path = setting.FILE_PATH_OF_CSV_TEST
+        # self.path = setting.FILE_PATH_OF_CSV
+        self.path = setting.FILE_PATH_OF_CSV_TEST
     
 
     def all(self) -> list:
@@ -220,7 +220,7 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         return
 
 
-    def write(self, tracks: list) -> None:
+    def write(self, track: dict) -> None:
         """ Write tracks on CSV.
 
         If there is no csv file to write,
@@ -231,8 +231,8 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
 
         Parameters
         ----------
-        tracks: list
-            A tracks list to be written on CSV.
+        track: dict
+            A track dict to be written on CSV.
 
         Raises
         ------
@@ -251,32 +251,31 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         if self.read_header() is None:
             self.write_header()
     
-        with open(self.path, 'a', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=self.columns)
-            for t in tracks:
+        logger_pro.info({
+            'action': 'Write a track data on CSV',
+            'status': 'Run',
+            'message': '',
+            'data': {
+                'path': self.path
+            }
+        })
+        try:
+            with open(self.path, 'a', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=self.columns)
+                writer.writerow(track)
                 logger_pro.info({
-                    'action': 'Write tracks data on CSV',
-                    'status': 'Run',
+                    'action': 'Write a tarack data on CSV',
+                    'status': 'Success',
                     'message': '',
-                    'data': {
-                        'path': self.path,
-                        'track': t
-                    }
+                    'track': track
                 })
-                try:
-                    writer.writerow(t)
-                    logger_pro.info({
-                        'action': 'Write tracks data on CSV',
-                        'status': 'Success',
-                        'message': ''
-                    })
-                except Exception as e:
-                    logger_pro.error({
-                        'action': 'Write tracks data on CSV',
-                        'status': 'Fails',
-                        'message': '',
-                        'exception': e
-                    })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Write a track data on CSV',
+                'status': 'Fails',
+                'message': '',
+                'exception': e
+            })
         return
 
     def find_track_first(self, track: dict) -> list:
