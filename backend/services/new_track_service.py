@@ -471,6 +471,61 @@ class NewTrackService(object):
             raise Exception
         return track
 
+    def extract_track_from_json2(self, track_json: list) -> dict:
+        """ 
+            Extract track a track from tracks json data.
+
+            Parameters
+            ----------
+            tracks_json_data: dict
+                A track json data.
+
+            Raises
+            ------
+            Exception
+                If it fail to extract track data.
+
+            Return
+            ------
+            track: dict
+                A track dict with certain keys
+        """
+        logger_pro.debug({
+            'action': 'Extract a track from tracks json data.',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            track = {
+                'name': track_json['name'],
+                'artist': track_json['artists'][0]['name'],
+                'playlist_name': None,
+                'track_url': track_json['external_urls']['spotify'],
+                'playlist_url': None,
+                'release_date': track_json["album"]["release_date"],
+                'added_at': None,
+                'created_at': helper.get_date(),
+                'like': False
+            }
+            logger_pro.debug({
+                'action': 'Extract a track from tracks json data.',
+                'status': 'Success',
+                'message': '',
+                'track': track
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Extract a track from tracks json data.',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'track_json': track_json
+                }
+            })
+            raise Exception
+        return track
+
     def put_playlist_data_to_tracks_dict(self, playlist_id: str, tracks_dict: list) -> list:
         """ 
             Put playlist name and url to tracks dict
@@ -651,41 +706,68 @@ class NewTrackService(object):
             raise Exception
         return unique_tracks
 
+    def show_current_track(self) -> None:
+        """
+            Show current track you are listening.
 
+            Parameters
+            ----------
+            None
+            
+            Raises
+            ------
+            Exception
+                If you can not show current track
 
-
+            Return
+            ------
+            None  
+        """
+        track = self.fetch_current_track()
+        logger_con.info(f'Track: {track["name"]}')  
+        logger_con.info(f'Artist: {track["artist"]}')
+        return None
 
     def fetch_current_track(self) -> list:
-        """ Fetch a track data you are listening.
+        """ 
+            Fetch a track data you are listening.
 
-        if there is no track you are listening,
-        return empty list.
+            if there is no track you are listening,
+            return empty list.
 
-        Parameters
-        ----------
-        None
-        
-        Raises
-        ------
-        Exception
-            If you can not fetch current track.
+            Parameters
+            ----------
+            None
+            
+            Raises
+            ------
+            Exception
+                If you can not fetch current track.
 
-        Return
-        ------
-        track: list
-            A track you are listening.
+            Return
+            ------
+            track: list
+                A track you are listening.
         """
-        track_json_data = self.repository.fetch_current_track_json_data()
+        track_json = self.spotify.conn.current_user_playing_track()
         
-        if track_json_data:
-            track_json_data = track_json_data['item']
-            track = SpotifyService.extract_track_data(track_json_data)
+        if track_json:
+            track_json = track_json['item']
+            track = self.extract_track_from_json2(track_json)
         else:
             track = []
             message = 'There is no current track you are listening on Spotify right now'
             logger_con.warning(message)
             logger_pro.warning(message)
         return track
+
+    @classmethod
+    def show_track_names(cls, tracks) -> None:
+        names = [track['name'] for track in tracks]
+        print("\n")
+        for name in names:
+            print(f'\t[TRACK NAME] - {name}')
+        return
 
     @staticmethod
     def remove_all_tracks_from_playlist(spotify, playlist_id) -> None:
@@ -742,13 +824,7 @@ class NewTrackService(object):
         return
 
 
-    @classmethod
-    def show_track_names(cls, tracks) -> None:
-        names = [track['name'] for track in tracks]
-        print("\n")
-        for name in names:
-            print(f'\t[TRACK NAME] - {name}')
-        return
+
 
     @classmethod
     def is_in_track(cls, track: dict, tracks: list) -> bool:

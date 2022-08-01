@@ -34,7 +34,7 @@ class Console(object):
         if user_input == 1:
             new_track_controller.add_new_tracks()
         elif user_input == 2:
-            print(2)
+            new_track_controller.show_current_track_from_csv()
         elif user_input == 3:
             print(3)
         logger_pro.info('End app')    

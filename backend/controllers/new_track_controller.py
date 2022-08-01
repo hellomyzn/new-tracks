@@ -34,27 +34,11 @@ class NewTrackController(object):
         new_track_service.add_new_tracks()
         return
 
-    # def add_new_tracks_to_playlist(self) -> None:
-    
-    #     # Retrieve new tracks
-    #     new_tracks = self.csv_service.retrieve_new_tracks(tracks_from_spotify)
-
-    #     # Add tracks to CSV
-    #     self.csv_service.write_tracks(new_tracks)
-        
-    #     # Add tracks to google spreadsheet
-    #     self.google_spreadsheet_service.add_tracks(new_tracks)
-
-    #     # Add tracks to a playlist on Spotify
-    #     self.spotify_service.add_tracks_to_playlist(new_tracks)
-
-    #     return
-
-    # def show_current_track_from_csv(self) -> None:
-    #     track_from_spotify = self.spotify_service.fetch_current_track()
-    #     if track_from_spotify:
-    #         track = self.csv_service.show_track(track_from_spotify)
-    #     return
+    def show_current_track_from_csv(self) -> None:
+        connect.set_up_spotify()
+        new_track_service = NewTrackService()
+        new_track_service.show_current_track()
+        return
 
     # def remove_tracks_from_playlist(self) -> None:
     #     my_playlist_id = setting.MY_PLAYLIST_ID
