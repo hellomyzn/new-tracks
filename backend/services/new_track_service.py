@@ -50,10 +50,6 @@ class NewTrackService(object):
             "37i9dQZEVXbMXbN3EUUhlg",  # BR
             "37i9dQZF1DX4JAvHpjipBk"   # New Music Friday
             ]
-        # self.playlist_ids = ["37i9dQZEVXbMDoHDwVN2tF", "37i9dQZEVXbLRQDuF5jep"]
-        # self.spotify = SpotifyNewTrackRepository()
-        # self.csv = CsvNewTrackRepository()
-        # self.gss = GssNewTrackRepository()
 
     def add_new_tracks(self) -> None:
         """ Add new tracks to csv, gss, spotify playlist
@@ -70,34 +66,20 @@ class NewTrackService(object):
         ------
         None
         """
-        # Fetch tracks from playlists
-        
-        # tracks_spotify = self.fetch_tracks_from_playlists()
-        data = {
-            'name': "test_name",
-            'artist': "test_artist",
-            'playlist_name': "test_playlist_name",
-            'track_url': "https://open.spotify.com/track/0Ntl87gyxtztbpfK8hfqQr",
-            'playlist_url': "test_playlist_url",
-            'release_date': "test_release_date",
-            'added_at': "test_added_at",
-            'created_at': "test_created_at",
-            'like': "test_like"
-        }        
-
         spotify_repo = SpotifyNewTrackRepository()
         csv_repo = CsvNewTrackRepository()
         gss_repo =  GssNewTrackRepository()
-        
-        tracks_spotify = self.fetch_tracks_from_playlists()
-        
-        
+
+        # Fetch tracks from playlists
+        tracks_spotify = self.fetch_tracks_from_playlists()                
         tracks_csv = csv_repo.all()
         
         new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
+
         for track in new_tracks:
-            # spotify_repo.add(track)
+            spotify_repo.add(track)
             csv_repo.add(track)
+            gss_repo.add(track)
         return
 
     def fetch_tracks_from_playlists(self) -> list:

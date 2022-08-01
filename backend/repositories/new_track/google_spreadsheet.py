@@ -1,18 +1,16 @@
 import logging
 import time
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
+from models.new_track import NewTrackModel
+from models.google_spreadsheet import GoogleSpreadsheet
+from repositories.new_track.interfaces.new_track_repository import NewTrackRepoInterface
 import utils.setting as setting
 
-
 logger_pro = logging.getLogger('production')
-logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 
-class GssNewTrackRepository(object):
+class GssNewTrackRepository(NewTrackRepoInterface):
     """
     A class used to represent a Google Spreadsheet repository.
 
@@ -31,74 +29,96 @@ class GssNewTrackRepository(object):
     Methods
     ------
     """
-    def __init__(self, model):
+    def __init__(self):
         """
         Parameters
         ----------
         model:
             A Google Spreadsheet model
         """
-        self.model = model
-        self.columns = model.columns
-        self.worksheet = GoogleSpreadsheetRepository.connect(self.model)
+        key = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_KEY']
+        # sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME']
+        sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME_TEST']
+
+        self.model = NewTrackModel()
+        self.columns = self.model.get_columns()
+        self.gss = GoogleSpreadsheet()
+        self.workbook = self.gss.conn.open_by_key(key)
+        self.worksheet = self.workbook.worksheet(sheet_name)
         self.sleep_time_sec = 0.8
 
-    @classmethod
-    def connect(cls, model):
-        """ Connect Google Spreadsheet.
+    def all(self):
+        return
+
+
+    def find_by_name_and_artist(self, name: str, artist: str):
+        return
+    
+
+    def add(self, track: dict):
+        """ Add a track on CSV
 
         Parameters
         ----------
-        model:
-            A model to connect
+        track: dict
+            A dict to be add on GSS
 
         Raises
         ------
         Exception
-            If it fails to connect.
+            If it fails to add a track.
 
         Return
         ------
-        worksheet:
-            the worksheet to be written
+        None
         """
-        json_path = setting.AUTHENTICATION_JSON
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-        key = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_KEY']
+        # If the spreadsheet is empty, Add column on header(from (1,1))
+        if not self.has_header():
+            self.add_header()
 
-        logger_con.info('Start connecting Google Spreadsheet...')
         logger_pro.info({
-            'action': 'Connect Google Spreadsheet',
+            'action': 'Add a track',
             'status': 'Run',
             'message': '',
-            'data': {
-                'json_path': json_path,
-                'scope': scope,
-                'key': key,
-                'sheet_name': model.sheet
+            'args': {
+                'track': track
             }
         })
-        try:
-            credentials = ServiceAccountCredentials.from_json_keyfile_name(json_path, scope)
-            gc = gspread.authorize(credentials)
-            workbook = gc.open_by_key(key)
-            worksheet = workbook.worksheet(model.sheet)
+        
+        row_num = self.find_next_available_row()
+        
+        for col_num, column in enumerate(self.columns, start=1):
+            try:
+                self.worksheet.update_cell(row_num,
+                                           col_num,
+                                           track[column])
+                logger_con.info(f'{column}: {track[column]}')
+                time.sleep(self.sleep_time_sec)
+            except Exception as e:
+                logger_pro.error({
+                    'action': 'Add a track',
+                    'status': 'Fail',
+                    'message': e,
+                    'data': {
+                        'row_num': row_num,
+                        'col_num': col_num,
+                        'column': column,
+                        'track': track
+                    }
+                })
 
-            logger_con.info('Succeed in connecting Google Spreadshee...')
-            logger_pro.info({
-                'action': 'Connect Google Spreadsheet',
-                'status': 'Success',
-                'message': ''
-            })
-        except Exception as e:
-            logger_con.error('Fail to connecting Google Spreadshee...')
-            logger_pro.error({
-                'action': 'Connect Google Spreadsheet',
-                'status': 'Fail',
-                'message': e
-            })
-        return worksheet
+        logger_pro.info({
+            'action': 'Add a track',
+            'status': 'Success',
+            'message': ''
+        })
+        return
+    
+
+    def delete_by_name_and_artist(self, name: str, artist: str):
+        return
+
+
 
     def has_header(self) -> bool:
         """ Confirm there is header on GSS
@@ -159,66 +179,7 @@ class GssNewTrackRepository(object):
                 'message': e
             })
         
-        return None
-
-    def add_track(self, track: dict) -> None:
-        """ Add a track on CSV
-
-        Parameters
-        ----------
-        track: dict
-            A dict to be add on GSS
-
-        Raises
-        ------
-        Exception
-            If it fails to add a track.
-
-        Return
-        ------
-        None
-        """
-        # If the spreadsheet is empty, Add column on header(from (1,1))
-        if not self.has_header():
-            self.add_header()
-
-        logger_pro.info({
-            'action': 'Add a track',
-            'status': 'Run',
-            'message': '',
-            'args': {
-                'track': track
-            }
-        })
-        
-        row_num = self.find_next_available_row()
-        
-        for col_num, column in enumerate(self.columns, start=1):
-            try:
-                self.worksheet.update_cell(row_num,
-                                           col_num,
-                                           track[column])
-                logger_con.info(f'{column}: {track[column]}')
-                time.sleep(self.sleep_time_sec)
-            except Exception as e:
-                logger_pro.error({
-                    'action': 'Add a track',
-                    'status': 'Fail',
-                    'message': e,
-                    'data': {
-                        'row_num': row_num,
-                        'col_num': col_num,
-                        'column': column,
-                        'track': track
-                    }
-                })
-
-        logger_pro.info({
-            'action': 'Add a track',
-            'status': 'Success',
-            'message': ''
-        })
-        return
+        return None    
     
     def find_next_available_row(self) -> int:
         """ Find a next available row on GSS
