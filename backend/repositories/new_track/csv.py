@@ -33,8 +33,8 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         """
         self.model = NewTrackModel()
         self.columns = self.model.get_columns()
-        # self.path = setting.FILE_PATH_OF_CSV
-        self.path = setting.FILE_PATH_OF_CSV_TEST
+        self.path = setting.FILE_PATH_OF_CSV
+        # self.path = setting.FILE_PATH_OF_CSV_TEST
     
 
     def all(self) -> list:
@@ -69,7 +69,6 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         })
 
         tracks = []
-        track = {}
         if not helper.exists_file(self.path):
             return tracks
 
@@ -81,9 +80,11 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
                 csv_reader = csv.reader(csvfile)
                 next(csv_reader)
                 for row in csv_reader:
+                    track = {}
+
                     for r, c in zip(row, self.columns):
                         track[c] = r
-                    tracks.append(track)    
+                    tracks.append(track)
 
             logger_pro.info({
                 'action': 'Read all tracks from csv',

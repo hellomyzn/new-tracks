@@ -90,13 +90,9 @@ class NewTrackService(object):
         
         csv_repo = CsvNewTrackRepository()
         tracks_csv = csv_repo.all()
-        print(tracks_spotify[-1])
-        print(tracks_csv[-1])
-        new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
         
-        print(len(new_tracks))
-        print(new_tracks[-1])
-        return
+        new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
+
         print(len(tracks_spotify))
         print(time.time() - start)
         print(tracks_spotify[0])
@@ -621,9 +617,7 @@ class NewTrackService(object):
             'message': '',
             'data': {
                 'tracks_len': len(tracks),
-                'from_tracks_len': len(from_tracks),
-                'tracks_last_value': tracks[-1],
-                'from_tracks_last_value': from_tracks[-1]
+                'from_tracks_len': len(from_tracks)
             }
         })
         
@@ -644,6 +638,9 @@ class NewTrackService(object):
             from_track_names = [t['name'] for t in from_tracks]
             from_track_artists = [t['artist'] for t in from_tracks]
             for track in tracks:
+                if track['name'] in from_track_names:
+                    print(track['name'])
+
                 if track['name'] in from_track_names and track['artist'] in from_track_artists:
                     continue
                 unique_tracks.append(track)
@@ -676,84 +673,6 @@ class NewTrackService(object):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-    def add_tracks_to_playlist(self, tracks: list, playlist_id: str) -> None:
-        """ Add tracks to a playlist.
-
-        Parameters
-        ----------
-        tracks: list
-            A tracks list to add
-        playlist_id: str
-            A playlist id to add to 
-        
-        Raises
-        ------
-        Exception
-            If you can not add tracks to the playlist
-
-        Return
-        ------
-        None
-        """
-        if not tracks:
-            message = 'There is no new tracks to add to playlist on Spotify this time.'
-            logger_con.info(message)
-            logger_pro.info(message)
-            return
-
-        tracks_number = len(tracks)
-        max_number = 100
-        logger_pro.info({
-            'action': 'Add tracks between certain indexs',
-            'status': 'Run',
-            'message': '',
-            'args': {
-                'tracks_number': tracks_number
-            }
-        })
-        while max_number < tracks_number:
-            
-            extracted_tracks, tracks = tracks[0:int(max_number)], tracks[int(max_number)::]
-            track_urls = [t['track_url'] for t in extracted_tracks]
-
-            logger_pro.info({
-                'action': 'Add tracks between certain indexs',
-                'status': 'Success',
-                'message': '',
-                'args': {
-                    'extracted_tracks': len(extracted_tracks),
-                    'remaining_track': len(tracks),
-                    'track_urls': len(track_urls)
-                }
-            })
-
-            self.repository.add_tracks_to_playlist(track_urls)
-            tracks_number = len(tracks)
-        else:
-            track_urls = [t['track_url'] for t in tracks]
-            logger_pro.info({
-                'action': 'Add tracks between certain indexs',
-                'status': 'Success',
-                'message': '',
-                'args': {
-                    'tracks': len(tracks),
-                    'track_urls': len(track_urls)
-                }
-            })
-            self.repository.add_tracks_to_playlist(track_urls)
-        return
 
     def fetch_current_track(self) -> list:
         """ Fetch a track data you are listening.
