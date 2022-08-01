@@ -40,21 +40,17 @@ class NewTrackController(object):
         new_track_service.show_current_track()
         return
 
-    # def remove_tracks_from_playlist(self) -> None:
-    #     my_playlist_id = setting.MY_PLAYLIST_ID
-    #     # my_playlist_id = setting.MY_PLAYLIST_ID_TEST
-    #     question = "\nDo you want to remove some tracks you've already listened from playlist? (y/n): "
-    #     if helper.is_yes(input(question)):
-    #         SpotifyService.remove_tracks_played_recently_from_playlist(self.spotify,
-    #                                                                    my_playlist_id)
-    #     else:
-    #         print('You can remove tracks between the track number(first) you choose and the track number(last) you choose')
-    #         first = int(input('Enter a track number (first): '))
-    #         last = int(input('Enter a track number (last): '))
-    #         tracks = self.spotify_service.fetch_tracks_from_playlist(my_playlist_id)
-    #         # TODO: remove more than 100 tracks at one time
-    #         self.spotify_service.remove_tracks_from_playlist(my_playlist_id,
-    #                                                          tracks,
-    #                                                          first,
-    #                                                          last)
-    #     return
+    def remove_current_tracks(self) -> None:
+        connect.set_up_spotify()
+        new_track_service = NewTrackService()
+        new_track_service.remove_current_tracks()
+        return
+
+    def remove_tracks_by_index(self, first, last) -> None:
+        f = int(first)
+        l = int(last)
+        connect.set_up_spotify()
+        new_track_service = NewTrackService()
+        new_track_service.remove_tracks_by_index(f, l)
+
+        return

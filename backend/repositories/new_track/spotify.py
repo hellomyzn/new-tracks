@@ -52,7 +52,6 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
     def delete_by_name_and_artist(self, name: str, artist: str) -> None:
         return
 
-
     def convert_tracks_dict_into_new_tracks(self, tracks_dict) -> NewTrackModel:
         """
             Convert tracks dict into new tracks model
@@ -118,6 +117,11 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             raise Exception
         return new_tracks
 
+    def delete_track_by_url(self, url) -> None:
+        url = [url]
+        self.spotify.conn.playlist_remove_all_occurrences_of_items(self.playlist_id, url)
+        return None
+
     def add_tracks_to_playlist(self, urls_list: list) -> None:
         """ Add tracks to a playlist.
 
@@ -164,52 +168,6 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
                 }
             })
         return
-
-    def fetch_current_track_json_data(self) -> list:
-        """ Fetch a track data you are listening.
-
-        Parameters
-        ----------
-        None
-        
-        Raises
-        ------
-        Exception
-            If you can not fetch current track.
-
-        Return
-        ------
-        track: list
-            A track you are listening.
-        """
-        logger_pro.info({
-            'action': 'Fetch current track data from spotify',
-            'status': 'Run',
-            'message': ''
-        })
-
-        try:
-            track_json_data = self.connect.current_user_playing_track()
-            logger_pro.info({
-                'action': 'Fetch current track data from spotify',
-                'status': 'Success',
-                'message': ''
-            })
-        except Exception as e:
-            track_json_data = []
-            logger_pro.warning({
-                'action': 'Fetch current track data from spotify',
-                'status': 'Fail',
-                'message': '',
-                'exception': e
-            })
-        return track_json_data
-
-    def get_tracks_played_recently(self) -> list:
-            tracks = []
-            tracks_json_data = spotify.connect.current_user_recently_played()
-            tracks_json_data = tracks_json_data['items']
-            return tracks_json_data
 
     def remove_tracks_from_playlist(self, playlist_id: str, tracks: list) -> None:
         # TODO: if there are more than 100 tracks

@@ -1,6 +1,7 @@
 import logging
 
 import utils.setting as setting
+import utils.helper as helper
 from utils.logger import SetUpLogging
 from controllers.new_track_controller import NewTrackController
 
@@ -36,13 +37,15 @@ class Console(object):
         elif user_input == 2:
             new_track_controller.show_current_track_from_csv()
         elif user_input == 3:
-            print(3)
-        logger_pro.info('End app')    
-        # track_controller = TrackController()
-        # track_controller.add_new_tracks_to_playlist()
-        # track_controller.show_current_track_from_csv()
-        # track_controller.remove_tracks_from_playlist()
-        
+            question = "\nDo you want to remove some tracks you've already listened from playlist? (y/n): "
+            if helper.is_yes(input(question)):
+                new_track_controller.remove_current_tracks()
+            else:
+                print('You can remove tracks between the track number(first) you choose and the track number(last) you choose')
+                first = int(input('Enter a track number (first): '))
+                last = int(input('Enter a track number (last): '))
+                new_track_controller.remove_tracks_by_index(first, last)
+        logger_pro.info('End app')
         return
         
         
