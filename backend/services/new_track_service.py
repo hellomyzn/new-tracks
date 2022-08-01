@@ -89,8 +89,14 @@ class NewTrackService(object):
         tracks_spotify = self.fetch_tracks_from_playlists()
         
         csv_repo = CsvNewTrackRepository()
-        tracks_csv = csv_repo.retrieve_unique_new_tracks(tracks_spotify)
-        new_tracks = self.convert_tracks_dict_into_new_tracks(new_tracks_dict)
+        tracks_csv = csv_repo.all()
+        print(tracks_spotify[-1])
+        print(tracks_csv[-1])
+        new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
+        
+        print(len(new_tracks))
+        print(new_tracks[-1])
+        return
         print(len(tracks_spotify))
         print(time.time() - start)
         print(tracks_spotify[0])
@@ -612,7 +618,13 @@ class NewTrackService(object):
         logger_pro.info({
             'action': 'Retrieve unique tracks dict from tracks dict',
             'status': 'Run',
-            'message': ''
+            'message': '',
+            'data': {
+                'tracks_len': len(tracks),
+                'from_tracks_len': len(from_tracks),
+                'tracks_last_value': tracks[-1],
+                'from_tracks_last_value': from_tracks[-1]
+            }
         })
         
         if not from_tracks:

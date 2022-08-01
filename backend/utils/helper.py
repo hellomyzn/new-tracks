@@ -4,7 +4,6 @@ import datetime
 import logging
 
 logger_pro = logging.getLogger('production')
-logger_dev = logging.getLogger('develop')
 logger_con = logging.getLogger('console')
 
 def exists_file(path: str) -> bool:
@@ -25,7 +24,7 @@ def exists_file(path: str) -> bool:
     True/False
     """
 
-    logger_pro.info({
+    logger_pro.debug({
         'action': 'Confirm the path exists',
         'status': 'Run',
         'message': '',
@@ -35,7 +34,7 @@ def exists_file(path: str) -> bool:
     })
 
     if os.path.isfile(path):
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Confirm the path exists',
             'status': 'Success',
             'message': ''
