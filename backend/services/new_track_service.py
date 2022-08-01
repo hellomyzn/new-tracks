@@ -79,7 +79,7 @@ class NewTrackService(object):
         for track in new_tracks:
             spotify_repo.add(track)
             csv_repo.add(track)
-            gss_repo.add(track)
+            # gss_repo.add(track)
         return
 
     def fetch_tracks_from_playlists(self) -> list:
@@ -190,7 +190,7 @@ class NewTrackService(object):
                     }
                 })
             else:
-                # after while loop
+                # after while loop or less than 100 tracks
                 offset = len(tracks_json)
                 playlist_items = self.spotify.conn.playlist_items(playlist_id, limit=100, offset=offset)
                 current_tracks_json = playlist_items['items']
@@ -834,6 +834,36 @@ class NewTrackService(object):
                 'exception': e
             })
         return track_json
+
+    def remove_tracks_by_index(self, first, last) -> None:
+        """ 
+            remove tracks by index (first, last) you choose.
+
+            Parameters
+            ----------
+            first: int
+                The index number of playlist from.
+            last: int
+                The index number of playlist until.
+            
+            Raises
+            ------
+            Exception
+                If you can not remove.
+
+            Return
+            ------
+            None.
+        """
+        # Fetch tracks from playlist
+        spotify_repo = SpotifyNewTrackRepository()
+        tracks_dict = spotify_repo.all()
+        tracks_dict = tracks_dict[first-1:last]
+        
+        # Remove tracks
+        for t in tracks_dict:
+            spotify_repo.delete_track_by_url(t['track_url'])
+        return None     
 
     @classmethod
     def show_track_names(cls, tracks) -> None:
