@@ -11,12 +11,11 @@ logger_pro = logging.getLogger('production')
 logger_con = logging.getLogger('console')
 
 class SpotifyModel(Singleton):
+    conn = None
     def __init__(self):
-        self.connect = SpotifyModel.connect()
-        self.hoge = None
+        pass
 
-    @classmethod
-    def connect(cls):
+    def connect(self) -> None:
         """ Connect spotify api by SpotifyOAuth.
 
         Parameters
@@ -71,7 +70,7 @@ class SpotifyModel(Singleton):
 
         try:
             # Connect spotify
-            spotify = spotipy.Spotify(auth_manager=auth_manager, language='en')
+            self.conn = spotipy.Spotify(auth_manager=auth_manager, language='en')
             logger_con.info('Succeed in connecting Spotify...')
             logger_pro.info({
                 'action': 'Connect spotify api by SpotifyOAuth',
@@ -85,4 +84,4 @@ class SpotifyModel(Singleton):
                 'status': 'Fail',
                 'message': e
             })
-        return spotify
+        return

@@ -3,6 +3,7 @@ import logging
 
 import utils.setting as setting
 import utils.helper as helper
+import utils.connect as connect
 from services.new_track_service import NewTrackService
 
 logger_pro = logging.getLogger('production')
@@ -28,7 +29,7 @@ class NewTrackController(object):
         ------
         None
         """
-
+        connect.set_up()
         new_track_service = NewTrackService()
         new_track_service.add_new_tracks()
         return
