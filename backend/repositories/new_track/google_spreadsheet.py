@@ -37,8 +37,8 @@ class GssNewTrackRepository(NewTrackRepoInterface):
             A Google Spreadsheet model
         """
         key = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_KEY']
-        sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME']
-        # sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME_TEST']
+        # sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME']
+        sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME_TEST']
 
         self.model = NewTrackModel()
         self.columns = self.model.get_columns()
