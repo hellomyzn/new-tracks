@@ -35,8 +35,8 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             A spotify model
         """
         self.spotify = SpotifyModel()
-        # self.playlist_id = setting.CONFIG['PLAYLIST_ID']['NEW_TRACKS']
-        self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
+        self.playlist_id = setting.CONFIG['PLAYLIST_ID']['NEW_TRACKS']
+        # self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
 
     def all(self) -> list:
         logger_pro.info({
@@ -235,9 +235,50 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             raise Exception
         return new_tracks
 
-    def delete_track_by_url(self, url) -> None:
+    def delete_track_by_url(self, url: str) -> None:
+        """ 
+            Remove tracks by url
+
+            Parameters
+            ----------
+            url: str
+                A url to remove
+            
+            Raises
+            ------
+            Exception
+                If you can not remove
+
+            Return
+            ------
+            None
+        """
         url = [url]
-        self.spotify.conn.playlist_remove_all_occurrences_of_items(self.playlist_id, url)
+        logger_pro.debug({
+            'action': 'Remove tracks by url',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            self.spotify.conn.playlist_remove_all_occurrences_of_items(self.playlist_id, url)
+            logger_pro.debug({
+                'action': 'Remove tracks by url',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'url': url
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Remove tracks by url',
+                'status': 'Fail',
+                'message': '',
+                'args': {
+                    'playlist_id': playlist_id,
+                    'url': url
+                }
+            })
         return None
 
     def add_tracks_to_playlist(self, urls_list: list) -> None:
@@ -285,23 +326,4 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
                     'urls_list': urls_list
                 }
             })
-        return
-
-    def remove_tracks_from_playlist(self, playlist_id: str, tracks: list) -> None:
-        # TODO: if there are more than 100 tracks
-        items = [track['track_url'] for track in tracks]
-        names = [track['name'] for track in tracks]
-        print('\n')
-        for name in names:
-            print(f'\t[TRACK NAME] - {name}')
-
-        # TODO: If there is no track this time, return and print there is no track this time
-        question = '\nDo you want to remove these tracks above from your playlist? [y/n]: '
-        user_input = input(question)
-
-        if helper.is_yes(user_input):
-            self.connect.playlist_remove_all_occurrences_of_items(playlist_id, items)
-            print("It's removed")
-        else:
-            print("It's cancelled")
         return

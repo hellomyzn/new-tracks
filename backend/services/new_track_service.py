@@ -627,6 +627,89 @@ class NewTrackService(object):
             raise Exception
         return unique_tracks
 
+    def retrieve_duplicate_tracks_dict(self, tracks: list, from_tracks: list) -> list:
+        """
+            Retrieve duplicate tracks dict from tracks dict
+
+            Parameters
+            ----------
+            tracks: list
+                A tracks list to confirm It's duplicate or no.
+            from_tracks: list
+                A tracks list to confirm from.
+
+            Raises
+            ------
+            Exception
+                If it fail to retrieve
+
+            Return
+            ------
+            duplicate_tracks: list
+                a unique tracks list.
+        """
+        logger_pro.info({
+            'action': 'Retrieve duplicate tracks dict from tracks dict',
+            'status': 'Run',
+            'message': '',
+            'data': {
+                'tracks_len': len(tracks),
+                'from_tracks_len': len(from_tracks)
+            }
+        })
+        
+        if not tracks:
+            logger_pro.warning({
+                'action': 'Retrieve duplicate tracks dict from tracks dict',
+                'status': 'Warning',
+                'message': 'There is no tracks',
+                'data': {
+                    'tracks_len': len(tracks)
+                }
+            })
+            return tracks
+
+        duplicate_tracks = []
+        try:
+            from_track_names = [t['name'] for t in from_tracks]
+            from_track_artists = [t['artist'] for t in from_tracks]
+            for track in tracks:
+                if track['name'] in from_track_names and track['artist'] in from_track_artists:
+                    duplicate_tracks.append(track)
+                    logger_pro.debug({
+                        'action': 'Retrieve duplicate tracks dict from tracks dict',
+                        'status': 'Success',
+                        'message': '',
+                        'data': {
+                            'duplicate_tracks': track
+                        }
+                    })
+                continue
+
+            logger_pro.info({
+                'action': 'Retrieve duplicate tracks dict from tracks dict',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'duplicate_tracks_len': len(duplicate_tracks)
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Retrieve duplicate tracks dict from tracks dict',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'tracks_len': len(tracks),
+                    'from_tracks_len': len(from_tracks),
+                    'tracks': tracks,
+                    'from_tracks': from_tracks
+                }
+            })
+            raise Exception
+        return duplicate_tracks
+
     def show_current_track(self) -> None:
         """
             Show current track you are listening.
@@ -671,15 +754,40 @@ class NewTrackService(object):
         # Extract tracks from json
         tracks_json = tracks_json['items']
         tracks_dict = []
-        for t in tracks_json:
-            track_dict = self.extract_track_from_json(t['track'])
-            logger_con.info(f'Curent Track: {track_dict["name"]}')
+        for i, t in enumerate(tracks_json, start=1):
+            t = t['track']
+            track_dict = self.extract_track_from_json(t)
+            logger_con.info(f'Curent Track: [{i}] {track_dict["name"]}')
             tracks_dict.append(track_dict)
-        # Remove tracks
+        
         spotify_repo = SpotifyNewTrackRepository()
-        for t in tracks_dict:
-            spotify_repo.delete_track_by_url(t['track_url'])
 
+        # Retrieve only current tracks on playlist
+        playlist_tracks_dict = spotify_repo.all()
+        duplicate_tracks = self.retrieve_duplicate_tracks_dict(tracks_dict, playlist_tracks_dict)
+
+        if not duplicate_tracks:
+            m = 'There is no tracks to remove on you playlist'
+            logger_con.warning(m)
+            logger_pro.warning(m)
+            return None
+
+        # Show duplicate tracks
+        for i, t in enumerate(duplicate_tracks, start = 1):
+            logger_con.info(f'Duplicate Track: [{i}] {t["name"]}')
+
+        # Confirm to remove
+        q = 'Do you want to remove these tracks from playlist? (y/n): '
+        user_input = input(q)
+        
+        # Remove tracks
+        if helper.is_yes(user_input):
+            for t in duplicate_tracks:
+                spotify_repo.delete_track_by_url(t['track_url'])
+        else:
+            m = 'It is canceled'
+            logger_con.warning(m)
+            logger_pro.warning(m)
         return None
 
     def remove_tracks_by_index(self, first, last) -> None:
