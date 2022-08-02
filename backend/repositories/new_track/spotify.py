@@ -35,7 +35,8 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             A spotify model
         """
         self.spotify = SpotifyModel()
-        self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
+        self.playlist_id = setting.CONFIG['PLAYLIST_ID']['NEW_TRACKS']
+        # self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
 
     def all(self) -> list:
         logger_pro.info({

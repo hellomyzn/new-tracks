@@ -79,7 +79,7 @@ class NewTrackService(object):
         for track in new_tracks:
             spotify_repo.add(track)
             csv_repo.add(track)
-            # gss_repo.add(track)
+            gss_repo.add(track)
         return
 
     def fetch_tracks_from_playlists(self) -> list:
