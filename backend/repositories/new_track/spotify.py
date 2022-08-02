@@ -35,8 +35,13 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             A spotify model
         """
         self.spotify = SpotifyModel()
-        self.playlist_id = setting.CONFIG['PLAYLIST_ID']['NEW_TRACKS']
-        # self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
+        sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME']
+        if setting.ENV == 'dev':
+            self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
+        else:
+            self.playlist_id = setting.CONFIG['PLAYLIST_ID']['NEW_TRACKS']
+        print(self.playlist_id)
+        
 
     def all(self) -> list:
         logger_pro.info({

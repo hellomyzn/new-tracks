@@ -69,10 +69,8 @@ class NewTrackService(object):
         spotify_repo = SpotifyNewTrackRepository()
         csv_repo = CsvNewTrackRepository()
         gss_repo =  GssNewTrackRepository()
-
         # Fetch tracks
         tracks_spotify = self.fetch_tracks_from_playlists()
-        return
         tracks_csv = csv_repo.all()
         
         new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)

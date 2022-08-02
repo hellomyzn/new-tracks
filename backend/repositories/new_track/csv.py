@@ -33,9 +33,11 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         """
         self.model = NewTrackModel()
         self.columns = self.model.get_columns()
-        # self.path = setting.FILE_PATH_OF_CSV
-        self.path = setting.FILE_PATH_OF_CSV_TEST
-    
+        if setting.ENV == 'dev':
+            self.path = setting.FILE_PATH_OF_CSV_TEST
+        else:
+            self.path = setting.FILE_PATH_OF_CSV
+        print(self.path)
 
     def all(self) -> list:
         """ 
