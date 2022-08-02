@@ -72,6 +72,7 @@ class NewTrackService(object):
 
         # Fetch tracks
         tracks_spotify = self.fetch_tracks_from_playlists()
+        return
         tracks_csv = csv_repo.all()
         
         new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
@@ -524,13 +525,12 @@ class NewTrackService(object):
             'status': 'Run',
             'message': ''
         })
-        tracks = []
         try:
             p_name = self.fetch_playlist_name(playlist_id)
             p_url = self.fetch_playlist_url(playlist_id)
             for t in tracks_dict:
-                
-            tracks = [self.put_playlist_data_to_track_dict(t, p_name, p_url) for t in tracks_dict]
+                t['playlist_name'] = p_name
+                t['playlist_url'] = p_url
             logger_pro.info({
                 'action': 'Put playlist name and url to tracks dict',
                 'status': 'Success',
@@ -548,60 +548,7 @@ class NewTrackService(object):
                 }
             })
             raise Exception
-        return tracks
-
-    def put_playlist_data_to_track_dict(self, 
-                                        track_dict: dict,
-                                        p_name: str,
-                                        p_url: str) -> dict:
-        """ 
-            Put playlist name and url to a track dict
-
-            Parameters
-            ----------
-            tracks_dict: dict
-                A tracks dict without playlist data.
-            p_name: str
-                A playlist name to add
-            p_url: str
-                A playlist url to add
-
-            Raises
-            ------
-            Exception
-                If it fail to put playlist data to the tracks dict.
-
-            Return
-            ------
-            tracks: dict
-                A track dict added playlist data.
-        """
-        logger_pro.debug({
-            'action': 'Put playlist name and url to a track dict',
-            'status': 'Run',
-            'message': ''
-        })
-        try:
-            track_dict['playlist_name'] = p_name
-            track_dict['playlist_url'] = p_url
-            logger_pro.debug({
-                'action': 'Put playlist name and url to a track dict',
-                'status': 'Success',
-                'message': '',
-                'track_dict': track_dict
-            })
-        except Exception as e:
-            logger_pro.error({
-                'action': 'Put playlist name and url to a track dict',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'track_dict': track_dict
-                }
-            })
-            raise Exception
-        return track_dict
+        return tracks_dict
 
     def retrieve_unique_tracks_dict(self, tracks: list, from_tracks: list) -> list:
         """
