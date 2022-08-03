@@ -58,33 +58,34 @@ class GssNewTrackRepository(NewTrackRepoInterface):
         return
     
 
-    def add(self, track: dict):
-        """ Add a track on CSV
+    def add(self, track: NewTrackModel) -> None:
+        """ 
+            Add a track on GSS
 
-        Parameters
-        ----------
-        track: dict
-            A dict to be add on GSS
+            Parameters
+            ----------
+            track: NewTrackModel
+                A new track instance to add on GSS
 
-        Raises
-        ------
-        Exception
-            If it fails to add a track.
+            Raises
+            ------
+            Exception
+                If it fails to add a track.
 
-        Return
-        ------
-        None
+            Return
+            ------
+            None
         """
         # If the spreadsheet is empty, Add column on header(from (1,1))
         if not self.has_header():
             self.add_header()
 
-        logger_pro.info({
-            'action': 'Add a track',
+        logger_pro.debug({
+            'action': 'Add a track on GSS',
             'status': 'Run',
             'message': '',
             'args': {
-                'track': track
+                'track': vars(track)
             }
         })
         
@@ -92,10 +93,9 @@ class GssNewTrackRepository(NewTrackRepoInterface):
         
         for col_num, column in enumerate(self.columns, start=1):
             try:
-                self.worksheet.update_cell(row_num,
-                                           col_num,
-                                           track[column])
-                logger_con.info(f'{column}: {track[column]}')
+                v = getattr(track, column)
+                self.worksheet.update_cell(row_num, col_num, v)
+                logger_con.debug(f'{column}: {v}')
                 time.sleep(self.sleep_time_sec)
             except Exception as e:
                 logger_pro.error({
@@ -106,16 +106,17 @@ class GssNewTrackRepository(NewTrackRepoInterface):
                         'row_num': row_num,
                         'col_num': col_num,
                         'column': column,
-                        'track': track
+                        'track': vars(track)
                     }
                 })
+                raise Exception
 
         logger_pro.info({
-            'action': 'Add a track',
+            'action': 'Add a track on GSS',
             'status': 'Success',
             'message': ''
         })
-        return
+        return None
     
 
     def delete_by_name_and_artist(self, name: str, artist: str):

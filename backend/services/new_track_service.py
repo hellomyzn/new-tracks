@@ -798,19 +798,20 @@ class NewTrackService(object):
         return unique_tracks, duplicate_tracks
 
     def add_new_tracks(self) -> None:
-        """ Add new tracks to csv, gss, spotify playlist
-        
-        Parameters
-        ----------
-        None
+        """ 
+            Add new tracks to csv, gss, spotify playlist
+            
+            Parameters
+            ----------
+            None
 
-        Raises
-        ------
-        None
+            Raises
+            ------
+            None
 
-        Return
-        ------
-        None
+            Return
+            ------
+            None
         """
         spotify_repo = SpotifyNewTrackRepository()
         csv_repo = CsvNewTrackRepository()
@@ -830,10 +831,33 @@ class NewTrackService(object):
         tracks_csv = csv_repo.all()
 
         new_tracks, _ = NewTrackService.retrieve_unique_and_duplicate_tracks(tracks_spo, tracks_csv)
-        for t in new_tracks:
-            spotify_repo.add(t)
-            csv_repo.add(t)
-            gss_repo.add(t)
+
+        logger_pro.info({
+            'action': 'Add new tracks to csv, gss, spotify playlist',
+            'status': 'Run',
+            'message': ''
+        })
+
+        try:
+            for t in new_tracks:
+                spotify_repo.add(t)
+                csv_repo.add(t)
+                gss_repo.add(t)
+                logger_pro.info({
+                    'action': 'Add new tracks to csv, gss, spotify playlist',
+                    'status': 'Success',
+                    'message': '',
+                    'track': vars(t)
+                })
+                return
+        except Exception as e:
+            logger_pro.info({
+                'action': 'Add new tracks to csv, gss, spotify playlist',
+                'status': 'Fail',
+                'message': '',
+                'track': vars(t)
+            })
+            raise Exception
         return None
 
     def show_current_track(self) -> None:

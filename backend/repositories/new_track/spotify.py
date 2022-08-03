@@ -283,10 +283,48 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
         return
     
     def add(self, track: NewTrackModel) -> None:
-        url = [track.track_url]
+        """ 
+            Add a track on Spotify
+
+            Parameters
+            ----------
+            track: NewTrackModel
+                A new track instance to add on Spotify
+
+            Raises
+            ------
+            Exception
+                If it fails to add a track.
+
+            Return
+            ------
+            None
+        """
+        logger_pro.debug({
+            'action': 'Add a track on Spotify',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            url = [track.track_url]
+            self.add_tracks_to_playlist(url)
+            logger_pro.debug({
+                'action': 'Add a track on Spotify',
+                'status': 'Success',
+                'message': '',
+                'data': vars(track)
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Add a track on Spotify',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': vars(track)
+            })
+            raise Exception
         
-        self.add_tracks_to_playlist(url)
-        return
+        return None
     
     def delete_by_name_and_artist(self, name: str, artist: str) -> None:
         return

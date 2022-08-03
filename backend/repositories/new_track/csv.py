@@ -233,27 +233,28 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         return
 
     def write_dict(self, track: dict) -> None:
-        """ Write tracks on CSV.
+        """ 
+            Write tracks on CSV.
 
-        If there is no csv file to write,
-        create a csv file.
+            If there is no csv file to write,
+            create a csv file.
 
-        If there is no header on csv,
-        Add headers on csv.
+            If there is no header on csv,
+            Add headers on csv.
 
-        Parameters
-        ----------
-        track: dict
-            A track dict to be written on CSV.
+            Parameters
+            ----------
+            track: dict
+                A track dict to be written on CSV.
 
-        Raises
-        ------
-        Exception
-            If it fails to write on CSV
+            Raises
+            ------
+            Exception
+                If it fails to write on CSV
 
-        Return
-        ------
-        None
+            Return
+            ------
+            None
         """
         # Check there is csv file
         if not helper.exists_file(self.path):
@@ -263,19 +264,16 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         if self.read_header() is None:
             self.write_header()
     
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Write a track data on CSV',
             'status': 'Run',
-            'message': '',
-            'data': {
-                'path': self.path
-            }
+            'message': ''
         })
         try:
             with open(self.path, 'a', newline='') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=self.columns)
                 writer.writerow(track)
-                logger_pro.info({
+                logger_pro.debug({
                     'action': 'Write a tarack data on CSV',
                     'status': 'Success',
                     'message': '',
@@ -286,7 +284,8 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
                 'action': 'Write a track data on CSV',
                 'status': 'Fails',
                 'message': '',
-                'exception': e
+                'exception': e,
+                'tarack': track
             })
         return
 

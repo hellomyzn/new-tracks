@@ -113,6 +113,7 @@ class NewTrackModel(NewTrack):
             self.playlist_name = tracks_dict['playlist_name']
             self.track_url = tracks_dict['track_url']
             self.playlist_url = tracks_dict['playlist_url']
+            self.release_date = tracks_dict['release_date']
             self.added_at = tracks_dict['added_at']
             self.created_at = tracks_dict['created_at']
             self.like = tracks_dict['like']
