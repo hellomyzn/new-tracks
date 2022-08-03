@@ -849,7 +849,6 @@ class NewTrackService(object):
                     'message': '',
                     'track': vars(t)
                 })
-                return
         except Exception as e:
             logger_pro.info({
                 'action': 'Add new tracks to csv, gss, spotify playlist',

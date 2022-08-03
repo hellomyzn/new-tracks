@@ -111,7 +111,7 @@ class GssNewTrackRepository(NewTrackRepoInterface):
                 })
                 raise Exception
 
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Add a track on GSS',
             'status': 'Success',
             'message': ''

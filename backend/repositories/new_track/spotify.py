@@ -307,7 +307,7 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
         })
         try:
             url = [track.track_url]
-            self.add_tracks_to_playlist(url)
+            self.spotify.conn.playlist_add_items(self.playlist_id, url, position=0)
             logger_pro.debug({
                 'action': 'Add a track on Spotify',
                 'status': 'Success',
@@ -441,50 +441,3 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             })
             raise Exception
         return None
-
-    def add_tracks_to_playlist(self, urls_list: list) -> None:
-        """ Add tracks to a playlist.
-
-        Parameters
-        ----------
-        urls_list: list
-            A list of track urls to add
-        
-        Raises
-        ------
-        Exception
-            If you can not add tracks to the playlist
-
-        Return
-        ------
-        None
-        """
-        logger_pro.info({
-            'action': 'Add tracks to a playlist',
-            'status': 'Run',
-            'message': '',
-            'args': {
-                'length': len(urls_list),
-                'urls_list': urls_list,
-                'playlist_id': self.playlist_id
-            }
-        })
-        try:
-            self.spotify.conn.playlist_add_items(self.playlist_id, urls_list, position=0)
-            logger_pro.info({
-                'action': 'Add tracks to a playlist',
-                'status': 'Success',
-                'message': ''
-            })
-        except Exception as e:
-            logger_pro.warning({
-                'action': 'Add tracks to a playlist',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'playlist_id': self.playlist_id,
-                    'urls_list': urls_list
-                }
-            })
-        return
