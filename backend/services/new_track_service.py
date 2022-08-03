@@ -51,6 +51,78 @@ class NewTrackService(object):
             "37i9dQZF1DX4JAvHpjipBk"   # New Music Friday
             ]
 
+    @classmethod
+    def confirm_remove_tracks(cls, tracks: list) -> bool:
+        """
+            Confirm to remove tracks.
+
+            If there is no tracks, return False
+
+            Parameters
+            ----------
+            tracks: list
+                A list of NewTrackModel instances to remove.
+            
+            Raises
+            ------
+            Warninig
+                If there is no tracks.
+            Exception
+                If you can not confirm.
+            
+            Return
+            ------
+            Bool.
+        """
+        logger_pro.debug({
+            'action': 'Confirm to remove tracks.',
+            'status': 'Run',
+            'message': ''
+        })
+        if not tracks:
+            m = 'There is no tracks to remove on you playlist'
+            logger_con.warning(m)
+            logger_pro.warning({
+                'action': 'Confirm to remove tracks.',
+                'status': 'Warning',
+                'message': m
+            })
+            return False
+
+        # Show tracks
+        for i, t in enumerate(tracks, start = 1):
+            logger_pro.debug(f'Track: [{i}] {t.name}')
+            logger_con.debug(f'Track: [{i}] {t.name}')
+
+        while True:
+            # Confirm to remove
+            q = 'Do you want to remove these tracks from playlist? (y/n): '
+            user_input = input(q)
+            if helper.is_yes(user_input):
+                logger_pro.debug({
+                    'action': 'Confirm to remove tracks.',
+                    'status': 'Success',
+                    'message': '',
+                    'user_input': user_input
+                })
+                return True
+            elif helper.is_no(user_input):
+                logger_pro.debug({
+                    'action': 'Confirm to remove tracks.',
+                    'status': 'Success',
+                    'message': '',
+                    'user_input': user_input
+                })
+                return False
+            else:
+                logger_pro.warning({
+                    'action': 'Confirm to remove tracks.',
+                    'status': 'Warning',
+                    'message': '',
+                    'user_input': user_input
+                })
+                continue
+
     def add_new_tracks(self) -> None:
         """ Add new tracks to csv, gss, spotify playlist
         
@@ -819,7 +891,7 @@ class NewTrackService(object):
             'status': 'Run',
             'message': ''
         })
-        if self.confirm_remove_tracks(tracks):
+        if NewTrackService.confirm_remove_tracks(tracks):
             try:
                 for t in tracks:
                     spotify_repo.delete_track(t)
@@ -849,74 +921,5 @@ class NewTrackService(object):
                 'message': 'It was canceled.'
             })
         return None
-
-    def confirm_remove_tracks(self, tracks: list) -> bool:
-        """
-            Confirm to remove tracks.
-
-            If there is no tracks, return False
-
-            Parameters
-            ----------
-            tracks: list
-                A list of NewTrackModel instances to remove.
-            
-            Raises
-            ------
-            Warninig
-                If there is no tracks.
-            Exception
-                If you can not confirm.
-            
-            Return
-            ------
-            Bool.
-        """
-        logger_pro.debug({
-            'action': 'Confirm to remove tracks.',
-            'status': 'Run',
-            'message': ''
-        })
-        if not tracks:
-            m = 'There is no tracks to remove on you playlist'
-            logger_con.warning(m)
-            logger_pro.warning({
-                'action': 'Confirm to remove tracks.',
-                'status': 'Warning',
-                'message': m
-            })
-            return False
-
-        # Show tracks
-        for i, t in enumerate(tracks, start = 1):
-            logger_pro.debug(f'Track: [{i}] {t.name}')
-            logger_con.debug(f'Track: [{i}] {t.name}')
-
-        while True:
-            # Confirm to remove
-            q = 'Do you want to remove these tracks from playlist? (y/n): '
-            user_input = input(q)
-            if helper.is_yes(user_input):
-                logger_pro.debug({
-                    'action': 'Confirm to remove tracks.',
-                    'status': 'Success',
-                    'message': '',
-                    'user_input': user_input
-                })
-                return True
-            elif helper.is_no(user_input):
-                logger_pro.debug({
-                    'action': 'Confirm to remove tracks.',
-                    'status': 'Success',
-                    'message': '',
-                    'user_input': user_input
-                })
-                return False
-            else:
-                logger_pro.warning({
-                    'action': 'Confirm to remove tracks.',
-                    'status': 'Warning',
-                    'message': '',
-                    'user_input': user_input
-                })
-                continue
+    
+    
