@@ -55,11 +55,7 @@ class NewTrackModel(NewTrack):
             'message': ''
         })
         try:
-            logger_pro.debug({
-                'action': 'Set dict data up columns.',
-                'status': 'Success',
-                'message': ''
-            })
+
             self.name = tracks_dict['name']
             self.artist = tracks_dict['artist']
             self.playlist_name = tracks_dict['playlist_name']
@@ -68,6 +64,12 @@ class NewTrackModel(NewTrack):
             self.added_at = tracks_dict['added_at']
             self.created_at = tracks_dict['created_at']
             self.like = tracks_dict['like']
+
+            logger_pro.debug({
+                'action': 'Set dict data up columns.',
+                'status': 'Success',
+                'message': ''
+            })
         except Exception as e:
             logger_pro.error({
                 'action': 'Set dict data up columns.',

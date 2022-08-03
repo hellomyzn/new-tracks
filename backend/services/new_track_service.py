@@ -790,7 +790,7 @@ class NewTrackService(object):
 
     def remove_tracks_by_index(self, first: int, last: int) -> None:
         """ 
-            remove tracks by index (first, last) you choose.
+            Remove tracks by index (first, last) you choose.
 
             Parameters
             ----------
@@ -814,9 +814,40 @@ class NewTrackService(object):
         tracks = tracks_all[first-1:last]
 
         # Remove tracks
-        if self.confirm_remove_tracks(tracks):    
-            for t in tracks:
-                spotify_repo.delete_track_by_url(t['track_url'])
+        logger_pro.info({
+            'action': 'Remove tracks by index (first, last) you choose.',
+            'status': 'Run',
+            'message': ''
+        })
+        if self.confirm_remove_tracks(tracks):
+            try:
+                for t in tracks:
+                    spotify_repo.delete_track(t)
+                logger_pro.info({
+                    'action': 'Remove tracks by index (first, last) you choose.',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'deleted_tracks_len': len(tracks)
+                    }
+                })
+            except Exception as e:
+                logger_pro.error({
+                    'action': 'Remove tracks by index (first, last) you choose.',
+                    'status': 'Fail',
+                    'message': '',
+                    'exception': e,
+                    'data': {
+                        'tracks_len': len(tracks)
+                    }
+                })
+                raise Exception
+        else:
+            logger_pro.warning({
+                'action': 'Remove tracks by index (first, last) you choose.',
+                'status': 'Warning',
+                'message': 'It was canceled.'
+            })
         return None
 
     def confirm_remove_tracks(self, tracks: list) -> bool:
@@ -828,7 +859,7 @@ class NewTrackService(object):
             Parameters
             ----------
             tracks: list
-                A list of tracks to remove.
+                A list of NewTrackModel instances to remove.
             
             Raises
             ------
@@ -841,7 +872,7 @@ class NewTrackService(object):
             ------
             Bool.
         """
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Confirm to remove tracks.',
             'status': 'Run',
             'message': ''
@@ -858,15 +889,15 @@ class NewTrackService(object):
 
         # Show tracks
         for i, t in enumerate(tracks, start = 1):
-            logger_pro.debug(f'Track: [{i}] {t["name"]}')
-            logger_con.info(f'Track: [{i}] {t["name"]}')
+            logger_pro.debug(f'Track: [{i}] {t.name}')
+            logger_con.debug(f'Track: [{i}] {t.name}')
 
         while True:
             # Confirm to remove
             q = 'Do you want to remove these tracks from playlist? (y/n): '
             user_input = input(q)
             if helper.is_yes(user_input):
-                logger_pro.info({
+                logger_pro.debug({
                     'action': 'Confirm to remove tracks.',
                     'status': 'Success',
                     'message': '',
@@ -874,7 +905,7 @@ class NewTrackService(object):
                 })
                 return True
             elif helper.is_no(user_input):
-                logger_pro.info({
+                logger_pro.debug({
                     'action': 'Confirm to remove tracks.',
                     'status': 'Success',
                     'message': '',

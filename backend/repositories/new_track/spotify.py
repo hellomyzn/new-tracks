@@ -71,7 +71,7 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             for t in tracks_json:
                 # Extract track dict
                 track_json = t['track']
-                track_dict = self.extract_track_from_json(track_json)
+                track_dict = self.extract_track_dict_from_json(track_json)
                 
                 # Create new track instance
                 track = NewTrackModel()
@@ -224,7 +224,7 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             })
             raise Exception
 
-    def extract_track_from_json(self, track_json: list) -> dict:
+    def extract_track_dict_from_json(self, track_json: list) -> dict:
         """ 
             Extract track a track from tracks json data.
 
@@ -356,50 +356,52 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             raise Exception
         return new_tracks
 
-    def delete_track_by_url(self, url: str) -> None:
+    def delete_track(self, track: NewTrackModel) -> None:
         """ 
-            Remove tracks by url
+            Delete a track.
 
             Parameters
             ----------
-            url: str
-                A url to remove
+            track: NewTrackModel
+                A new track instance to delete.
             
             Raises
             ------
             Exception
-                If you can not remove
+                If you can not delete.
 
             Return
             ------
             None
         """
-        url = [url]
-        logger_pro.debug({
-            'action': 'Remove tracks by url',
+        logger_pro.info({
+            'action': 'Delete tracks.',
             'status': 'Run',
             'message': ''
         })
         try:
+            url = [track.track_url]
             self.spotify.conn.playlist_remove_all_occurrences_of_items(self.playlist_id, url)
             logger_pro.debug({
-                'action': 'Remove tracks by url',
+                'action': 'Delete tracks.',
                 'status': 'Success',
                 'message': '',
                 'data': {
-                    'url': url
+                    'track': vars(track)
                 }
             })
         except Exception as e:
             logger_pro.error({
-                'action': 'Remove tracks by url',
+                'action': 'Delete tracks.',
                 'status': 'Fail',
                 'message': '',
+                'exception': e,
                 'args': {
-                    'playlist_id': playlist_id,
-                    'url': url
+                    'playlist_id': self.playlist_id,
+                    'track': vars(track)
                 }
             })
+            raise Exception
         return None
 
     def add_tracks_to_playlist(self, urls_list: list) -> None:
