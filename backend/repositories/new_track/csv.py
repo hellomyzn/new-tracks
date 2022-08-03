@@ -33,14 +33,15 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         """
         self.model = NewTrackModel()
         self.columns = self.model.get_columns()
+
         if setting.ENV == 'dev':
             self.path = setting.FILE_PATH_OF_CSV_TEST
         else:
             self.path = setting.FILE_PATH_OF_CSV
 
-    def all(self) -> list:
+    def all(self) -> NewTrackModel:
         """ 
-            Read all tracks
+            Read all tracks.
             
             Parameters
             ----------
@@ -52,27 +53,26 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
                 if there is no file or you set path up wrongly.
                 if there is no any track data in csv file.
             Exception
-                If it fails to read tracks
+                If it fails to read tracks.
 
             Return
             ------
             tracks: list
-                A list of tracks (each tracks was not dict, just a list)
+                A list of tracks (each tracks was not dict, just a list).
         """
 
         logger_pro.info({
             'action': 'Read all tracks from csv',
             'status': 'Run',
-            'message': '',
-            'data': {
-                'path': self.path
-            }
+            'message': ''
         })
 
         tracks = []
+        # If there is no csv file, return empty list
         if not helper.exists_file(self.path):
             return tracks
 
+        # If there is no header on csv file, return empty list
         if not self.read_header():
             return tracks
 
@@ -81,22 +81,35 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
                 csv_reader = csv.reader(csvfile)
                 next(csv_reader)
                 for row in csv_reader:
-                    track = {}
+                    track_dict = {}
 
+                    # Set track dict
                     for r, c in zip(row, self.columns):
-                        track[c] = r
-                    tracks.append(track)
+                        track_dict[c] = r
 
-            logger_pro.info({
-                'action': 'Read all tracks from csv',
-                'status': 'Success',
-                'message': '',
-                'data': {
-                    'tracks_len': len(tracks)
-                }
-            })
+                    # Set new track
+                    track = NewTrackModel()
+                    track.set_columns(track_dict)
+
+                    tracks.append(track)
+            if tracks:
+                logger_pro.info({
+                    'action': 'Read all tracks from csv',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'tracks_len': len(tracks)
+                    }
+                })
+            else:
+                logger_pro.warning({
+                    'action': 'Read all tracks from csv',
+                    'status': 'Warning',
+                    'message': 'There is no track on CSV'
+                })
+
         except Exception as e:          
-            logger_pro.warning({
+            logger_pro.error({
                 'action': 'Read all tracks from csv',
                 'status': 'Fails',
                 'message': '',
@@ -112,30 +125,28 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         return None
 
     def read_header(self) -> list:
-        """ Read header data on CSV
+        """ 
+            Read header data on CSV.
 
-        Parameters
-        ----------
-        None
+            Parameters
+            ----------
+            None
 
-        Raises
-        ------
-        Exception
-            If you fail to read the header.
+            Raises
+            ------
+            Exception
+                If you fail to read the header.
 
-        Return
-        ------
-        header: str
-            The header on the path of CSV
+            Return
+            ------
+            header: str
+                The header on the path of CSV.
         """
 
         logger_pro.debug({
             'action': 'Read header data from csv',
             'status': 'Run',
-            'message': '',
-            'data': {
-                'path': self.path
-            }
+            'message': ''
         })
 
         try:
@@ -164,7 +175,7 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         if header is None:
             logger_pro.warning({
                 'action': 'Read header data from csv',
-                'status': 'Fails',
+                'status': 'Warning',
                 'message': 'There is no header on the CSV',
                 'data': {
                     'path': self.path
@@ -219,7 +230,6 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
             })
 
         return
-
 
     def write(self, track: dict) -> None:
         """ Write tracks on CSV.
@@ -315,5 +325,70 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
     def find_by_name_and_artist(self, name: str, artist: str) -> dict:
         pass
     
+    def find_by_url(self, url: str) -> NewTrackModel:
+        """
+            Find a track by url.
+            
+            If there is no track on csv, return None.
+
+            Parameters
+            ----------
+            url: str
+                An url of track.
+
+            Raises
+            ------
+            Warning
+                If it could not find track on csv
+            Exception
+                If it fails to find tracks.
+
+            Return
+            ------
+            tracks: list
+                A new track instance found by url.
+        """
+        logger_pro.info({
+            'action': 'Find a track by url.',
+            'status': 'Run',
+            'message': ''
+            })
+        try:
+            tracks = self.all()
+            track = None
+
+            for t in tracks:
+                if t.track_url == url:
+                    track = t
+
+            if track:
+                logger_pro.info({
+                    'action': 'Find a track by url.',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'track': vars(track)
+                    }
+                })
+            else:
+                logger_pro.warning({
+                    'action': 'Find a track by url.',
+                    'status': 'Warning',
+                    'message': 'You could not find a track on the csv',
+                    'url': url
+                })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Find a track by url.',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'url': url
+                }
+            })
+            raise Exception
+        return track
+
     def delete_by_name_and_artist(self, name: str, artist: str) -> None:
         pass
