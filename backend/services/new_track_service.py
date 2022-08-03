@@ -788,7 +788,7 @@ class NewTrackService(object):
             logger_pro.warning(m)
         return None
 
-    def remove_tracks_by_index(self, first, last) -> None:
+    def remove_tracks_by_index(self, first: int, last: int) -> None:
         """ 
             remove tracks by index (first, last) you choose.
 
@@ -810,12 +810,12 @@ class NewTrackService(object):
         """
         # Fetch tracks from playlist
         spotify_repo = SpotifyNewTrackRepository()
-        tracks_dict = spotify_repo.all()
-        tracks_dict = tracks_dict[first-1:last]
+        tracks_all = spotify_repo.all()
+        tracks = tracks_all[first-1:last]
 
         # Remove tracks
-        if self.confirm_remove_tracks(tracks_dict):    
-            for t in tracks_dict:
+        if self.confirm_remove_tracks(tracks):    
+            for t in tracks:
                 spotify_repo.delete_track_by_url(t['track_url'])
         return None
 

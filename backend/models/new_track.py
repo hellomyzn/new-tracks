@@ -1,7 +1,12 @@
-import utils.setting as setting
-from models.interfaces.new_track import Track
+import logging
 
-class NewTrackModel(Track):
+import utils.setting as setting
+from models.interfaces.new_track import NewTrack
+
+logger_pro = logging.getLogger('production')
+logger_con = logging.getLogger('console')
+
+class NewTrackModel(NewTrack):
     def __init__(self):
         self.name = None
         self.artist = None
@@ -25,3 +30,50 @@ class NewTrackModel(Track):
             'like'
             ]
         return columns
+    
+    def set_columns(self, tracks_dict: dict) -> None:
+        """ 
+            Set dict data up columns.
+            
+            Parameters
+            ----------
+            tracks_dict: dict
+                A dict to set up
+
+            Raises
+            ------
+            Exception
+                If you can not set up.
+
+            Return
+            ------
+            None.
+        """
+        logger_pro.debug({
+            'action': 'Set dict data up columns.',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            logger_pro.debug({
+                'action': 'Set dict data up columns.',
+                'status': 'Success',
+                'message': ''
+            })
+            self.name = tracks_dict['name']
+            self.artist = tracks_dict['artist']
+            self.playlist_name = tracks_dict['playlist_name']
+            self.track_url = tracks_dict['track_url']
+            self.playlist_url = tracks_dict['playlist_url']
+            self.added_at = tracks_dict['added_at']
+            self.created_at = tracks_dict['created_at']
+            self.like = tracks_dict['like']
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Set dict data up columns.',
+                'status': 'Fail',
+                'message': ''
+            })
+            raise Exception
+        return None
+
