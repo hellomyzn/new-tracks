@@ -121,8 +121,8 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         return tracks
 
     def add(self, track: NewTrackModel) -> None:
-        track = 
-        self.write(data)
+        track_dict = track.get_dict()
+        self.write_dict(track_dict)
         return None
 
     def read_header(self) -> list:
@@ -232,7 +232,7 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
 
         return
 
-    def write(self, track: dict) -> None:
+    def write_dict(self, track: dict) -> None:
         """ Write tracks on CSV.
 
         If there is no csv file to write,
