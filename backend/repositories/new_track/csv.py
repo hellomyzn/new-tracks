@@ -37,7 +37,6 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
             self.path = setting.FILE_PATH_OF_CSV_TEST
         else:
             self.path = setting.FILE_PATH_OF_CSV
-        print(self.path)
 
     def all(self) -> list:
         """ 

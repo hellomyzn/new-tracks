@@ -40,7 +40,6 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             self.playlist_id = setting.CONFIG['PLAYLIST_ID']['TEST']
         else:
             self.playlist_id = setting.CONFIG['PLAYLIST_ID']['NEW_TRACKS']
-        print(self.playlist_id)
         
 
     def all(self) -> list:

@@ -42,7 +42,7 @@ class GssNewTrackRepository(NewTrackRepoInterface):
             sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME_TEST']
         else:
             sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME']
-        print(sheet_name)
+
         self.model = NewTrackModel()
         self.columns = self.model.get_columns()
         self.gss = GoogleSpreadsheet()

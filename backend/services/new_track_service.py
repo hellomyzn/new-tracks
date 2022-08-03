@@ -812,8 +812,80 @@ class NewTrackService(object):
         spotify_repo = SpotifyNewTrackRepository()
         tracks_dict = spotify_repo.all()
         tracks_dict = tracks_dict[first-1:last]
-        
+
         # Remove tracks
-        for t in tracks_dict:
-            spotify_repo.delete_track_by_url(t['track_url'])
+        if self.confirm_remove_tracks(tracks_dict):    
+            for t in tracks_dict:
+                spotify_repo.delete_track_by_url(t['track_url'])
         return None
+
+    def confirm_remove_tracks(self, tracks: list) -> bool:
+        """
+            Confirm to remove tracks.
+
+            If there is no tracks, return False
+
+            Parameters
+            ----------
+            tracks: list
+                A list of tracks to remove.
+            
+            Raises
+            ------
+            Warninig
+                If there is no tracks.
+            Exception
+                If you can not confirm.
+            
+            Return
+            ------
+            Bool.
+        """
+        logger_pro.info({
+            'action': 'Confirm to remove tracks.',
+            'status': 'Run',
+            'message': ''
+        })
+        if not tracks:
+            m = 'There is no tracks to remove on you playlist'
+            logger_con.warning(m)
+            logger_pro.warning({
+                'action': 'Confirm to remove tracks.',
+                'status': 'Warning',
+                'message': m
+            })
+            return False
+
+        # Show tracks
+        for i, t in enumerate(tracks, start = 1):
+            logger_pro.debug(f'Track: [{i}] {t["name"]}')
+            logger_con.info(f'Track: [{i}] {t["name"]}')
+
+        while True:
+            # Confirm to remove
+            q = 'Do you want to remove these tracks from playlist? (y/n): '
+            user_input = input(q)
+            if helper.is_yes(user_input):
+                logger_pro.info({
+                    'action': 'Confirm to remove tracks.',
+                    'status': 'Success',
+                    'message': '',
+                    'user_input': user_input
+                })
+                return True
+            elif helper.is_no(user_input):
+                logger_pro.info({
+                    'action': 'Confirm to remove tracks.',
+                    'status': 'Success',
+                    'message': '',
+                    'user_input': user_input
+                })
+                return False
+            else:
+                logger_pro.warning({
+                    'action': 'Confirm to remove tracks.',
+                    'status': 'Warning',
+                    'message': '',
+                    'user_input': user_input
+                })
+                continue
