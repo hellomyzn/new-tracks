@@ -282,8 +282,8 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
     def find_by_name_and_artist(self, name: str, artist: str) -> NewTrackModel:
         return
     
-    def add(self, data: dict) -> None:
-        url = [data['track_url']]
+    def add(self, track: NewTrackModel) -> None:
+        url = [track.track_url]
         
         self.add_tracks_to_playlist(url)
         return

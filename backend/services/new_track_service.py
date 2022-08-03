@@ -17,12 +17,7 @@ class NewTrackService(object):
 
         Attributes
         ----------
-        spotify:
-            A spotify new track repository.
-        csv:
-            A csv new track repository.
-        gss:
-            A google spreadsheet new track repository.
+        None
 
         Methods
         ------
@@ -34,8 +29,29 @@ class NewTrackService(object):
             ----------
             None
         """
-        self.spotify = SpotifyModel()
-        self.playlist_ids = [
+        pass
+
+    @classmethod
+    def fetch_tracks_dict_from_playlists(cls) -> list:
+        """ 
+            Fetch tracks from multiple playlists.
+            
+            Parameters
+            ----------
+            None
+
+            Raises
+            ------
+            Exception:
+                If it fails to fetch tracks from playlists, return an empty list.
+
+            Return
+            ------
+            tracks: list
+                A tracks list
+        """
+        new_tracks_dict = []
+        playlist_ids = [
             "37i9dQZEVXbMDoHDwVN2tF",  # GLOBAL
             "37i9dQZEVXbLRQDuF5jeBp",  # US
             "37i9dQZEVXbKXQ4mDTEBXq",  # JP
@@ -50,7 +66,285 @@ class NewTrackService(object):
             "37i9dQZEVXbIPWwFssbupI",  # FR
             "37i9dQZEVXbMXbN3EUUhlg",  # BR
             "37i9dQZF1DX4JAvHpjipBk"   # New Music Friday
-            ]
+        ]
+
+        logger_pro.info({
+            'action': 'Fetch tracks from multiple playlists.',
+            'status': 'Run',
+            'message': ''
+        })
+
+        try:
+            for p_id in playlist_ids:
+                # Fetch json data
+                tracks_json = NewTrackService.fetch_tracks_json_from_playlist(p_id)
+                # Extract only the data we need
+                tracks_json = [t['track'] for t in tracks_json]
+                # Extract track data
+                tracks_dict = [NewTrackService.extract_track_dict_from_json(t) for t in tracks_json]
+                # Remove duplicated tracks amoung the playlists
+                if new_tracks_dict:
+                    tracks_dict, _ = NewTrackService.retrieve_unique_and_duplicate_tracks_dict(tracks_dict, new_tracks_dict)
+                # Put playlist data on tracks dict
+                tracks_dict = NewTrackService.put_playlist_data_into_tracks_dict(p_id, tracks_dict)
+                new_tracks_dict += tracks_dict
+                logger_pro.info({
+                    'action': 'Fetch tracks from a playlist.',
+                    'status': 'Success',
+                    'message': 'This is in a for loop',
+                    'data': {
+                        'id': p_id,
+                        'p_tracks_len': len(tracks_dict),
+                        'tracks_len': len(new_tracks_dict)
+                    }
+                })
+        except Exception as e:
+            new_tracks_dict = []
+            logger_con.error(f"Stoped while fetching tracks:': ({e})")
+            logger_pro.error({
+                'action': 'Fetch tracks from multiple playlists.',
+                'status': 'Fail',
+                'message': '',
+                'exception': e
+            })
+            raise Exception
+
+        logger_pro.info({
+            'action': 'Fetch tracks from multiple playlists.',
+            'status': 'Success',
+            'message': '',
+            'new_tracks_dict_len': len(new_tracks_dict)
+        })
+        
+        return new_tracks_dict
+    
+    @classmethod
+    def fetch_tracks_json_from_playlist(cls, playlist_id: str) -> list:
+        """ 
+            Fetch tracks json data from a playlist.
+            
+            Parameters
+            ----------
+            playlist_id: str
+                A playlist ID to fetch tracks from.
+
+            Raises
+            ------
+            Exception
+                The playlist id you provided is not correct.
+
+            Return
+            ------
+            tracks: list
+                A tracks json data list gotten from the playlist.
+        """
+        logger_pro.debug({
+            'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
+            'status': 'Run',
+            'message': ''
+        })
+        tracks_number = NewTrackService.fetch_playlist_track_number(playlist_id)
+        max_number = 100
+        tracks_json = []
+
+        try:
+            spotify = SpotifyModel()
+            while max_number < tracks_number:
+                offset = len(tracks_json)
+                playlist_items = spotify.connect.playlist_items(playlist_id, limit=100, offset=offset)
+                current_tracks_json = playlist_items['items']
+                tracks_json += current_tracks_json
+                tracks_number -= len(current_tracks_json)
+                logger_pro.debug({
+                    'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'offset': offset,
+                        'until': offset + len(current_tracks_json),
+                        'length': len(current_tracks_json)
+                    }
+                })
+            else:
+                # after while loop or less than 100 tracks
+                offset = len(tracks_json)
+                playlist_items = spotify.conn.playlist_items(playlist_id, limit=100, offset=offset)
+                current_tracks_json = playlist_items['items']
+                tracks_json += current_tracks_json
+                logger_pro.debug({
+                    'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
+                    'status': 'Success',
+                    'message': '',
+                    'data': {
+                        'offset': offset,
+                        'until': offset + len(current_tracks_json),
+                        'length': len(current_tracks_json)
+                    }
+                })
+        except Exception as e:
+            logger_pro.error({
+                'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
+                'status': 'Fail',
+                'message': 'This is in a while loop',
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
+            })
+            raise Exception
+
+        return tracks_json
+
+    @classmethod
+    def fetch_playlist_track_number(cls, playlist_id: str) -> int:
+        """
+            Fetch a playlist track number.
+
+            Parameters
+            ----------
+            playlist_id: str
+                A playlist ID to fetch tracks from.
+
+            Raises
+            ------
+            Exception
+                If you can not fetch playlist track number through Spotify API.
+
+            Return
+            ------
+            track_number: int
+                The number of tracks in a playlist.
+        """
+        logger_pro.debug({
+            'action': f'Fetch a playlist track number. ({playlist_id}) ',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            spotify = SpotifyModel()
+            playlist_data = spotify.conn.playlist(playlist_id)
+            track_number = playlist_data['tracks']['total']
+            logger_pro.debug({
+                'action': f'Fetch a playlist track number. ({playlist_id}) ',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'track_number': track_number
+                }
+            })
+            return track_number
+        except Exception as e:
+            logger_pro.error({
+                'action': f'Fetch a playlist track number. ({playlist_id}) ',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
+            })
+            raise Exception
+
+    @classmethod
+    def fetch_playlist_name(cls, playlist_id: str) -> str:
+        """ 
+            Fetch a playlist name.
+
+            Parameters
+            ----------
+            playlist_id: str
+                A playlist ID to fetch tracks from.
+
+            Raises
+            ------
+            Exception
+                If you can not fetch playlist name through Spotify API.
+
+            Return
+            ------
+            playlist_name: str
+                A playlist name.
+        """
+        logger_pro.debug({
+            'action': f'Fetch a playlist name ({playlist_id}) ',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            spotify = SpotifyModel()
+            playlist_data = spotify.conn.playlist(playlist_id)
+            playlist_name = playlist_data["name"]
+            logger_pro.debug({
+                'action': f'Fetch a playlist name ({playlist_id}) ',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'playlist_name': playlist_name
+                }
+            })
+            return playlist_name
+        except Exception as e:
+            logger_pro.error({
+                'action': f'Fetch a playlist name ({playlist_id}) ',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
+            })
+            raise Exception
+
+    @classmethod
+    def fetch_playlist_url(cls, playlist_id: str) -> str:
+        """
+            Fetch a playlist url
+
+            Parameters
+            ----------
+            playlist_id: str
+                A playlist ID to fetch tracks from.
+
+            Raises
+            ------
+            Exception
+                If you can not fetch playlist url through Spotify API
+
+            Return
+            ------
+            playlist_url: str
+                A playlist url
+        """
+        logger_pro.debug({
+            'action': f'Fetch a playlist url ({playlist_id}) ',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            spotify = SpotifyModel()
+            playlist_data = spotify.conn.playlist(playlist_id)
+            playlist_url = playlist_data['external_urls']['spotify']
+            logger_pro.debug({
+                'action': f'Fetch a playlist url ({playlist_id}) ',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'playlist_url': playlist_url
+                }
+            })
+            return playlist_url
+        except Exception as e:
+            logger_pro.error({
+                'action': f'Fetch a playlist url ({playlist_id}) ',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'playlist_id': playlist_id
+                }
+            })
+            raise Exception
+
     @classmethod
     def fetch_current_tracks_json(cls) -> dict:
         """ 
@@ -266,411 +560,9 @@ class NewTrackService(object):
             })
             raise Exception
         return track
-    
+
     @classmethod
-    def retrieve_duplicate_tracks(cls, tracks: list, from_tracks: list) -> list:
-        """
-            Retrieve duplicate tracks dict from tracks dict
-
-            Parameters
-            ----------
-            tracks: list
-                A tracks list to confirm It's duplicate or no.
-            from_tracks: list
-                A tracks list to confirm from.
-
-            Raises
-            ------
-            Warning
-                If there is no tracks.
-                If there is no from_tracks.
-            Exception
-                If it fail to retrieve.
-
-            Return
-            ------
-            duplicate_tracks: list
-                a unique tracks list.
-        """
-        logger_pro.debug({
-            'action': 'Retrieve duplicate tracks dict from tracks dict',
-            'status': 'Run',
-            'message': '',
-            'data': {
-                'tracks_len': len(tracks),
-                'from_tracks_len': len(from_tracks)
-            }
-        })
-        
-        if not tracks:
-            logger_pro.warning({
-                'action': 'Retrieve duplicate tracks dict from tracks dict',
-                'status': 'Warning',
-                'message': 'There is no tracks'
-            })
-            return None
-
-        if not from_tracks:
-            logger_pro.warning({
-                'action': 'Retrieve duplicate tracks dict from tracks dict',
-                'status': 'Warning',
-                'message': 'There is no from_tracks'
-            })
-            return None
-
-        duplicate_tracks = []
-        try:
-            from_track_urls = [t.track_url for t in from_tracks]
-
-            for track in tracks:
-                # If url is the same
-                if track.track_url in from_track_urls:
-                    duplicate_tracks.append(track)
-                    logger_pro.debug(f'Duplicate track: {vars(track)} by url')
-                    continue
-                
-            logger_pro.debug({
-                'action': 'Retrieve duplicate tracks dict from tracks dict',
-                'status': 'Success',
-                'message': '',
-                'data': {
-                    'duplicate_tracks_len': len(duplicate_tracks)
-                }
-            })
-        except Exception as e:
-            logger_pro.error({
-                'action': 'Retrieve duplicate tracks dict from tracks dict',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'tracks_len': len(tracks),
-                    'from_tracks_len': len(from_tracks),
-                    'tracks': tracks,
-                    'from_tracks': from_tracks
-                }
-            })
-            raise Exception
-        return duplicate_tracks
-
-    def add_new_tracks(self) -> None:
-        """ Add new tracks to csv, gss, spotify playlist
-        
-        Parameters
-        ----------
-        None
-
-        Raises
-        ------
-        None
-
-        Return
-        ------
-        None
-        """
-        spotify_repo = SpotifyNewTrackRepository()
-        csv_repo = CsvNewTrackRepository()
-        gss_repo =  GssNewTrackRepository()
-        # Fetch tracks
-        tracks_spotify = self.fetch_tracks_from_playlists()
-        tracks_csv = csv_repo.all()
-        
-        new_tracks = self.retrieve_unique_tracks_dict(tracks_spotify,tracks_csv)
-
-        for track in new_tracks:
-            spotify_repo.add(track)
-            csv_repo.add(track)
-            gss_repo.add(track)
-        return
-
-    def fetch_tracks_from_playlists(self) -> list:
-        """ 
-            Fetch tracks from multiple playlists.
-            
-            Parameters
-            ----------
-            None
-
-            Raises
-            ------
-            Exception:
-                If it fails to fetch tracks from playlists, return an empty list.
-
-            Return
-            ------
-            tracks: list
-                A tracks list
-        """
-        new_tracks_dict = []
-        logger_pro.info({
-            'action': 'Fetch tracks from multiple playlists.',
-            'status': 'Run',
-            'message': ''
-        })
-        try:
-            for p_id in self.playlist_ids:
-                # Fetch json data
-                tracks_json = self.fetch_tracks_json_from_playlist(p_id)
-                # Extract only the data we need
-                tracks_json = [t['track'] for t in tracks_json]
-                # Extract track data
-                tracks_dict = [NewTrackService.extract_track_dict_from_json(t) for t in tracks_json]
-                # Remove duplicated tracks amoung the playlists
-                tracks_dict = self.retrieve_unique_tracks_dict(tracks_dict, new_tracks_dict)
-                # Put playlist data on tracks dict
-                tracks_dict = self.put_playlist_data_into_tracks_dict(p_id, tracks_dict)
-                new_tracks_dict += tracks_dict
-                logger_pro.debug({
-                    'action': 'Fetch tracks from multiple playlists.',
-                    'status': 'Success',
-                    'message': 'This is in a for loop',
-                    'data': {
-                        'id': p_id,
-                        'p_tracks_len': len(tracks_dict),
-                        'tracks_len': len(new_tracks_dict)
-                    }
-                })
-        except Exception as e:
-            new_tracks_dict = []
-            logger_con.error(f"Stoped while fetching tracks:': ({e})")
-            logger_pro.error({
-                'action': 'Fetch tracks from multiple playlists.',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'playlist_id': p_id
-                }
-            })
-
-        logger_pro.info({
-            'action': 'Fetch tracks from multiple playlists.',
-            'status': 'Success',
-            'message': ''
-        })
-        
-        return new_tracks_dict
-    
-    def fetch_tracks_json_from_playlist(self, playlist_id: str) -> list:
-        """ 
-            Fetch tracks json data from a playlist.
-            
-            Parameters
-            ----------
-            playlist_id: str
-                A playlist ID to fetch tracks from.
-
-            Raises
-            ------
-            Exception
-                The playlist id you provided is not correct.
-
-            Return
-            ------
-            tracks: list
-                A tracks json data list gotten from the playlist.
-        """
-        logger_pro.info({
-            'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
-            'status': 'Run',
-            'message': ''
-        })
-        tracks_number = self.fetch_playlist_track_number(playlist_id)
-        max_number = 100
-        tracks_json = []
-
-        try:
-            while max_number < tracks_number:
-                offset = len(tracks_json)
-                playlist_items = self.spotify.connect.playlist_items(playlist_id, limit=100, offset=offset)
-                current_tracks_json = playlist_items['items']
-                tracks_json += current_tracks_json
-                tracks_number -= len(current_tracks_json)
-                logger_pro.debug({
-                    'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
-                    'status': 'Success',
-                    'message': '',
-                    'data': {
-                        'offset': offset,
-                        'until': offset + len(current_tracks_json),
-                        'length': len(current_tracks_json)
-                    }
-                })
-            else:
-                # after while loop or less than 100 tracks
-                offset = len(tracks_json)
-                playlist_items = self.spotify.conn.playlist_items(playlist_id, limit=100, offset=offset)
-                current_tracks_json = playlist_items['items']
-                tracks_json += current_tracks_json
-                logger_pro.debug({
-                    'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
-                    'status': 'Success',
-                    'message': '',
-                    'data': {
-                        'offset': offset,
-                        'until': offset + len(current_tracks_json),
-                        'length': len(current_tracks_json)
-                    }
-                })
-        except Exception as e:
-            logger_pro.error({
-                'action': f'Fetch tracks json data from a playlist ({playlist_id}).',
-                'status': 'Fail',
-                'message': 'This is in a while loop',
-                'exception': e,
-                'data': {
-                    'playlist_id': playlist_id
-                }
-            })
-            raise Exception
-
-        return tracks_json
-
-    def fetch_playlist_track_number(self, playlist_id: str) -> int:
-        """
-            Fetch a playlist track number.
-
-            Parameters
-            ----------
-            playlist_id: str
-                A playlist ID to fetch tracks from.
-
-            Raises
-            ------
-            Exception
-                If you can not fetch playlist track number through Spotify API.
-
-            Return
-            ------
-            track_number: int
-                The number of tracks in a playlist.
-        """
-        logger_pro.info({
-            'action': f'Fetch a playlist track number. ({playlist_id}) ',
-            'status': 'Run',
-            'message': ''
-        })
-        try:
-            playlist_data = self.spotify.conn.playlist(playlist_id)
-            track_number = playlist_data['tracks']['total']
-            logger_pro.info({
-                'action': f'Fetch a playlist track number. ({playlist_id}) ',
-                'status': 'Success',
-                'message': '',
-                'data': {
-                    'track_number': track_number
-                }
-            })
-            return track_number
-        except Exception as e:
-            logger_pro.error({
-                'action': f'Fetch a playlist track number. ({playlist_id}) ',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'playlist_id': playlist_id
-                }
-            })
-            raise Exception
-
-    def fetch_playlist_name(self, playlist_id: str) -> str:
-        """ 
-            Fetch a playlist name.
-
-            Parameters
-            ----------
-            playlist_id: str
-                A playlist ID to fetch tracks from.
-
-            Raises
-            ------
-            Exception
-                If you can not fetch playlist name through Spotify API.
-
-            Return
-            ------
-            playlist_name: str
-                A playlist name.
-        """
-        logger_pro.info({
-            'action': f'Fetch a playlist name ({playlist_id}) ',
-            'status': 'Run',
-            'message': ''
-        })
-        try:
-            playlist_data = self.spotify.conn.playlist(playlist_id)
-            playlist_name = playlist_data["name"]
-            logger_pro.info({
-                'action': f'Fetch a playlist name ({playlist_id}) ',
-                'status': 'Success',
-                'message': '',
-                'data': {
-                    'playlist_name': playlist_name
-                }
-            })
-            return playlist_name
-        except Exception as e:
-            logger_pro.error({
-                'action': f'Fetch a playlist name ({playlist_id}) ',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'playlist_id': playlist_id
-                }
-            })
-            raise Exception
-
-    def fetch_playlist_url(self, playlist_id: str) -> str:
-        """
-            Fetch a playlist url
-
-            Parameters
-            ----------
-            playlist_id: str
-                A playlist ID to fetch tracks from.
-
-            Raises
-            ------
-            Exception
-                If you can not fetch playlist url through Spotify API
-
-            Return
-            ------
-            playlist_url: str
-                A playlist url
-        """
-        logger_pro.info({
-            'action': f'Fetch a playlist url ({playlist_id}) ',
-            'status': 'Run',
-            'message': ''
-        })
-        try:
-            playlist_data = self.spotify.conn.playlist(playlist_id)
-            playlist_url = playlist_data['external_urls']['spotify']
-            logger_pro.info({
-                'action': f'Fetch a playlist url ({playlist_id}) ',
-                'status': 'Success',
-                'message': '',
-                'data': {
-                    'playlist_url': playlist_url
-                }
-            })
-            return playlist_url
-        except Exception as e:
-            logger_pro.error({
-                'action': f'Fetch a playlist url ({playlist_id}) ',
-                'status': 'Fail',
-                'message': '',
-                'exception': e,
-                'data': {
-                    'playlist_id': playlist_id
-                }
-            })
-            raise Exception
-
-    def put_playlist_data_into_tracks_dict(self, playlist_id: str, tracks_dict: list) -> list:
+    def put_playlist_data_into_tracks_dict(cls, playlist_id: str, tracks_dict: list) -> list:
         """ 
             Put playlist name and url to tracks dict
 
@@ -691,18 +583,18 @@ class NewTrackService(object):
             tracks: list
                 A track dict of list added name and url.
         """
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Put playlist name and url to tracks dict',
             'status': 'Run',
             'message': ''
         })
         try:
-            p_name = self.fetch_playlist_name(playlist_id)
-            p_url = self.fetch_playlist_url(playlist_id)
+            p_name = NewTrackService.fetch_playlist_name(playlist_id)
+            p_url = NewTrackService.fetch_playlist_url(playlist_id)
             for t in tracks_dict:
                 t['playlist_name'] = p_name
                 t['playlist_url'] = p_url
-            logger_pro.info({
+            logger_pro.debug({
                 'action': 'Put playlist name and url to tracks dict',
                 'status': 'Success',
                 'message': ''
@@ -721,9 +613,10 @@ class NewTrackService(object):
             raise Exception
         return tracks_dict
 
-    def retrieve_unique_tracks_dict(self, tracks: list, from_tracks: list) -> list:
+    @classmethod
+    def retrieve_unique_and_duplicate_tracks_dict(cls, tracks: list, from_tracks: list) -> list:
         """
-            Retrieve unique tracks dict from tracks dict
+            Retrieve unique and duplicate tracks dict from tracks dict
 
             Parameters
             ----------
@@ -734,16 +627,21 @@ class NewTrackService(object):
 
             Raises
             ------
+            Warning
+                If there is no tracks.
+                If there is no from_tracks.
             Exception
                 If it fail to retrieve
 
             Return
             ------
             unique_tracks: list
-                a unique tracks list.
+                An unique track dict list.
+            duplicate_tracks: list
+                A duplicate track dict list.
         """
-        logger_pro.info({
-            'action': 'Retrieve unique tracks dict from tracks dict',
+        logger_pro.debug({
+            'action': 'Retrieve unique and duplicate tracks dict from tracks dict',
             'status': 'Run',
             'message': '',
             'data': {
@@ -751,35 +649,44 @@ class NewTrackService(object):
                 'from_tracks_len': len(from_tracks)
             }
         })
-        
-        if not from_tracks:
-            logger_con.info(f'The number of new tracks is {len(tracks)}')
-            logger_pro.info({
-                'action': 'Retrieve unique tracks dict from tracks dict',
-                'status': 'Success',
-                'message': '',
-                'data': {
-                    'tracks_len': len(tracks)
-                }
+
+        if not tracks:
+            logger_pro.warning({
+                'action': 'Retrieve unique and duplicate tracks dict from tracks dict',
+                'status': 'Warning',
+                'message': 'There is no tracks'
             })
-            return tracks
+            return None, None
+
+        if not from_tracks:
+            logger_pro.warning({
+                'action': 'Retrieve unique and duplicate tracks dict from tracks dict',
+                'status': 'Warning',
+                'message': 'There is no from_tracks'
+            })
+            return None, None      
 
         unique_tracks = []
+        duplicate_tracks = []
+
         try:
-            from_track_names = [t['name'] for t in from_tracks]
-            from_track_artists = [t['artist'] for t in from_tracks]
-            for track in tracks:
-                if track['name'] in from_track_names and track['artist'] in from_track_artists:
-                    continue
-                unique_tracks.append(track)
-            
-            logger_con.info(f'The number of new tracks is {len(unique_tracks)}')
-            logger_pro.info({
-                'action': 'Retrieve unique tracks dict from tracks dict',
+            from_track_urls = [t['track_url'] for t in from_tracks]
+
+            for t in tracks:
+                if t['track_url'] in from_track_urls:
+                    duplicate_tracks.append(t)
+                    logger_pro.debug(f'Duplicate track: {t} by url')
+                else:
+                    unique_tracks.append(t)
+                    logger_pro.debug(f'Unique track: {t} by url')
+
+            logger_pro.debug({
+                'action': 'Retrieve unique and duplicate tracks dict from tracks dict',
                 'status': 'Success',
                 'message': '',
                 'data': {
-                    'tracks_len': len(unique_tracks)
+                    'unique_tracks_len': len(unique_tracks),
+                    'duplicate_tracks_len': len(duplicate_tracks)
                 }
             })
         except Exception as e:
@@ -796,7 +703,138 @@ class NewTrackService(object):
                 }
             })
             raise Exception
-        return unique_tracks
+        return unique_tracks, duplicate_tracks
+
+    @classmethod
+    def retrieve_unique_and_duplicate_tracks(cls, tracks: list, from_tracks: list) -> list:
+        """
+            Retrieve unique and duplicate new track instances from tracks dict
+
+            Parameters
+            ----------
+            tracks: list
+                A tracks list to confirm It's duplicate or no.
+            from_tracks: list
+                A tracks list to confirm from.
+
+            Raises
+            ------
+            Warning
+                If there is no tracks.
+                If there is no from_tracks.
+            Exception
+                If it fail to retrieve.
+
+            Return
+            ------
+            unique_tracks: list
+                An unique new tracks instances list.
+            duplicate_tracks: list
+                A duplicate new tracks instances list.
+        """
+        logger_pro.info({
+            'action': 'Retrieve unique and duplicate new track instances from tracks dict',
+            'status': 'Run',
+            'message': '',
+            'data': {
+                'tracks_len': len(tracks),
+                'from_tracks_len': len(from_tracks)
+            }
+        })
+        
+        if not tracks:
+            logger_pro.warning({
+                'action': 'Retrieve unique and duplicate new track instances from tracks dict',
+                'status': 'Warning',
+                'message': 'There is no tracks'
+            })
+            return None, None
+
+        if not from_tracks:
+            logger_pro.warning({
+                'action': 'Retrieve unique and duplicate new track instances from tracks dict',
+                'status': 'Warning',
+                'message': 'There is no from_tracks'
+            })
+            return None, None
+
+        unique_tracks = []
+        duplicate_tracks = []
+        try:
+            from_track_urls = [t.track_url for t in from_tracks]
+
+            for t in tracks:
+                # If url is the same
+                if t.track_url in from_track_urls:
+                    duplicate_tracks.append(t)
+                    logger_pro.debug(f'Duplicate track: {vars(t)} by url')
+                else:
+                    unique_tracks.append(t)
+                    logger_pro.debug(f'Unique track: {vars(t)} by url')
+                
+            logger_pro.info({
+                'action': 'Retrieve unique and duplicate new track instances from tracks dict',
+                'status': 'Success',
+                'message': '',
+                'data': {
+                    'unique_tracks_len': len(unique_tracks),
+                    'duplicate_tracks_len': len(duplicate_tracks)
+                }
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Retrieve unique and duplicate new track instances from tracks dict',
+                'status': 'Fail',
+                'message': '',
+                'exception': e,
+                'data': {
+                    'tracks_len': len(tracks),
+                    'from_tracks_len': len(from_tracks),
+                    'tracks': tracks,
+                    'from_tracks': from_tracks
+                }
+            })
+            raise Exception
+        return unique_tracks, duplicate_tracks
+
+    def add_new_tracks(self) -> None:
+        """ Add new tracks to csv, gss, spotify playlist
+        
+        Parameters
+        ----------
+        None
+
+        Raises
+        ------
+        None
+
+        Return
+        ------
+        None
+        """
+        spotify_repo = SpotifyNewTrackRepository()
+        csv_repo = CsvNewTrackRepository()
+        gss_repo =  GssNewTrackRepository()
+        
+        # Fetch tracks
+        tracks_dict_spo = NewTrackService.fetch_tracks_dict_from_playlists()
+
+        # Set tracks
+        tracks_spo = []
+        for t_dict in tracks_dict_spo:
+            t = NewTrackModel()
+            t.set_columns(t_dict)
+            tracks_spo.append(t)
+
+        # Get tracks on csv
+        tracks_csv = csv_repo.all()
+
+        new_tracks, _ = NewTrackService.retrieve_unique_and_duplicate_tracks(tracks_spo, tracks_csv)
+        for t in new_tracks:
+            spotify_repo.add(t)
+            csv_repo.add(t)
+            gss_repo.add(t)
+        return None
 
     def show_current_track(self) -> None:
         """
@@ -931,7 +969,7 @@ class NewTrackService(object):
             return None
 
         # Retrieve duplicate tracks
-        duplicate_tracks = NewTrackService.retrieve_duplicate_tracks(playlist_tracks, current_tracks)
+        _, duplicate_tracks = NewTrackService.retrieve_unique_and_duplicate_tracks(playlist_tracks, current_tracks)
         if not duplicate_tracks:
             m = 'There is no duplicate tracks. So There is no tracks to remove on your playlist'
             logger_con.warning(m)

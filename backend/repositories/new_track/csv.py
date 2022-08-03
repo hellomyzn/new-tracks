@@ -120,7 +120,8 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
             })
         return tracks
 
-    def add(self, data: dict) -> None:
+    def add(self, track: NewTrackModel) -> None:
+        track = 
         self.write(data)
         return None
 
