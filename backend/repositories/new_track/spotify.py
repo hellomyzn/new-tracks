@@ -374,7 +374,7 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             ------
             None
         """
-        logger_pro.info({
+        logger_pro.debug({
             'action': 'Delete tracks.',
             'status': 'Run',
             'message': ''
