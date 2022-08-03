@@ -13,11 +13,12 @@ class NewTrackModel(NewTrack):
         self.playlist_name = None
         self.track_url = None
         self.playlist_url = None
+        self.release_date = None
         self.added_at = None
         self.created_at = None
         self.like = None
     
-    def get_columns(self):
+    def get_columns(self) -> list:
         columns = [
             'name',
             'artist',
@@ -31,6 +32,57 @@ class NewTrackModel(NewTrack):
             ]
         return columns
     
+    def get_dict(self) -> dict:
+        """ 
+            Get track dict data.
+            
+            Parameters
+            ----------
+            None
+
+            Raises
+            ------
+            Exception
+                If you can not get.
+
+            Return
+            ------
+            track: dict
+                A track dict data.
+        """
+        logger_pro.debug({
+            'action': 'Get track dict data.',
+            'status': 'Run',
+            'message': ''
+        })
+        try:
+            track = {
+                'name': self.name,
+                'artist': self.artist,
+                'playlist_name': self.playlist_name,
+                'track_url': self.track_url,
+                'playlist_url': self.playlist_url,
+                'release_date': self.release_date,
+                'added_at': self.added_at,
+                'created_at': self.created_at,
+                'like': self.like
+            }
+            logger_pro.debug({
+                'action': 'Get track dict data.',
+                'status': 'Success',
+                'message': '',
+                'track': track
+            })
+        except Exception as e:
+            logger_pro.error({
+                'action': 'Get track dict data.',
+                'status': 'Success',
+                'message': '',
+                'exception': e
+            })
+            raise Exception
+        return track
+
     def set_columns(self, tracks_dict: dict) -> None:
         """ 
             Set dict data up columns.
