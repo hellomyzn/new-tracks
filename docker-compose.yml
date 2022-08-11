@@ -3,7 +3,7 @@ services:
   python3:
     restart: always
     build: ./infra/python/
-    container_name: 'python3_new_song'
+    container_name: 'new_tracks'
     working_dir: '/root/'
     tty: true
     volumes:
