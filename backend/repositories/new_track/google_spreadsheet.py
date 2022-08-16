@@ -119,8 +119,12 @@ class GssNewTrackRepository(NewTrackRepoInterface):
         return None
     
 
-    def delete_by_name_and_artist(self, name: str, artist: str):
-        return
+    def delete_by_url(self, url: str) -> None:
+        pass
+
+
+    def find_by_url(self, url: str) -> None:
+        pass
 
 
 

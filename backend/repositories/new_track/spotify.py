@@ -279,8 +279,11 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
             raise Exception
         return track
 
-    def find_by_name_and_artist(self, name: str, artist: str) -> NewTrackModel:
-        return
+    def find_by_url(self, url: str) -> None:
+        pass
+
+    def delete_by_url(self, url: str) -> None:
+        pass
     
     def add(self, track: NewTrackModel) -> None:
         """ 
@@ -326,8 +329,7 @@ class SpotifyNewTrackRepository(NewTrackRepoInterface):
         
         return None
     
-    def delete_by_name_and_artist(self, name: str, artist: str) -> None:
-        return
+    
 
     def convert_tracks_dict_into_new_tracks(self, tracks_dict) -> NewTrackModel:
         """

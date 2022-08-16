@@ -9,7 +9,7 @@ class NewTrackRepoInterface(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def find_by_name_and_artist(self, name: str, artist: str):
+    def find_by_url(self, url: str):
         raise NotImplementedError()
     
     @abc.abstractmethod
@@ -17,5 +17,5 @@ class NewTrackRepoInterface(metaclass=abc.ABCMeta):
         raise NotImplementedError()
     
     @abc.abstractmethod
-    def delete_by_name_and_artist(self, name: str, artist: str):
+    def delete_by_url(self, url: str):
         raise NotImplementedError()

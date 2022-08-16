@@ -186,21 +186,22 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
         return header
 
     def write_header(self) -> None:
-        """ Write header on CSV.
+        """ 
+            Write header on CSV.
 
-        Parameters
-        ----------
-        tracks: list
-            A tracks list to be written on CSV.
+            Parameters
+            ----------
+            tracks: list
+                A tracks list to be written on CSV.
 
-        Raises
-        ------
-        Exception
-            If it fails to write on CSV
+            Raises
+            ------
+            Exception
+                If it fails to write on CSV
 
-        Return
-        ------
-        None
+            Return
+            ------
+            None
         """
         logger_pro.info({
             'action': 'Write header on CSV.',
@@ -289,42 +290,6 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
             })
         return
 
-    def find_track_first(self, track: dict) -> list:
-        """ find the first track by name and artist on CSV
-
-        Parameters
-        ----------
-        track: dict
-            A track dict to find
-
-        Raises
-        ------
-        Exception
-            If it fails to find it
-
-        Return
-        ------
-        track_from_csv: list
-            the first track found on CSV
-        """
-        track_from_csv = []
-        if not helper.exists_file(self.path):
-            return track_from_csv
-
-        if not self.read_header():
-            return track_from_csv
-
-        with open(self.path, 'r', newline='') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            next(csv_reader)
-            for row in csv_reader:
-                if row[0] == track['name'] and row[1] == track['artist']:
-                    track_from_csv = row
-                    return track_from_csv
-
-    def find_by_name_and_artist(self, name: str, artist: str) -> dict:
-        pass
-    
     def find_by_url(self, url: str) -> NewTrackModel:
         """
             Find a track by url.
@@ -390,5 +355,5 @@ class CsvNewTrackRepository(NewTrackRepoInterface):
             raise Exception
         return track
 
-    def delete_by_name_and_artist(self, name: str, artist: str) -> None:
+    def delete_by_url(self, url: str) -> None:
         pass
