@@ -152,7 +152,7 @@ class NewTrackService(object):
             spotify = SpotifyModel()
             while max_number < tracks_number:
                 offset = len(tracks_json)
-                playlist_items = spotify.connect.playlist_items(playlist_id, limit=100, offset=offset)
+                playlist_items = spotify.conn.playlist_items(playlist_id, limit=100, offset=offset)
                 current_tracks_json = playlist_items['items']
                 tracks_json += current_tracks_json
                 tracks_number -= len(current_tracks_json)
