@@ -81,6 +81,8 @@ class NewTrackService(object):
                 tracks_json = NewTrackService.fetch_tracks_json_from_playlist(p_id)
                 # Extract only the data we need
                 tracks_json = [t['track'] for t in tracks_json]
+                # Remove None in the list
+                tracks_json = filter(None, tracks_json)
                 # Extract track data
                 tracks_dict = [NewTrackService.extract_track_dict_from_json(t) for t in tracks_json]
                 # Remove duplicated tracks amoung the playlists
