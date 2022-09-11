@@ -66,6 +66,7 @@ class NewTrackService(object):
             "37i9dQZEVXbIPWwFssbupI",  # FR
             "37i9dQZEVXbMXbN3EUUhlg",  # BR
             "37i9dQZF1DX4JAvHpjipBk",  # New Music Friday
+            "37i9dQZF1DWZvuOKNcLsjv",  # Next up
             "37i9dQZEVXbfAlVIR3gQhM"   # Release Radar
         ]
 
