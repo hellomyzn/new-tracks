@@ -86,6 +86,8 @@ class NewTrackService(object):
                 tracks_json = filter(None, tracks_json)
                 # Extract track data
                 tracks_dict = [NewTrackService.extract_track_dict_from_json(t) for t in tracks_json]
+                # Remove None from tracks_dict
+                tracks_dict = [ t for t in tracks_dict if t is not None]
                 # Remove duplicated tracks amoung the playlists
                 if new_tracks_dict:
                     tracks_dict, _ = NewTrackService.retrieve_unique_and_duplicate_tracks_dict(tracks_dict, new_tracks_dict)
@@ -562,7 +564,7 @@ class NewTrackService(object):
                     'track_json': track_json
                 }
             })
-            raise Exception
+            return None
         return track
 
     @classmethod
