@@ -115,5 +115,5 @@ def get_date():
     t_delta = datetime.timedelta(hours=9)
     JST = datetime.timezone(t_delta, 'JST')
     now = datetime.datetime.now(JST)
-    date = now.strftime('%Y/%m/%d')
+    date = now.strftime('%Y-%m-%d')
     return date
