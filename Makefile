@@ -21,4 +21,5 @@ python:
 	docker-compose exec python3 bash
 start:
 	@make up
+	@make python
 
