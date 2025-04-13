@@ -9,10 +9,11 @@ from controllers.new_track_controller import NewTrackController
 logger_pro = logging.getLogger('production')
 logger_con = logging.getLogger('console')
 
+
 class Console(object):
     def __init__(self):
         pass
-    
+
     def start(self) -> None:
         # Init logger
         SetUpLogging().setup_logging(setting.LOG_CONFIG_PATH)
@@ -21,7 +22,10 @@ class Console(object):
             print('[1]: add new tracks')
             print('[2]: show track you are listening now')
             print('[3]: remove tracks')
-            print('[4]: quit')
+            print('[4]: add liked tracks')
+            print('[5]: podcasts')
+            print('[6]: export')
+            print('[7]: quit')
             user_input = input('Input what you want to do: ')
             try:
                 user_input = int(user_input)
@@ -30,7 +34,7 @@ class Console(object):
             except Exception as e:
                 logger_con.warning('Input is not appropriate. Choose appropriate number.\n')
                 logger_pro.warning(f"User's input is not appropriate: ({user_input})")
-        
+
         new_track_controller = NewTrackController()
         if user_input == 1:
             new_track_controller.add_new_tracks()
@@ -45,7 +49,12 @@ class Console(object):
                 first = int(input('Enter a track number (first): '))
                 last = int(input('Enter a track number (last): '))
                 new_track_controller.remove_tracks_by_index(first, last)
+        elif user_input == 4:
+            new_track_controller.retreave_liked_tracks()
+        elif user_input == 5:
+            new_track_controller.podcasts()
+        elif user_input == 6:
+            pass
+
         logger_pro.info('End app')
         return
-        
-        

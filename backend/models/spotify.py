@@ -10,8 +10,10 @@ import utils.setting as setting
 logger_pro = logging.getLogger('production')
 logger_con = logging.getLogger('console')
 
+
 class SpotifyModel(Singleton):
     conn = None
+
     def __init__(self):
         pass
 
@@ -63,10 +65,10 @@ class SpotifyModel(Singleton):
             }
         })
         auth_manager = SpotifyOAuth(client_id=client_id,
-                                        client_secret=client_secret,
-                                        redirect_uri=redirect_uri,
-                                        scope=scope,
-                                        open_browser=False)
+                                    client_secret=client_secret,
+                                    redirect_uri=redirect_uri,
+                                    scope=scope,
+                                    open_browser=False)
 
         try:
             # Connect spotify

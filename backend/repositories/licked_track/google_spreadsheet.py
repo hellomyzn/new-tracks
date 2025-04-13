@@ -6,13 +6,11 @@ from models.google_spreadsheet import GoogleSpreadsheet
 from repositories.new_track.interfaces.new_track_repository import NewTrackRepoInterface
 import utils.setting as setting
 
-import gspread
-
 logger_pro = logging.getLogger('production')
 logger_con = logging.getLogger('console')
 
 
-class GssNewTrackRepository(NewTrackRepoInterface):
+class GssLikedTrackRepository():
     """
     A class used to represent a Google Spreadsheet repository.
 
@@ -25,12 +23,13 @@ class GssNewTrackRepository(NewTrackRepoInterface):
     worksheet:
         An instance to connect Google Spreadsheet
     sleep_time_sec: float
-        The sleep time by second for the interval 
+        The sleep time by second for the interval
         to write on a Google Spreadsheet.
 
     Methods
     ------
     """
+
     def __init__(self):
         """
         Parameters
@@ -38,20 +37,15 @@ class GssNewTrackRepository(NewTrackRepoInterface):
         model:
             A Google Spreadsheet model
         """
-
-        SHEET_SIZE_ERR_STATUS = "INVALID_ARGUMENT"
-        REQUEST_LIMIT_ERR_STATUS = "RESOURCE_EXHAUSTED"
-        ROW_NUM_TO_ADD = 1000
-
         key = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_KEY']
 
-        if setting.ENV == 'dev':            
+        if setting.ENV == 'dev':
             sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME_TEST']
         else:
-            sheet_name = setting.CONFIG['GOOGLE_API']['SPREAD_SHEET_NAME']
+            sheet_name = "Liked Tracks"
 
         self.model = NewTrackModel()
-        self.columns = self.model.get_columns()
+        self.header = ["name", "artist", "url", "release_date", "added_at", "created_at", "download"]
         self.gss = GoogleSpreadsheet()
         self.workbook = self.gss.conn.open_by_key(key)
         self.worksheet = self.workbook.worksheet(sheet_name)
@@ -60,13 +54,11 @@ class GssNewTrackRepository(NewTrackRepoInterface):
     def all(self):
         return
 
-
     def find_by_name_and_artist(self, name: str, artist: str):
         return
-    
 
-    def add(self, track: NewTrackModel) -> None:
-        """ 
+    def add_track(self, track: dict) -> None:
+        """
             Add a track on GSS
 
             Parameters
@@ -84,87 +76,57 @@ class GssNewTrackRepository(NewTrackRepoInterface):
             None
         """
         # If the spreadsheet is empty, Add column on header(from (1,1))
-        # TODO: move this header validation outside of for statement
-        # if not self.has_header():
-        #     self.add_header()
-        print(self.has_header)
+        if not self.has_header():
+            self.add_header()
+
 
         logger_pro.debug({
             'action': 'Add a track on GSS',
             'status': 'Run',
             'message': '',
             'args': {
-                'track': vars(track)
+                'track': track
             }
         })
 
-        values = []
-        for column in self.columns:
-            values.append(getattr(track, column))
+        row_num = self.find_next_available_row()
+        track["download"] = None
 
-        attempts = 1
-        max_attempts = 3
-
-        while attempts <= max_attempts:
+        for col_num, column in enumerate(self.header, start=1):
             try:
-                row_num = self.__find_next_available_row()
-                self.worksheet.insert_row(values, row_num)
-            except ConnectionError as err:
-                attempts += 1
-                is_connection_err = True
+                v = track[column]
+                if type(v) == list:
+                    v = ", ".join(v)
+
+                self.worksheet.update_cell(row_num, col_num, v)
+                logger_con.debug(f'{column}: {v}')
+                time.sleep(self.sleep_time_sec)
+            except Exception as e:
                 logger_pro.error({
-                    'action': 'Add row',
-                    'status': 'Fail: connection error',
-                    'message': err
+                    'action': 'Add a track',
+                    'status': 'Fail',
+                    'message': e,
+                    'data': {
+                        'row_num': row_num,
+                        'col_num': col_num,
+                        'column': column,
+                        'track': track
+                    }
                 })
-                time.sleep(30)
-            except gspread.exceptions.APIError as err:
-                err_status = err.response.json()["error"]["status"]
-                is_sheet_size_err = bool(err_status == self.SHEET_SIZE_ERR_STATUS)
-                is_request_limit = bool(err_status == self.REQUEST_LIMIT_ERR_STATUS)
+                raise Exception
 
-                if is_sheet_size_err:
-                    # no row to add new data in the sheet.
-                    # warn("sheet size(row) is not enough. {0}: {1}", err.__class__.__name__, err)
-                    time.sleep(10)
-                    self.worksheet.add_rows(self.ROW_NUM_TO_ADD)
-                    # info("added {0} rows in the sheet({1})", self.ROW_NUM_TO_ADD, self.sheet_name)
-                elif is_request_limit:
-                    # request quota exceeded the limit
-                    # warn("request quota exceeded the limit. {0}: {1}", err.__class__.__name__, err)
-                    time.sleep(60)
-                else:
-                    attempts += 1
-                    mes = ("failed to add data into gss 3 times. ",
-                           "please check the log. "
-                           f"{err.__class__.__name__}: {err}")
-                    # error(mes)
-                    raise gspread.exceptions.APIError(mes)
-            else:
-                # success
-                # info("added data in the gss({0}).", self.sheet_name)
-                is_connection_err = False
-                break
-
-        if is_connection_err:
-            mes = ("failed to connect to gss 3 times. ",
-                   "please check your internet connection.")
-            # error(mes)
-            raise ConnectionError(mes)
-
-        time.sleep(1)
-
-        
-    
+        logger_pro.debug({
+            'action': 'Add a track on GSS',
+            'status': 'Success',
+            'message': ''
+        })
+        return None
 
     def delete_by_url(self, url: str) -> None:
         pass
 
-
     def find_by_url(self, url: str) -> None:
         pass
-
-
 
     def has_header(self) -> bool:
         """ Confirm there is header on GSS
@@ -184,7 +146,7 @@ class GssNewTrackRepository(NewTrackRepoInterface):
             There is header or no.
         """
         header = self.worksheet.row_values(1)
-        if header == self.columns:
+        if header == self.header:
             return True
         else:
             return False
@@ -211,7 +173,7 @@ class GssNewTrackRepository(NewTrackRepoInterface):
             'message': '',
         })
         try:
-            for i, column in enumerate(self.columns, start=1):
+            for i, column in enumerate(self.header, start=1):
                 self.worksheet.update_cell(1, i, column)
             logger_pro.info({
                 'action': 'Add header',
@@ -224,9 +186,9 @@ class GssNewTrackRepository(NewTrackRepoInterface):
                 'status': 'Fail',
                 'message': e
             })
-        
-        return None    
-    
+
+        return None
+
     def find_next_available_row(self) -> int:
         """ Find a next available row on GSS
         This is for confirming from which row is available
@@ -248,19 +210,5 @@ class GssNewTrackRepository(NewTrackRepoInterface):
         """
         # it is a list which contains all data on first column
         fist_column_data = list(filter(None, self.worksheet.col_values(1)))
-        available_row = int(len(fist_column_data)) + 1
-        return available_row
-
-    def __find_next_available_row(self) -> int:
-        """ Find a next available row on GSS
-            This is for confirming from which row is available
-            when you add data on GSS.
-
-        Returns:
-            int: _description_
-        """
-        # it is a list which contains all data on first column
-        fist_column_data = list(filter(None, self.worksheet.col_values(1)))
-        time.sleep(1)
         available_row = int(len(fist_column_data)) + 1
         return available_row

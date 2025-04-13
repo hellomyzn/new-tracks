@@ -11,7 +11,8 @@ import utils.helper as helper
 logger_pro = logging.getLogger('production')
 logger_con = logging.getLogger('console')
 
-class NewTrackService(object):
+
+class NewTrackService():
     """
         A class used to represent a spotify service.
 
@@ -33,9 +34,9 @@ class NewTrackService(object):
 
     @classmethod
     def fetch_tracks_dict_from_playlists(cls) -> list:
-        """ 
+        """
             Fetch tracks from multiple playlists.
-            
+
             Parameters
             ----------
             None
@@ -52,21 +53,21 @@ class NewTrackService(object):
         """
         new_tracks_dict = []
         playlist_ids = [
-            "37i9dQZEVXbMDoHDwVN2tF",  # GLOBAL
-            "37i9dQZEVXbLRQDuF5jeBp",  # US
-            "37i9dQZEVXbKXQ4mDTEBXq",  # JP
-            "37i9dQZEVXbNBz9cRCSFkY",  # PH
-            "37i9dQZEVXbLZ52XmnySJg",  # IN
-            "37i9dQZEVXbLnolsZ8PSNw",  # UK
-            "37i9dQZEVXbNxXF4SkHj9F",  # KR
-            "37i9dQZEVXbNFJfN1Vw8d9",  # SP
-            "37i9dQZEVXbJPcfkRz0wJ0",  # AU
-            "37i9dQZEVXbJiZcmkrIHGU",  # GE
-            "37i9dQZEVXbIQnj7RRhdSX",  # IT
-            "37i9dQZEVXbIPWwFssbupI",  # FR
-            "37i9dQZEVXbMXbN3EUUhlg",  # BR
-            "37i9dQZF1DX4JAvHpjipBk",  # New Music Friday
-            "37i9dQZF1DWZvuOKNcLsjv",  # Next up
+            # "37i9dQZEVXbNG2KDcFcKOF",  # GLOBAL
+            # "37i9dQZEVXbLp5XoPON0wI",  # US
+            # "37i9dQZEVXbfAlVIR3gQhM",  # JP
+            # "37i9dQZEVXbJVKdmjH0pON",  # PH
+            # "37i9dQZEVXbIZK8aUquyx8",  # Indonesia
+            # "37i9dQZEVXbMWDif5SCBJq",  # India
+            # "37i9dQZEVXbMwmF30ppw50",  # UK
+            # "37i9dQZEVXbJZGli0rRP3r",  # Korea
+            # "37i9dQZEVXbJwoKy8qKpHG",  # Spain
+            # "37i9dQZEVXbK4fwx2r07XW",  # AU
+            # "37i9dQZEVXbK8BKKMArIyl",  # Germany
+            # "37i9dQZEVXbJUPkgaWZcWG",  # Italy
+            # "37i9dQZEVXbKQ1ogMOyW9N",  # France
+            # "37i9dQZF1DXc57cuGAMEkA",  # New Music Friday
+            # "37i9dQZF1DWZvuOKNcLsjv",  # Next up
             "37i9dQZEVXbfAlVIR3gQhM"   # Release Radar
         ]
 
@@ -87,10 +88,11 @@ class NewTrackService(object):
                 # Extract track data
                 tracks_dict = [NewTrackService.extract_track_dict_from_json(t) for t in tracks_json]
                 # Remove None from tracks_dict
-                tracks_dict = [ t for t in tracks_dict if t is not None]
+                tracks_dict = [t for t in tracks_dict if t is not None]
                 # Remove duplicated tracks amoung the playlists
                 if new_tracks_dict:
-                    tracks_dict, _ = NewTrackService.retrieve_unique_and_duplicate_tracks_dict(tracks_dict, new_tracks_dict)
+                    tracks_dict, _ = NewTrackService.retrieve_unique_and_duplicate_tracks_dict(
+                        tracks_dict, new_tracks_dict)
                 # Put playlist data on tracks dict
                 tracks_dict = NewTrackService.put_playlist_data_into_tracks_dict(p_id, tracks_dict)
                 new_tracks_dict += tracks_dict
@@ -121,14 +123,14 @@ class NewTrackService(object):
             'message': '',
             'new_tracks_dict_len': len(new_tracks_dict)
         })
-        
+
         return new_tracks_dict
-    
+
     @classmethod
     def fetch_tracks_json_from_playlist(cls, playlist_id: str) -> list:
-        """ 
+        """
             Fetch tracks json data from a playlist.
-            
+
             Parameters
             ----------
             playlist_id: str
@@ -253,7 +255,7 @@ class NewTrackService(object):
 
     @classmethod
     def fetch_playlist_name(cls, playlist_id: str) -> str:
-        """ 
+        """
             Fetch a playlist name.
 
             Parameters
@@ -353,13 +355,13 @@ class NewTrackService(object):
 
     @classmethod
     def fetch_current_tracks_json(cls) -> dict:
-        """ 
+        """
             Fetch a track data you are listening.
 
             Parameters
             ----------
             None
-            
+
             Raises
             ------
             Exception
@@ -396,7 +398,7 @@ class NewTrackService(object):
 
     @classmethod
     def fetch_playing_track_json(cls) -> dict:
-        """ 
+        """
             Fetch a track json data you are listening.
 
             if there is no track you are listening,
@@ -405,7 +407,7 @@ class NewTrackService(object):
             Parameters
             ----------
             None
-            
+
             Raises
             ------
             Exception
@@ -450,14 +452,14 @@ class NewTrackService(object):
             ----------
             tracks: list
                 A list of NewTrackModel instances to remove.
-            
+
             Raises
             ------
             Warninig
                 If there is no tracks.
             Exception
                 If you can not confirm.
-            
+
             Return
             ------
             Bool.
@@ -478,7 +480,7 @@ class NewTrackService(object):
             return False
 
         # Show tracks
-        for i, t in enumerate(tracks, start = 1):
+        for i, t in enumerate(tracks, start=1):
             logger_pro.debug(f'Track: [{i}] {t.name}')
             logger_con.debug(f'Track: [{i}] {t.name}')
 
@@ -513,7 +515,7 @@ class NewTrackService(object):
 
     @classmethod
     def extract_track_dict_from_json(cls, track_json: list) -> dict:
-        """ 
+        """
             Extract track data from tracks json data.
 
             Parameters
@@ -569,7 +571,7 @@ class NewTrackService(object):
 
     @classmethod
     def put_playlist_data_into_tracks_dict(cls, playlist_id: str, tracks_dict: list) -> list:
-        """ 
+        """
             Put playlist name and url to tracks dict
 
             Parameters
@@ -670,7 +672,7 @@ class NewTrackService(object):
                 'status': 'Warning',
                 'message': 'There is no from_tracks'
             })
-            return None, None      
+            return None, None
 
         unique_tracks = []
         duplicate_tracks = []
@@ -747,7 +749,7 @@ class NewTrackService(object):
                 'from_tracks_len': len(from_tracks)
             }
         })
-        
+
         if not tracks:
             logger_pro.warning({
                 'action': 'Retrieve unique and duplicate new track instances from tracks dict',
@@ -777,7 +779,7 @@ class NewTrackService(object):
                 else:
                     unique_tracks.append(t)
                     logger_pro.debug(f'Unique track: {vars(t)} by url')
-                
+
             logger_pro.info({
                 'action': 'Retrieve unique and duplicate new track instances from tracks dict',
                 'status': 'Success',
@@ -804,9 +806,9 @@ class NewTrackService(object):
         return unique_tracks, duplicate_tracks
 
     def add_new_tracks(self) -> None:
-        """ 
+        """
             Add new tracks to csv, gss, spotify playlist
-            
+
             Parameters
             ----------
             None
@@ -821,8 +823,8 @@ class NewTrackService(object):
         """
         spotify_repo = SpotifyNewTrackRepository()
         csv_repo = CsvNewTrackRepository()
-        gss_repo =  GssNewTrackRepository()
-        
+        gss_repo = GssNewTrackRepository()
+
         # Fetch tracks
         tracks_dict_spo = NewTrackService.fetch_tracks_dict_from_playlists()
 
@@ -844,25 +846,16 @@ class NewTrackService(object):
             'message': ''
         })
 
-        try:
-            for t in new_tracks:
-                spotify_repo.add(t)
-                csv_repo.add(t)
-                gss_repo.add(t)
-                logger_pro.info({
-                    'action': 'Add new tracks to csv, gss, spotify playlist',
-                    'status': 'Success',
-                    'message': '',
-                    'track': vars(t)
-                })
-        except Exception as e:
+        for t in new_tracks:
+            spotify_repo.add(t)
+            csv_repo.add(t)
+            gss_repo.add(t)
             logger_pro.info({
                 'action': 'Add new tracks to csv, gss, spotify playlist',
-                'status': 'Fail',
+                'status': 'Success',
                 'message': '',
                 'track': vars(t)
             })
-            raise Exception
         return None
 
     def show_current_track(self) -> None:
@@ -872,7 +865,7 @@ class NewTrackService(object):
             Parameters
             ----------
             None
-            
+
             Raises
             ------
             Exception
@@ -880,20 +873,20 @@ class NewTrackService(object):
 
             Return
             ------
-            None  
+            None
         """
         # Fetch playing track
         track_json = NewTrackService.fetch_playing_track_json()
-        
+
         if not track_json:
             message = 'There is no current track you are listening on Spotify right now'
             logger_con.warning(message)
             logger_pro.warning(message)
             return None
-        
+
         # Extrack track dict
         track_json = track_json['item']
-        track_dict = NewTrackService.extract_track_dict_from_json(track_json)        
+        track_dict = NewTrackService.extract_track_dict_from_json(track_json)
 
         # Find playing track on csv
         csv_repo = CsvNewTrackRepository()
@@ -907,7 +900,7 @@ class NewTrackService(object):
         })
         if track_csv:
             try:
-                logger_con.info(f'Track: {track_csv.name}')  
+                logger_con.info(f'Track: {track_csv.name}')
                 logger_con.info(f'Artist: {track_csv.artist}')
                 logger_con.info(f'Playlist: {track_csv.playlist_name}')
                 logger_pro.info({
@@ -924,10 +917,10 @@ class NewTrackService(object):
                     'exception': e,
                     'track_csv': vars(track_csv)
                 })
-                raise Exception          
+                raise Exception
         else:
             try:
-                logger_con.info(f'Track: {track_dict["name"]}')  
+                logger_con.info(f'Track: {track_dict["name"]}')
                 logger_con.info(f'Artist: {track_dict["artist"]}')
                 logger_pro.info({
                     'action': 'Show current track you are listening.',
@@ -947,13 +940,13 @@ class NewTrackService(object):
         return None
 
     def remove_current_tracks(self) -> None:
-        """ 
+        """
             Remove tracks you listened currently on Spotify.
 
             Parameters
             ----------
             None.
-            
+
             Raises
             ------
             Exception
@@ -979,14 +972,14 @@ class NewTrackService(object):
             t = t['track']
             track_dict = NewTrackService.extract_track_dict_from_json(t)
 
-            # Set dict data up New Track instance 
+            # Set dict data up New Track instance
             track = NewTrackModel()
             track.set_columns(track_dict)
 
             # Show track
             logger_con.info(f'Curent Track: [{i}] {track.name}')
             current_tracks.append(track)
-        
+
         spotify_repo = SpotifyNewTrackRepository()
 
         # Retrieve only current tracks on playlist
@@ -1047,7 +1040,7 @@ class NewTrackService(object):
         return None
 
     def remove_tracks_by_index(self, first: int, last: int) -> None:
-        """ 
+        """
             Remove tracks by index (first, last) you choose.
 
             Parameters
@@ -1056,7 +1049,7 @@ class NewTrackService(object):
                 The index number of playlist from.
             last: int
                 The index number of playlist until.
-            
+
             Raises
             ------
             Exception
@@ -1069,7 +1062,7 @@ class NewTrackService(object):
         # Fetch tracks from playlist
         spotify_repo = SpotifyNewTrackRepository()
         tracks_all = spotify_repo.all()
-        tracks = tracks_all[first-1:last]
+        tracks = tracks_all[first - 1:last]
 
         # Remove tracks
         logger_pro.info({
@@ -1107,3 +1100,15 @@ class NewTrackService(object):
                 'message': 'It was canceled.'
             })
         return None
+
+    def toggle_like(self, status: bool) -> None:
+        pass
+
+
+    def fetch_podcasts(self) -> list:
+        spotify = SpotifyModel()
+        data = spotify.conn.current_user_recently_played()
+        print(data["items"][0])
+        print(data["items"][49])
+
+
